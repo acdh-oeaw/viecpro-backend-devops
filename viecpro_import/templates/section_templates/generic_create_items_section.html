@@ -1,0 +1,242 @@
+{% load crispy_forms_tags %}
+{% load static %}
+<div class="container-fluid w-100 h-100 pb-5 mt-0 mx-0" style="background-color: white">
+    <div class="container pt-3 pb-5 text-center justify-content-center">
+        <h3 class="h3">Create Items</h3>
+    </div>
+    <div class="container w-100 m-0 px-3 py-0">
+        <div class="card card-default">
+            <div class="card-header" id="heading_entity" role="tab">
+                <h4 class="card-title">
+                    <a aria-controls="collapseOne3" aria-expanded="false" data-parent="#accordion"
+                        data-toggle="collapse" href="#collapse_test" role="button">
+                        Entity
+                    </a>
+                </h4>
+            </div>
+
+            <div aria-labelledby="heading_entity" class="card-collapse collapse" id="collapse_test" role="tabcard">
+                <div class="card-body" id="tab_Revisions" style="background-color: white">
+                    <div class="container">
+                        {% for et, en in entities_ %}
+                        <div class="card card-default">
+                            <div class="card-header" id="heading_{{et}}" role="tab">
+                                <h4 class="card-title">
+                                    <a aria-controls="collapseOne_{{et}}" aria-expanded="false" data-parent="#accordion"
+                                        data-toggle="collapse" href="#collapse_test_{{et}}" role="button">
+                                        {{et}}
+                                    </a>
+                                </h4>
+                            </div>
+                            <div aria-labelledby="heading_{{et}}" class="card-collapse collapse"
+                                id="collapse_test_{{et}}" role="tabcard">
+                                <div class="card-body" id="tab_Revisions_{{et}}">
+                                    <div class="container" id="entity_section_{{en}}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card card-default">
+            <div class="card-header" id="heading_entity_type" role="tab">
+                <h4 class="card-title">
+                    <a aria-controls="collapseOne3" aria-expanded="false" data-parent="#accordion"
+                        data-toggle="collapse" href="#collapse_test_8" role="button">
+                        Entitytype
+                    </a>
+                </h4>
+            </div>
+
+            <div aria-labelledby="heading_entity_type" class="card-collapse collapse" id="collapse_test_8"
+                role="tabcard">
+                <div class="card-body pb-4" id="tab_Revisions8">
+                    <div class="container pb-4">
+                        {% csrf_token %}
+
+                        {% for rt, rt_form in entity_types %}
+
+                        <div class="card card-default">
+                            <div class="card-header" id="heading_{{rt}}" role="tab">
+                                <h4 class="card-title">
+                                    <a aria-controls="collapseOne3" aria-expanded="false" data-parent="#accordion"
+                                        data-toggle="collapse" href="#collapse_test_{{rt}}" role="button">
+                                        {{rt}}
+                                    </a>
+                                </h4>
+                            </div>
+                            <div aria-labelledby="heading_{{rt}}" class="card-collapse collapse"
+                                id="collapse_test_{{rt}}" role="tabcard">
+                                <div class="card-body" id="tab_Revisions_{{rt}}">
+                                    <div class="container">
+
+                                        {% crispy rt_form %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="card card-default">
+                <div class="card-header" id="heading_two" role="tab">
+                    <h4 class="card-title">
+                        <a aria-controls="collapseOne3" aria-expanded="false" data-parent="#accordion"
+                            data-toggle="collapse" href="#collapse_test_2" role="button">
+                            Relationtype
+                        </a>
+                    </h4>
+                </div>
+                <div aria-labelledby="heading_two" class="card-collapse collapse" id="collapse_test_2" role="tabcard">
+                    <div class="card-body pb-4" id="tab_Revisions2">
+                        <div class="container pb-4">
+                            {% csrf_token %}
+
+                            {% for rt, rt_form in relation_types %}
+
+                            <div class="card card-default">
+                                <div class="card-header" id="heading_{{rt}}" role="tab">
+                                    <h4 class="card-title">
+                                        <a aria-controls="collapseOne3" aria-expanded="false" data-parent="#accordion"
+                                            data-toggle="collapse" href="#collapse_test_{{rt}}" role="button">
+                                            {{rt}}
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div aria-labelledby="heading_{{rt}}" class="card-collapse collapse"
+                                    id="collapse_test_{{rt}}" role="tabcard">
+                                    <div class="card-body" id="tab_Revisions_{{rt}}">
+                                        <div class="container">
+
+                                            {% crispy rt_form %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-default">
+                <div class="card-header" id="heading_labeltype" role="tab">
+                    <h4 class="card-title">
+                        <a aria-controls="collapseOne3" aria-expanded="false" data-parent="#accordion"
+                            data-toggle="collapse" href="#collapse_test_3" role="button">
+                            Labeltype
+                        </a>
+                    </h4>
+                </div>
+                <div aria-labelledby="heading_labeltype" class="card-collapse collapse" id="collapse_test_3"
+                    role="tabcard">
+                    <div class="card-body" id="tab_Revisions3">
+                        <div class="container">
+                            {% crispy label_form %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-default">
+                <div class="card-header" id="heading_title" role="tab">
+                    <h4 class="card-title">
+                        <a aria-controls="collapseOne3" aria-expanded="false" data-parent="#accordion"
+                            data-toggle="collapse" href="#collapse_test_4" role="button">
+                            Title
+                        </a>
+                    </h4>
+                </div>
+                <div aria-labelledby="heading_title" class="card-collapse collapse" id="collapse_test_4" role="tabcard">
+                    <div class="card-body" id="tab_Revisions4">
+                        <div class="container">
+                            {% crispy title_form %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $(document).on('submit', 'form.form.pdf_tool_itemcreate', custom_unbind_ajax_forms);
+
+
+        });
+
+
+        function CreateItem_response(response) {
+            let prompt_flag = false;
+            if (response.success) {
+                $(`#${response.form_name}_name_field`).val("");
+                $(`#${response.form_name}_name_reverse_field`).val("");
+                $(`#${response.form_name}Form_name_field`).val("");
+                $(`#${response.form_name}Form_description_field`).val("");
+
+                if (response.form_name === "LabelType") {
+
+                    if ($.ApisForms) {
+                        $.ApisForms['PersonLabelForm' + '_' + selectedEntity.toLowerCase()] = null;
+                        GetFormAjax('PersonLabelForm');
+                    }
+                }
+
+
+                let ent_type = response.ent_type;
+                //console.log("in CreateItemResponse, ent type is: ", ent_type);
+                if (["person", "institution", "event", "work", "place", "Person", "Place", "Institution", "Event", "Work"].includes(ent_type) && !response.selected_name) {
+                    //console.log("case 1")
+                    let select_entity = confirm(`${response.msg}\nDo you want to select this entity?`);
+                    if (select_entity) {
+                        updateSessionEntity(type = ent_type, entity_pk = response.created_pk);
+                    }
+                    getSuggestionsData(ent_type); //refactor: adjust ent type if updating ent was not selected, to not switch the autocomplete; set to selected ent here and add this line here in if-statement above
+
+                    prompt_flag = true;
+                    GetEntityForms(ent_type);
+
+                } else if (["person", "institution", "event", "work", "place", "Person", "Place", "Institution", "Event", "Work"].includes(ent_type) && response.selected_name) {
+                    //console.log("case 2")
+
+                    getSuggestionsData(ent_type);
+                }
+                GetEntityForms(ent_type);
+
+
+                if (response.selected_name) {
+                    //console.log("case 3")
+
+                    $("#selected_entity_header").html(`<small>selected:</small> ${response.selected_name}`);
+
+                }
+
+            }
+            //console.log("no case was true in ItemCreate")
+            if (!prompt_flag) {
+                alert(response.msg);
+            }
+            POST_PROCESSING = false;
+        }
+
+        function GetEntityForms(entity = null) {
+            let Entities = ["person", "event", "work", "institution", "place"]
+
+            if (!entity) {
+                for (let ent of Entities) {
+                    AjaxElementRequest(type = "create", target_id = `entity_section_${ent}`, entity = ent);
+                }
+            } else {
+                AjaxElementRequest(type = "create", target_id = `entity_section_${entity}`, entity = entity);
+            }
+
+
+        }
+
+        GetEntityForms();
+    </script>

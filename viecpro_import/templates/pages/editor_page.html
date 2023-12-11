@@ -1,0 +1,751 @@
+{% extends "webpage/base.html" %}
+{% load static %}
+{% block content %}
+
+<script src="/static/viecpro_import/js/autocomplete.js"></script>
+<link href="/static/viecpro_import/css/autocomplete.css" rel="stylesheet" type="text/css">
+<link href="/static/viecpro_import/css/main.css" rel="stylesheet" type="text/css">
+
+
+
+<div class="container-fluid w-100 pt-4 mx-3 pl-4 mb-5" style="min-height: 1200px;">
+    <div class="row w-100 h-100 ">
+        <div class="col-md-4 p-0">
+            <div class="container w-100 justify-content-between">
+                <div class="row">
+                    <div class="col-md-6 text-left my-2">{{ ds_select_html }}</div>
+                    <div class="col-md-6 text-right text-align-middle">
+                        <div class="container text-right align-content-middle">
+                            <Button class="btn btn-outline-secondary btn-sm mr-1 my-2" id="btn_edit_ds"
+                                onclick="editDataSource()">edit
+                            </Button>
+                            <button class="btn btn-sm btn-outline-primary my-2 mr-4" id="btn_create_source"
+                                onclick="callUpload()" type="create">new
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 p-0 text-center">
+            <div class="row w-100 no-gutters pr-2">
+                <div class="col-md-8 pl-4 text-left">
+                    <h3 class="h3 ml-3 my-2" id="selected_entity_header"> <br></h3>
+                </div>
+                <div class="col-md-4 p-0  m-0 justify-content-end text-right align-content-middle">
+                    <button class="btn btn-sm btn-outline-secondary entity_select_button my-2 mr-1"
+                        onclick="selectEntityType('Institution')">Institution
+                    </button>
+
+                    <button class="btn btn-sm btn-outline-secondary entity_select_button my-2 mr-1"
+                        onclick="selectEntityType('Person')">Person
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary entity_select_button my-2 mr-1"
+                        onclick="selectEntityType('Place')">Place
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary entity_select_button my-2 mr-1"
+                        onclick="selectEntityType('Event')">Event
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary entity_select_button my-2 mr-4 ml-0"
+                        onclick="selectEntityType('Work')">Work
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row h-100 w-100 no-gutters">
+            <div class="col-md-4  h-auto">
+
+                <div class="container">
+                    <div class="row w-100">
+                        <div class="col-md-12 py-4 rounded mx-0" id="div_content_left"
+                            style="background-color: lightgrey">
+                            <div class="container-fluid mx-0">
+                                <div id="browser_div"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 h-auto"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8 h-100 w-100 py-0  pl-4 pr-3" id="div_content_right" style="min-height: 1200px;">
+                <div class="container-fluid w-100 m-0 p-0">
+                    <div class="w-100 m-0 p-0 rounded align-content-middle"
+                        style="background-color: lightgrey; height: 60px">
+                        <div class="input-group p-2 align-content-middle">
+                            <input aria-label="Search" class="form-control mr-4 rounded-right" id="input_search"
+                                placeholder="" type="search">
+
+                            <button class="btn btn-outline-secondary align-middle my-1 mr-1" id="btn_create"
+                                onclick="createNewEntity()" type="create">
+                                new Person
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="container-fluid m-0 p-0">
+                        <div class="row no-gutters">
+                            <div class="col-md-12 m-0 p-0 rounded" id="div_content_right_body">
+                                <div class="card p-0 m-0">
+                                    <div class="card-header m-0" id="white_header">
+                                        <ul class="nav nav-pills p-2" id="pills-tab" role="tablist">
+                                            <li class="nav-item">
+                                                <a aria-controls="pills-relations" aria-selected="true"
+                                                    class="nav-link " data-toggle="pill"
+                                                    href="#generic_relations_section" id="pills-relations-tab"
+                                                    role="tab">Relations</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a aria-controls="pills-meta" aria-selected="false" class="nav-link"
+                                                    data-toggle="pill" href="#generic_meta_section" id="pills-meta-tab"
+                                                    role="tab">Metadata</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a aria-controls="pills-create-items" aria-selected="false"
+                                                    class="nav-link" data-toggle="pill"
+                                                    href="#generic_create_items_section" id="pills-create-items-tab"
+                                                    role="tab">Create Items</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a aria-controls="pills-progress" aria-selected="false"
+                                                    class="nav-link active" data-toggle="pill"
+                                                    href="#generic_progress_section" id="pills-progress-tab"
+                                                    role="tab">Show Process</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-body m-0 p-0" style="background-color: #F1F1F1"></div>
+
+                                    <div class="tab-content" id="pills-tabContent">
+                                        <div aria-labelledby="pills-relations-tab" class="tab-pane fade"
+                                            id="generic_relations_section" role="tabpanel">
+                                        </div>
+                                        <div aria-labelledby="pills-meta-tab" class="tab-pane fade"
+                                            id="generic_meta_section" role="tabpanel">
+                                        </div>
+                                        <div aria-labelledby="pills-create-items-tab" class="tab-pane fade"
+                                            id="generic_create_items_section" role="tabpanel">
+                                        </div>
+                                        <div aria-labelledby="pills-progress-tab" class="tab-pane fade  show active"
+                                            id="generic_progress_section" role="tabpanel">
+                                        </div>
+                                    </div>
+                                    <!--                                <div class="col-md-12 w-100" id="generic_relations_section"></div>-->
+                                    <div id="institution_section"></div>
+                                    <div id="place_section"></div>
+                                    <div id="event_section"></div>
+                                    <div id="label_section"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    // todo: __gpirgie__ these functions and gobals could use a good refactor;
+    let selectionDATA;
+    let inputSearch = document.getElementById("input_search");
+    let RelationsLoaded = false;
+    let POST_PROCESSING = false;
+    let initAutocomplete = true;
+    let selectedEntity;
+    let suggestions_data;
+    const ENTITIES = ["Person", "Place", "Event", "Institution", "Work"];
+
+    $(document).ready(function () {
+        DataSourceSelectClick(first_call = true);
+        updatePageSection(section = "itemcreate");
+    });
+
+    $("#input_select").on("change", function () {
+        DataSourceSelectClick();
+    })
+
+    function setPageToken() {
+        let url = "{% url 'viecpro_import:page_set_token' %}";
+        //console.log("called set token")
+
+        let token = prompt("New token:");
+        if (token) {
+            //console.log("token was true")
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: { "page_token": token },
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+            }).done(function (response) {
+                updateBrowserPage({ refresh_progress: false });
+            })
+        } else {
+            //console.log("token was false");
+        }
+    }
+
+    $("#input_search").on("keyup", function (e) {
+        if (e.key === "Enter" || e.keyCode === 13) {
+            updateSessionEntity();
+        }
+    })
+
+    function custom_unbind_ajax_forms(event) {
+
+        if (!POST_PROCESSING) {
+            POST_PROCESSING = true;
+            $(this).find('button').attr('disabled', true);
+            event.preventDefault();
+            event.stopPropagation();
+
+            let url = $(this).attr('action');
+            //console.log("clicked unbind, url is: ", url);
+            let formData = $(this).serialize();
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+
+                beforeSend: function (request) {
+                    var csrftoken = getCookie('csrftoken');
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+            })
+                .done(function (response) {
+
+                    window[response.call_function](response);
+                    updatePageSection(section = "pageprocess");
+
+                }
+                )
+        } else {
+            event.preventDefault();
+            event.stopPropagation()
+        }
+    }
+
+
+
+    function updateSessionEntity(type = false, entity_pk = false) {
+        if (selectionDATA || (type && entity_pk)) {
+            if (!type || !entity_pk) {
+                type = selectionDATA[1];
+                entity_pk = ent_pk = selectionDATA[2];
+            }
+
+            $.ajax({
+                url: '{% url "viecpro_import:editor_session_update" %}',
+                type: 'POST',
+                data: { "ent_type": type, "ent_pk": entity_pk },
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (response) {
+                    if ($.ApisForms) {
+                        $.ApisForms = {}
+                    } else {
+                    }
+                    loadPageSection();
+                }
+            })
+        } else {
+            alert("Nothing Selected. Search and Select an Entity first.")
+        }
+    }
+
+    function createNewEntity() {
+        $("#pills-create-items-tab").trigger("click");
+
+        let heading;
+        for (let ent of ENTITIES) {
+            heading = $(`#heading_${ent} a`);
+            if (heading.attr("aria-expanded") === "true") {
+                heading.trigger("click");
+            }
+        }
+        let el1 = $("#heading_entity a");
+        let el2 = $(`#heading_${selectedEntity} a`);
+        if (el1.attr("aria-expanded") === "false") {
+            el1.trigger("click");
+        }
+        el2.trigger("click");
+
+        $("select.select2multiple").each(function (index, element) {
+            let url = $(this).data("autocomplete-light-url")
+            $(this).select2({
+                escapeMarkup: function (markup) {
+                    return markup;
+                },
+                ajax: {
+                    url: url,
+                    dataType: 'json',
+                    // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+                }
+            });
+        })
+
+    }
+
+
+    function updatePageSection(section) {
+        console.log("update page section called, section is:", section);
+
+        let url = `/viecpro_import/editor/section/update/${section}/`;
+        $.ajax({
+            type: "GET",
+            url: url,
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data, status, xhttp) {
+                let section_dic = { "itemcreate": "generic_create_items_section", "pageprocess": "generic_progress_section" }
+                for (let res_section in data.content) {
+                    res = section_dic[res_section];
+                    let t = $(`#${res}`).html(data.content[res_section]); //empty().append(
+                }
+
+
+
+
+                //todo: check if pageprocess is active, and which section and trigger click to refresh display
+                if (section == "pageprocess") {
+                    let progress_tab = $("#pills-progress-tab.active"); //.children().select("a .active").trigger("click");
+                    //console.log("ps is active: ", progress_tab);
+
+                    if (progress_tab) {
+                        let tablink;
+                        let active;
+                        let inactive;
+                        // todo: not implemented yet  "pills-deleted-tab
+
+                        ["pills-edited-tab", "pills-created-tab", "pills-deleted-tab"].forEach(function (el) {
+                            tablink = $(`#${el}`);
+
+                            if (tablink.hasClass("active")) {
+                                active = $(`#${el}`);
+                            } else {
+                                inactive = $(`#${el}`);
+                            }
+                        })
+                        //inactive.trigger("click"); //$("#pills-")
+                        //active.trigger("click");
+                        $("#pills-edited-tab").trigger("click");
+                    }
+                }
+                else {
+                    setTimeout(() => {
+                        //console.log("in else", `"${section}"`)
+
+                        //console.log("calling update select2")
+                        $("select.select2multiple").each(function (index, element) {
+                            let url = $(this).data("autocomplete-light-url")
+                            //console.log("updated select2  ready")
+
+                            $(this).select2({
+                                escapeMarkup: function (markup) {
+                                    return markup;
+                                },
+                                ajax: {
+                                    url: url,
+                                    dataType: 'json',
+                                    // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+                                }
+                            });
+                        })
+                        // console.log("after calling update")
+
+                    }, 300);
+                }
+            }
+
+
+        })
+    }
+
+
+    function loadPageSection() {
+        let url = "{% url 'viecpro_import:get_sections' %}"//`/viecpro_import/entity_custom/`;
+        $.ajax({
+            type: "GET",
+            url: url,
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data, status, xhttp) {
+
+                $("#input_search").val([]);
+                selectionDATA = false;
+
+                let a = $(`#generic_relations_section`).empty().append(data.content.relations_html);
+                let b = $(`#generic_meta_section`).empty().append(data.content.meta_html);
+
+                $("#pills-relations-tab").trigger("click");
+                //console.log("selEnt is: ", data.entity_type);
+                if (data.entity_type === "Person") {
+                    $("#heading2 a").trigger("click");
+
+                }
+                let ent_header = $("#selected_entity_header");
+                ent_header.html(`<small>selected:</small> ${data.content.ent_name}`);
+
+                $("select.select2multiple").each(function (index, element) {
+                    let url = $(this).data("autocomplete-light-url")
+                    $(this).select2({
+                        escapeMarkup: function (markup) {
+                            return markup;
+                        },
+                        ajax: {
+                            url: url,
+                            dataType: 'json',
+                            // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+                        }
+                    });
+                })
+            }
+        })
+    }
+
+    function AjaxElementRequest(type, target_id = null, entity = null) {
+        if (!["LabelType", "Title"].includes(entity) && !entity.endsWith("elation") && !entity.endsWith("ype")) {
+
+            let url = `/viecpro_import/editor/entity/create/${entity}/`;
+            $.ajax({
+                type: "GET",
+                url: url,
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (data) {
+                    $(`#${target_id}`).empty().append(data.content);
+                    $("select.listselect2").each(function (index, element) {
+                        let url = $(this).data("autocomplete-light-url")
+                        $(this).select2({
+                            escapeMarkup: function (markup) {
+                                return markup;
+                            },
+                            ajax: {
+                                url: url,
+                                dataType: 'json',
+                                // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+                            }
+                        });
+                    })
+                }
+            });
+        }
+
+    }
+
+
+
+    function selectEntityType(entity) {
+        $("#btn_create").html(`new ${entity}`);
+        getSuggestionsData(entity);
+    }
+
+    async function getSuggestionsData(type) {
+        selectedEntity = type;
+
+        $("#input_search").val([]);
+        await fetch(
+            `/viecpro_import/editor/autocomplete/${type}/`,
+            function (d) {
+                if (!d.ok) {
+                    alert(
+                        "ERROR\nFailed to load autocomplete data.\n Please try reloading the page."
+                    );
+                    return false;
+                } else {
+                    return d;
+                }
+            }
+        )
+            .then((d) => {
+                return d.text();
+            })
+            .then((data) => {
+                $("#input_search").attr("placeholder", `Search for ${type}`)
+                if (initAutocomplete) {
+                    initNewAutocomplete(data, inputSearch, "person");
+                    initAutocomplete = false;
+                } else {
+                    selectedEntity = type;
+                    suggestions_data = JSON.parse(data);
+                    suggestions_data = suggestions_data.context;
+                }
+            });
+    }
+
+    function initNewAutocomplete(data, input, type) {
+        suggestions_data = JSON.parse(data);
+        suggestions_data = suggestions_data.context;
+
+        autocomplete({
+            input: input,
+            fetch: function (text, update) {
+                text = text.toLowerCase();
+                // you can also use AJAX requests instead of preloaded data
+
+                let suggestions = suggestions_data.filter((n) =>
+                    n.label.toLowerCase().startsWith(text)
+                );
+                update(suggestions); //.slice(0, 6));
+            },
+            onSelect: function (item) {
+                input.value = item.label;
+                selectionDATA = item.value;
+            },
+        });
+    }
+
+    getSuggestionsData("Person");
+
+
+    function DataSourceSelectClick(first_call = false) {
+
+        let datasource_pk = $("#input_select").val();
+        if (datasource_pk) {
+            $.ajax({
+                url: '{% url "viecpro_import:ds_select" %}',
+                type: 'POST',
+                data: { "ds_pk": datasource_pk, "first_call": first_call },
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (response) {
+                    updateBrowserPage()
+                }
+            })
+        } else {
+            let start_upload = confirm("Nothing to load.\n\nDo you want to upload a new DataSource?");
+            if (start_upload) {
+                callUpload();
+            }
+        }
+    }
+
+    window.addEventListener("resize", updateImageZoom);
+
+    function updateImageZoom(event = null) {
+        let lens = $(".img-zoom-lens").remove();
+        imageZoom("myimage", "myresult");
+    }
+
+    function renderBrowser(data) {
+        $("#browser_div").empty().append(data.browser_html);
+        if ($.ApisForms) {
+            $.ApisForms["PersonInstitutionForm_person"] = null;
+        }
+        setTimeout(updateImageZoom, 1500);
+        if (RelationsLoaded) {
+            GetFormAjax("PersonInstitutionForm");
+        }
+    }
+
+    function updateRelationDate(clicked_el, rel_id) {
+        let tab = $(clicked_el).closest(".card-body").attr("id"); // changed this from event.target
+        let url = `/viecpro_import/editor/relation/autodate/${rel_id}/${tab}/`;
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: { "tab": tab },
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+        }).done(function (response) {
+            if (response.success) {
+                alert(response.msg);
+            } else {
+                alert(response.msg);
+            }
+
+            $(`#${response.tab}`).find('div').remove();
+            $(`#${response.tab}`).append(response.table_html);
+            updatePageSection(section = "pageprocess");
+
+            GetFormAjax("PersonInstitutionForm");
+        });
+    }
+
+    function goToPage() {
+        let page_num = prompt("Please enter the index of the page you want to jump to:");
+        if (page_num) {
+            updateBrowserPage(page_num);
+        }
+    }
+
+    function setStartPage() {
+        let page_token = prompt("Enter new page token for this page\nAll concurrent pages will be updated.");
+
+        if (page_token) {
+            let url = "{% url 'viecpro_import:page_set_start' %}"
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { "page_token": page_token },
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+
+            }).done(function (response) {
+                updateBrowserPage({ refresh_progress: false });
+            })
+
+        }
+    }
+
+    function updateBrowserPage(page = null, direction = null, refresh_progress = true) {
+        let page_num = page
+        let url = "{% url 'viecpro_import:browser_refresh' %}";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: { "page_num": page_num, "direction": direction },
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+
+        }).done(function (response) {
+            renderBrowser(response);
+            if (refresh_progress) {
+                updatePageSection("pageprocess")
+            }
+        })
+    }
+
+    function callUpload() {
+
+        let url = "{% url 'viecpro_import:ds_upload' %}";
+        $.ajax({
+            type: "GET",
+            url: url,
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+
+            },
+            success: function (data, status, xhttp) {
+                $("#browser_div").empty().append(data.content);
+                $('#post-upload').on("submit", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    postUploadData(this);
+                });
+
+            }
+        })
+    }
+
+
+    function updateDataSourceSelect(ds_pk) {
+        let url = '{% url "viecpro_import:ds_list_refresh" %}';
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: { "ds_pk": ds_pk },
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+
+            },
+            success: function (data) {
+                $("#input_select").replaceWith(data['select_html']);
+                $("#input_select").on("change", function () {
+                    DataSourceSelectClick();
+                })
+                DataSourceSelectClick();
+
+            }
+        })
+    }
+
+    async function postUploadData(element) {
+        let url = "{% url 'viecpro_import:ds_upload' %}";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: new FormData(element),
+            processData: false,
+            contentType: false,
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+
+            },
+            success: function (data) {
+                if (data["success"]) {
+                    $("#browser_div").empty();
+                    updateDataSourceSelect(data["ds_pk"]);
+
+                } else {
+                    $("#post-upload").replaceWith(data['form_html']);
+
+                }
+            },
+            error: function () {
+            },
+        })
+    }
+
+    function editDataSource() {
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'viecpro_import:ds_update' %}",
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (response) {
+                $("#browser_div").html(response.content);
+                $(".update_datasource_form").on("submit", function (event) {
+                    //console.log("reached success");
+                    event.preventDefault();
+                    event.stopPropagation();
+                    let url = "{% url 'viecpro_import:ds_update' %}";
+                    let formData = $(this).serialize();
+
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: formData,
+
+                        beforeSend: function (request) {
+                            var csrftoken = getCookie('csrftoken');
+                            request.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                    })
+                        .done(function (response) {
+
+                            alert(response.msg);
+                            updateDataSourceSelect(response.ds_pk);
+                            DataSourceSelectClick(first_call = true);
+                        })
+                })
+            }
+        })
+    }
+
+</script>
+
+
+{% block scripts %}
+{{block.super}}
+{% endblock scripts %}
+{% endblock content %}

@@ -1,0 +1,8 @@
+<select aria-label="Default select example" class="form-select my-2 mr-sm-2"
+        id="input_select">
+        <option selected value="{{last_ds.pk}}">{{last_ds.name}}</option>
+
+    {% for ds in DataSources %}
+    <option value="{{ ds.pk }}">{{ds.name}}</option>
+    {% endfor %}
+</select>

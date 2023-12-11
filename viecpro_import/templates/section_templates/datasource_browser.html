@@ -1,0 +1,168 @@
+{% load static %}
+
+
+<div class="w-100 container-fluid" id="pdf_content_div">
+
+    <div class="w-100 container-fluid p-0 m-0" id="ds_meta_container">
+        <div class="row w-100 align-content-center justify-content-start">
+            <div class="col-md-4">
+                <h5 class="h5 text-left">Name: </h5>
+            </div>
+            <div class="col-md-8 text-left">
+                <h5 class="ml-1 font-weight-light">{{ name }}</h5>
+            </div>
+        </div>
+        <div class="row w-100 align-content-center justify-content-start">
+            <div class="col-md-4">
+                <h5 class="h5 text-left">Citation: </h5>
+            </div>
+            <div class="col-md-8 text-left">
+                <h5 class="ml-1 font-weight-light">{{ citation }}, {{ page_token }}.</h5>
+            </div>
+        </div>
+        <div class="row w-100 align-content-center justify-content-start">
+            <div class="col-md-4">
+                <h5 class="h5 text-left">Year: </h5>
+            </div>
+            <div class="col-md-8 text-left">
+                <h5 class="ml-1 font-weight-light">{{ year }}</h5>
+            </div>
+        </div>
+        <div class="row w-100 align-content-center justify-content-start pb-4">
+            <div class="col-md-4">
+                <h5 class="h5 text-left">Page Token: </h5>
+            </div>
+            <div class="col-md-8 text-left">
+                <h5 class="ml-1 font-weight-light">{{ page_token }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-100 container-fluid p-0 m-0" id="ds_navigation_container">
+
+        <div class="row w-100 justify-content-center mx-0 px-0 pt-4 border-top border-grey">
+            <div class="col-md-4 pt-4 pb-2 text-right">
+                <Button class="btn btn-secondary" id="btn_previous" onclick="updateBrowserPage(null, 'prev')"><<
+                </Button>
+            </div>
+            <div class="col-md-4 pt-4 pb-2 text-center"><h5 class="h5 my-1">{{ page_num }}/{{page_count}}</h5></div>
+            <div class="col-md-4 pt-4 pb-2 text-left">
+                <Button class="btn btn-secondary" id="btn_next" onclick="updateBrowserPage(null, 'next')">>></Button>
+            </div>
+        </div>
+        <div class="row w-100 justify-content-center align-items-center no-gutters mb-3">
+            <div class="col-md-auto mx-2"><input class="btn btn-sm btn-outline-secondary" onclick="goToPage();"
+                                                 type="button"
+                                                 value="jump to page"/></div>
+            <div class="col-md-auto mx-2"><input class="btn btn-sm btn-outline-secondary" onclick="setStartPage();"
+                                                 type="button"
+                                                 value="set start token"/></div>
+            <div class="col-md-auto mx-2"><input class="btn btn-sm btn-outline-secondary" onclick="setPageToken();"
+                                                 type="button"
+                                                 value="set page token"/></div>
+        </div>
+    </div>
+    <div class="w-100 container-fluid p-0 m-0" id="ds_image_container">
+        <div class="row w-100 no-gutters">
+            <div class="col-md-12 w-100" id="image_place_holder">
+                <img alt="nothing to see here" id="myimage" src="{{ img_path }}" style="width:100%">
+                <!-- todo: delete alt here -->
+
+            </div>
+            
+
+        </div>
+    </div>
+</div>
+<div class="img-zoom-result" id="myresult"></div>
+
+<script>
+
+
+    // todo: adjust width of result div on small windows.
+    // todo: __gpirgie__ not my code! Give credits.
+    function imageZoom(imgID, resultID) {
+        var img, lens, result, cx, cy;
+        img = document.getElementById(imgID);
+        result = document.getElementById(resultID);
+        /* Create lens: */
+        lens = document.createElement("DIV");
+        lens.setAttribute("class", "img-zoom-lens");
+        /* Insert lens: */
+        img.parentElement.insertBefore(lens, img);
+        /* Calculate the ratio between result DIV and lens: */
+        cx = result.offsetWidth / lens.offsetWidth;
+        cy = result.offsetHeight / lens.offsetHeight;
+        /* Set background properties for the result DIV */
+        result.style.backgroundImage = "url('" + img.src + "')";
+        result.style.backgroundSize = (img.width * cx) + "px " + (img.height * cy) + "px";
+        /* Execute a function when someone moves the cursor over the image, or the lens: */
+        lens.addEventListener("mousemove", moveLens);
+        img.addEventListener("mousemove", moveLens);
+        /* And also for touch screens: */
+        lens.addEventListener("touchmove", moveLens);
+        img.addEventListener("touchmove", moveLens);
+
+        function moveLens(e) {
+            document.getElementById(resultID).style.visibility = "visible";
+            whalf = window.innerWidth / 2;
+            hhalf = window.innerHeight / 2;
+            hfull = window.innerHeight;
+
+            //result.style.top = hhalf+"px";
+            result.style.top = hfull - 240 + "px";
+            result.style.left = whalf - 200 + "px";
+            var pos, x, y;
+            /* Prevent any other actions that may occur when moving over the image */
+            e.preventDefault();
+            /* Get the cursor's x and y positions: */
+            pos = getCursorPos(e);
+            /* Calculate the position of the lens: */
+            x = pos.x //- (lens.offsetWidth / 2);
+            y = pos.y - (lens.offsetHeight / 2);
+            /* Prevent the lens from being positioned outside the image: */
+            if (x > img.width) //s - lens.offsetWidth)
+            {
+                x = img.width// - lens.offsetWidth;
+                //result.style.visibility = "hidden";
+
+            }
+            if ((x - (lens.offsetWidth / 2)) < 0) {
+                //x = 0;
+                result.style.visibility = "hidden";
+
+            }
+            if (y > img.height - lens.offsetHeight) {
+                y = img.height - lens.offsetHeight;
+                result.style.visibility = "hidden";
+
+            }
+            if (y < 0) {
+                y = 0;
+                result.style.visibility = "hidden";
+
+            }
+            /* Set the position of the lens: */
+            //lens.style.left = x + "px";
+            lens.style.top = y + "px";
+            /* Display what the lens "sees": */
+            result.style.backgroundPosition = "-" + (0 * cx) + "px -" + (y * cy) + "px";
+        }
+
+        function getCursorPos(e) {
+            var a, x = 0, y = 0;
+            e = e || window.event;
+            /* Get the x and y positions of the image: */
+            a = img.getBoundingClientRect();
+            /* Calculate the cursor's x and y coordinates, relative to the image: */
+            x = e.pageX - a.left;
+            y = e.pageY - a.top;
+            /* Consider any page scrolling: */
+            x = x - window.pageXOffset;
+            y = y - window.pageYOffset;
+            return {x: x, y: y};
+        }
+    }
+
+</script>
+

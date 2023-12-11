@@ -1,37 +1,40 @@
-[tool.black]
-line-length = 120
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
-[tool.isort]
-profile = "black"
-
 [tool.poetry]
-name = "apis-core"
-version = "0.18"
-description = "Base package for the APIS framework"
-authors = ["Matthias Schlögl <matthias.schloegl@oeaw.ac.at>", "Peter Andorfer <peter.andorfer@oeaw.ac.at>", "Stefan Resch <stefan.resch@oeaw.ac.at>", "Richard Hadden <richard.hadden@oeaw.ac.at>", "Gregor Pirgie <gregor.pirgie@oeaw.ac.at>"]
+name = "viecpro-backend"
+version = "0.1.0"
+description = "Backend for the VieCPro project."
+authors = ["Matthias Schlögl <matthias.schloegl@oeaw.ac.at>", "Gregor Pirgie <gregor.pirgie@oeaw.ac.at>", "Peter Andorfer <peter.andorfer@oeaw.ac.at>", "Stefan Resch <stefan.resch@oeaw.ac.at>", "Richard Hadden <richard.hadden@oeaw.ac.at>"]
+readme = "README.md"
 license = "MIT"
-packages = [{include = "apis_core"}, {include = "browsing"}, {include = "infos"}]
-include = [{path = "LICENSE.txt", format = "sdist"}, {path = "README.rst", format = "sdist"}]
-exclude = ["apis/", "manage.py", "__pycache__"]
 
 [tool.poetry.dependencies]
-python = ">=3.7, <3.11"
-Django = "~3.1.8"
+python = ">=3.10,<3.12"
+whitenoise = "^5.2.0"
+sentry-sdk = "*"
+dj-database-url = "^0.5.0"
+gunicorn = "^20.0.4"
+acdh-django-charts = "^0.5.3"
+django-allow-cidr = "^0.3.1"
+mysqlclient = "^2.0.3"
+django-extensions = "^3.1.3"
+django-csp = "^3.7"
+apis-bibsonomy = "0.4.1"
+apis-ampel = "^0.2.0"
+pylint = "^2.6.0"
+jupyter = "^1.0.0"
+jupyter-tabnine = "^1.2.3"
+black = "^22.12.0"
+flake8 = "^6.0.0"
+celery = "^5.3.4"
+python-Levenshtein = "^0.23.0"
+django-celery-results = "^2.5.1"
+django-debug-toolbar = "^4.2.0"
+Django = "3.2.18"
+psycopg2 = "^2.9.7"
+traitlets = "<=5.9.0"
+jupyter-server = "^2.7.3"
+typesense = "^0.17.0"
+redis = "^5.0.1"
+pandas = "^2.0"
 djangorestframework = "^3.14.0"
 django-filter = "^2.4.0"
 django-autocomplete-light = "~3.8.2"
@@ -49,7 +52,6 @@ jmespath = "^0.10.0"
 jsonschema = "^3.2.0"
 lxml = "^4.6.2"
 convertdate = "^2.3.0"
-PyYAML = "^5.3.1"
 rdflib = "~6.1.1"
 drf-spectacular = "~0.26.1"
 tablib = "^3.0.0"
@@ -60,25 +62,10 @@ unicodecsv = "^0.14.1"
 django-model-utils = "^4.1.1"
 django-summernote = "^0.8.11"
 djangorestframework-jsonschema = "^0.1.1"
-dj-database-url = "^0.5.0"
-mysqlclient = "^2.0.3"
 django-admin-csvexport = "^1.9"
-tqdm = "^4.62.3"
-pandas = ">=1.1.5, <2"
+tqdm = "*"
 
-[tool.poetry.dev-dependencies]
-black = "^20.8b1"
-django-extensions = "^3.0.9"
-networkx = "^2.5"
-flake8 = "^3.8.3"
-yapf = "^0.30.0"
-jupyter = "^1.0.0"
-openpyxl = "^3.0.5"
-spacy = "^2.3.2"
-pylint = "^2.6.0"
-xlrd = "^1.2.0"
-lastversion = "^2.0.1"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry>=1.1.12"]
+build-backend = "poetry.core.masonry.api"

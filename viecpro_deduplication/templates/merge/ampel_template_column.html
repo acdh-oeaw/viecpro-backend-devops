@@ -1,0 +1,22 @@
+<div class="ampel_dotted" style="background-color: {{record.ampel.status}}"></div>
+
+
+{% comment %} 
+<script>
+    $(".ampel_pill").each((idx, el)=>{
+        let status = el.innerHTML;
+        el.innerHTML = "  ";
+        console.log(el, status)
+        $(el).css("background-color", status);
+    })
+</script>
+ {% endcomment %}
+
+ <style>
+    .ampel_dotted {
+        border: 2px solid black;
+        width: 20px;
+        height: 20px;
+        border-radius: 30px;
+    }
+ </style>

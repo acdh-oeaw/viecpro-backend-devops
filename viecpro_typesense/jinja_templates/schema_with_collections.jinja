@@ -1,0 +1,24 @@
+{# jinja_templates/schema_with_collections.jinja #}
+
+{% for col in schema.collections %}
+{% if col.config %}{{col.config.name }} {% else %}{{col.name}} {% endif %} = {
+    'name':{% if col.config %} '{{col.config.name }}',  {% else %} '{{col.name}}',{% endif %}
+    'enable_nested_fields': {% if col.config %} {{col.config.nested }},  {% else %} {{col.nested}}, {% endif %}
+    'fields': [
+        {% for field in col.fields %}
+        {
+            'name': '{{field.name}}',
+            'type': '{{field.options["type"]}}',
+            'optional':{{field.options["optional"]}},
+            'facet':{{field.options["facet"]}},
+            'index':{{field.options["index"]}},
+            'sort':{{field.options["sort"]}}
+
+        },
+        {% endfor %}
+    ],
+
+}
+
+{% endfor %}
+

@@ -1,22 +1,14 @@
-version: '3'
+version: "3.8"
 
 services:
   app:
+    env_file: devcontainer.env
     build:
       context: ..
       dockerfile: .devcontainer/Dockerfile
-      args:
-        # [Choice] Python version: 3, 3.8, 3.7, 3.6
-        VARIANT: 3.6
-        # [Choice] Install Node.js
-        INSTALL_NODE: "true"
-        NODE_VERSION: "lts/*"
-        # On Linux, you may need to update USER_UID and USER_GID below if not your local UID is not 1000.
-        USER_UID: 1000
-        USER_GID: 1000
 
     volumes:
-      - ..:/workspace:cached
+      - ../..:/workspaces:cached
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
@@ -24,25 +16,30 @@ services:
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
     network_mode: service:db
 
-    # Uncomment the next line to use a non-root user for all processes.
-    # user: vscode
-
-    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
-
   db:
     image: mariadb:latest
     restart: unless-stopped
     volumes:
       - mariadb-data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: mariadb
-      MYSQL_DATABASE: apisdb
-      MYSQL_USER: mariadb
-      MYSQL_PASSWORD: mariadb
 
-    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
+    env_file: devcontainer.env
+
+  ts:
+    image: typesense/typesense:0.24.1
+    entrypoint: sh -c "/opt/typesense-server --data-dir /data --api-key=xyz --enable-cors"
+    ports:
+      - "8111:8108"
+    volumes:
+      - typesense-data:/data
+
+  redis:
+    image: arm64v8/redis
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-data:/data
 
 volumes:
   mariadb-data:
+  redis-data:
+  typesense-data:

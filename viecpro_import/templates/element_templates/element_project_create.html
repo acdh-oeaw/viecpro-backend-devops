@@ -1,0 +1,14 @@
+<div class="container-fluid w-100 pt-4" id="crispy_row_form">
+    <div class="row w-100 justify-content-center mb-3">
+        <div class="col-md-auto align-text-center">
+            <h3 class="h3"> {{action}} Import Project </h3>
+        </div>
+    </div>
+    <div class="row w-100">
+        <div class="col-md-12">
+                {% load crispy_forms_tags %}
+                {% csrf_token %}
+                {% crispy form %}
+        </div>
+    </div>
+</div>

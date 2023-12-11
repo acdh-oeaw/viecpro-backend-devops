@@ -1,0 +1,21 @@
+<!-- {% for b in group.buttons %}
+<label class="border border-dark rounded m-2 p-1 my_checkbox {% if b.value %} checkbox_is_true {% endif %}" onclick="checkButtonResponse('{{b.id}}', '{{group.id}}')" id="check_button_{{b.id}}">{{b.kind.name}}</label>
+{% endfor %} -->
+
+
+
+
+
+{% for b in group.buttons %}
+{% if forloop.first %}
+<label class="border border-dark rounded-left m-0 my-2 p-1 my_checkbox {% if b.value %} checkbox_is_true {% endif %}" onclick="checkButtonResponse('{{b.id}}', '{{group.id}}')" id="check_button_{{b.id}}" ><small>{{b.kind.short}}</small></label>
+{% elif forloop.last %}
+<label class="border border-dark rounded-right m-0 my-2 p-1 my_checkbox {% if b.value %} checkbox_is_true {% endif %}" onclick="checkButtonResponse('{{b.id}}', '{{group.id}}')" id="check_button_{{b.id}}"><small>{{b.kind.short}}</small></label>
+
+{% else %}
+<label class="border border-dark m-0 my-2 p-1 my_checkbox {% if b.value %} checkbox_is_true {% endif %}" onclick="checkButtonResponse('{{b.id}}', '{{group.id}}')" id="check_button_{{b.id}}" ><small>{{b.kind.short}}</small></label>
+
+{% endif %}
+
+{% endfor %}
+

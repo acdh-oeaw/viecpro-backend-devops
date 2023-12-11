@@ -1,0 +1,55 @@
+{% with s=p.person %}
+
+<div class="container-fluid m-0 p-0" id="single_data_{{s.id}}">
+<div class="p-0 m-0 pb-2" >
+
+        
+    <span class="d-flex justify-content-start align-items-center">
+        <div class="m-0 mr-2 border border-dark rounded" onclick="toggleMemberSelect('singles','{{s.id}}')" id="select_toggle_button_single_{{s.id}}" style="width:2rem; height:2rem; min-width:30px; min-height: 30px;"></div>
+
+        <button class="btn btn-sm btn-outline-secondary m-0 mr-2 px-2 py-1" onclick="toggleSingleSelect('{{s.id}}')"><i class="fa fa-close"></i></button>
+
+
+<button class="btn btn-sm btn-outline pl-2 py-1 m-0" data-toggle="collapse" data-target="#data_div_single_{{s.id}}">{{s.name}}, {{s.first_name}} [{{s.id}}] &emsp;&emsp; {% if s.start_date %} *{{s.start_date}} &emsp;&emsp; {% endif %}{% if s.end_date %} †{{s.end_date}} {% endif %}</button>
+<!-- <div class="badge badge-primary badge-pill m-0">{% if p.note %}N{% endif %}</div> -->
+<button class="btn btn-sm btn-outline-secondary m-0 ml-2 px-2 py-1" onclick="getPersonDetail('{{s.id}}')"><i class="fa fa-eye"></i></button>
+<button class="btn btn-sm btn-outline-secondary m-0 ml-2 px-2 py-1" onclick="getPersonSuggestions('{{s.id}}')"><i class="fa fa-gear"></i></button>
+<button class="btn btn-sm btn-outline-secondary m-0 ml-2 px-2 py-1 note_icon_button {% if p.note %} has_note_flag {% endif %}" onclick="getNoteJson('{{s.id}}', 'single')"><i class="fa fa-edit"></i></button>
+
+
+</span></div>
+<div class="p-0 m-0 pb-3 collapse" id="data_div_single_{{s.id}}">
+    <span class="d-flex justify-content-start align-items-top person_names">
+        <label><small>LN:</small></label>
+        <div class="d-flex flex-wrap justify-content-start">
+        {% for n in p.allnames %}
+        <label class="px-1 mx-1 name-label-label rounded"><small>{{n}}</small> </label>
+        {% endfor %}
+    </div>
+    </span>
+    <span class="d-flex justify-content-start align-items-top person_names">
+        <label><small>FN:</small> </label>
+        <div class="d-flex flex-wrap justify-content-start">
+
+        {% for n in p.allfirst_names %}
+            <label class="px-1 mx-1 name-label-label rounded"><small> {{n}}</small></label>
+
+        {% endfor %}
+    </div>
+
+    </span>
+<ul class="list-group">
+    {% if rels %}
+{% for r in rels %}
+<li class="list-group-item list-group-item-sm border-0"><span class="rounded-left px-2 py-1 span_relation_type mr-0" ><small>{{ r.relation_type.name}}</small></span><span  class="px-2  mx-0 py-1 span_related_institution"><small>{{r.related_institution.name}}</small></span><span class="rounded-right px-2 ml-0 py-1 span_rel_dates"><small>{{r.start_date.year|default:"-"}} bis {{r.end_date.year|default:"-"}}</small></span></li>
+
+
+{% endfor %}
+{% else %} 
+<li class="list-group-item list-group-item-sm border-0">No Person-Institution Relations</li>
+{% endif %}
+</ul>
+</div>
+</div>
+
+{% endwith %}

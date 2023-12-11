@@ -1,0 +1,135 @@
+<div class="container p-0 m-0 mt-5" id="group_data_{{group.id}}">
+    <div class="m-0 p-0">
+        <h4 class="h4 group_id_name p-0 m-0 d-flex justify-content-start align-items-center"><label
+                onclick="renameGroup('{{group.id}}', '{{group.name}}')">{{group.name}} </label>
+            <span>
+                <button class="btn btn-outline-secondary btn-sm p-2 m-0 ml-4" onclick="toggleItemSelect('{{group.id}}')"
+                    style="width: 2rem;"><i class="fa fa-close"></i></button>
+                <button class="btn btn-sm btn-outline-secondary  p-2 m-0 ml-0"
+                    onclick="getGroupSuggestions('{{group.id}}')" style="width: 2rem;"><i
+                        class="fa fa-gear"></i></button>
+
+                <!-- <button class="btn btn-outline-secondary btn-sm p-2 m-0" onclick="editNote('{{group.id}}')"> <i class="fa fa-edit"></i></button> </span></h4> -->
+                <button
+                    class="btn btn-outline-secondary btn-sm p-2 m-0 note_icon_button {% if group.note %} has_note_flag {% endif %}"
+                    onclick="getNoteJson('{{group.id}}', 'group')"> <i class="fa fa-edit"></i></button>
+                <button class="btn btn-sm btn-outline-danger p-2 m-0 ml-0"
+                    onclick="remergeGroup('{{group.id}}')">Re-Merge</button>
+            </span>
+        </h4>
+
+
+        <span class="d-flex justify-content-start align-items-center pb-2 span_group_actions "
+            style="height: auto; width: 100%" id="span_group_actions_{{group.id}}">
+            <!-- <button class="btn btn-danger group_action_button">Remove</button> -->
+            <!-- <button class="btn btn-primary group_action_button m-0">New Group from Selection</button> -->
+        </span>
+    </div>
+    <div class="d-flex flex-wrap justify-content-start m-0 p-0 pb-3 pt-1" id="div_group_status_buttons_{{group.id}}">
+        {% include "group_buttons.html" %}
+        <!-- {% for b in group.buttons %}
+    {% if forloop.first %}
+    <label class="border border-dark rounded-left m-0 my-2 p-1 my_checkbox {% if b.value %} checkbox_is_true {% endif %}" onclick="checkButtonResponse('{{b.id}}', '{{group.id}}')" id="check_button_{{b.id}}"><small>{{b.kind.name}}</small></label>
+    {% elif forloop.last %}
+    <label class="border border-dark rounded-right m-0 my-2 p-1 my_checkbox {% if b.value %} checkbox_is_true {% endif %}" onclick="checkButtonResponse('{{b.id}}', '{{group.id}}')" id="check_button_{{b.id}}"><small>{{b.kind.name}}</small></label>
+
+    {% else %}
+    <label class="border border-dark m-0 my-2 p-1 my_checkbox {% if b.value %} checkbox_is_true {% endif %}" onclick="checkButtonResponse('{{b.id}}', '{{group.id}}')" id="check_button_{{b.id}}"><small>{{b.kind.name}}</small></label>
+
+    {% endif %}
+
+    {% endfor %} -->
+
+        <span class="mx-2 text-center my-auto">VORFIN:
+            {% if group.vorfin %}
+            <a href={% url "apis:apis_entities:generic_entities_detail_view" entity='person' pk=group.vorfin.id %}>{{group.vorfin.name}} ({{group.vorfin.id}})</a>
+
+            {% else %}
+            <b>NO VORFIN (not updated on merge)</b>
+            {% endif %}
+        </span>
+    </div>
+    <!-- <div class="form-check form-check-inline d-flex flex-wrap">
+    {% for b in group.buttons %}
+    <input type="checkbox" class="form-check-input" id="checkbutton_{{b.id}}" value="" checked="">
+    <label class="form-check-label" for="checkbutton_{{b.id}}">{{b.kind.name}}</label>
+    {% endfor %}
+</div> -->
+    {% for p, rels in members %}
+    {% with m=p.person %}
+    <div class="m-0 p-0" id="group_member_item_{{m.id}}">
+        <div class="p-0 m-0 pb-2">
+
+            <span class="d-flex justify-content-start align-items-center member_list_class">
+
+                <div class="m-0 mr-2 px-2 border border-dark rounded"
+                    onclick="toggleMemberSelect('{{group.id}}','{{m.id}}')" id="select_toggle_button_{{m.id}}"
+                    style="width:2rem; height:2rem; min-width:30px; min-height: 30px;"></div>
+                <button class="btn btn-sm btn-outline-secondary m-0 mr-2 px-2 py-1"
+                    onclick="removeMember('{{group.id}}', '{{m.id}}')"><i class="fa fa-close"></i></button>
+
+                <button class="btn btn-sm btn-outline px-2 py-1 m-0" data-toggle="collapse"
+                    data-target="#data_div_{{group.id}}_{{m.id}}">{{m.name}}, {{m.first_name}} [{{m.id}}] &emsp;&emsp;
+                    {% if m.start_date %} *{{m.start_date}} &emsp;&emsp; {% endif %}{% if m.end_date %} †{{m.end_date}}
+                    {% endif %}</button>
+                <button class="btn btn-sm btn-outline-secondary m-0 ml-2 px-2 py-1"
+                    onclick="getPersonDetail('{{m.id}}')"><i class="fa fa-eye"></i></button>
+                <!-- <button class="btn btn-sm btn-outline-secondary m-0 ml-2 px-2 py-1" onclick="getPersonSuggestions('{{m.id}}')"><i class="fa fa-gear"></i></button> -->
+                <button
+                    class="btn btn-sm btn-outline-secondary m-0 ml-2 px-2 py-1 note_icon_button {% if p.note %} has_note_flag {% endif %}"
+                    onclick="getNoteJson('{{m.id}}', 'single')"><i class="fa fa-edit"></i></button>
+
+            </span>
+        </div>
+        <div class="p-0 m-0 pb-3 collapse" id="data_div_{{group.id}}_{{m.id}}">
+            <span class="d-flex justify-content-start align-items-top person_names">
+                <label><small>LN:</small></label>
+                <div class="d-flex flex-wrap justify-content-start">
+                    {% for n in p.allnames %}
+                    <label class="px-1 mx-1 name-label-label rounded"><small>{{n}}</small> </label>
+                    {% endfor %}
+                </div>
+            </span>
+            <span class="d-flex justify-content-start align-items-top person_names">
+                <label><small>FN:</small> </label>
+                <div class="d-flex flex-wrap justify-content-start">
+
+                    {% for n in p.allfirst_names %}
+                    <label class="px-1 mx-1 name-label-label rounded"><small> {{n}}</small></label>
+
+                    {% endfor %}
+                </div>
+
+            </span>
+            <ul class="list-group">
+                {% if rels %}
+                {% for r in rels %}
+                <!-- <li class="list-group-item list-group-item-sm border-0">{{ r.relation_type.name}} {{r.related_institution.name}} {{r.start_date.year|default:"-"}} bis {{r.end_date.year|default:"-"}}</li> -->
+                <li class="list-group-item list-group-item-sm border"><span
+                        class="rounded-left px-2 py-1 span_relation_type mr-0"><small>
+                            {{r.relation_type.name}}</small></span><span
+                        class="px-2  mx-0 py-1 span_related_institution"><small>{{r.related_institution.name}}</small></span><span
+                        class="rounded-right px-2 ml-0 py-1 span_rel_dates"><small>{{r.start_date.year|default:"-"}} bis
+                            {{r.end_date.year|default:"-"}}</small></span></li>
+
+                {% endfor %}
+                {% else %}
+                <li class="list-group-item list-group-item-sm border-0">No Person-Institution Relations</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+</div>
+
+
+<script>
+//        $(function () {
+//     $('[data-toggle="tooltip"]').tooltip({trigger : 'hover'})
+//   })
+
+// $('[data-toggle="tooltip"]').on('click', function () {
+//     $(this).tooltip('hide')
+// })
+</script>
