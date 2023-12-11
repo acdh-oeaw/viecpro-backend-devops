@@ -1,0 +1,98 @@
+<div class="container-fluid">
+    <span class="d-flex flex-wrap m-0 p-0 jsutify-content-start align-items-center"><label class="mr-2">Suggestions for: </label>
+    <label class=""><b>{{instance.name}} </b>[{%if instance.person %}{{instance.person.id}} {% else %}{{instance.id}}{% endif %}]</label></span>
+
+    <h3 class="h3 mt-4">BY LEVENSTHEIN</h3>
+    {% if levs.groups or levs.singles %}
+    {% if levs.groups %}
+
+    <div class="container-fluid">
+    <h5 class="h5 pl-0 ml-0">Groups</h3>
+    <ul class="list-group" id="levensthein_suggestions_groups">
+    {% for g in levs.groups %}
+    <li class="suggestions_group_item list-group-item group_list_item_ list-group-item-sm d-flex justify-content-between align-items-center" onclick="toggleItemSelect('{{g.id}}')" id="li_suggestions_levensthein_group_{{g.id}}">{{g.id}} {{g.name}}
+        <span class="badge badge-primary badge-pill" id="group_count_badge_{{g.id}}">{{g.count}}</span> </li>
+
+    </ul>    
+    </div>
+
+    {% endfor %}
+    {% endif %}
+    {% if levs.singles %}
+    <div class="container-fluid m-0 p-0">
+    <h5 class="h5">Singles</h5>
+    <ul class="list-group" id="levensthein_suggestions_singles">
+
+    {% for l in levs.singles %}
+    <li class="suggestions_singles_item list-group-item single-list-item group_list_item_ list-group-item-sm d-flex justify-content-between align-items-center" id="single_suggestions_levensthein_item_{{l.person.id}}" onclick="toggleSingleSelect('{{l.person.id}}')">
+        {{l.person.name}}, {{l.person.first_name}}</li>
+
+    {% endfor %}
+    </ul>
+
+    <!-- {% for l in levs %}
+    <div>    <span>{{l.0}}, {{l.1}} [{{l.2}}]</span>
+
+    {% endfor %} -->
+    </div>
+    {% endif %}
+
+    {% else %}
+    No Matches
+
+    {% endif %}
+
+    <h5 class="h3 mt-4">BY ALL NAMES</h5>
+    {% if not names.groups and not names.singles %}
+    No Matches
+    {% endif %}
+
+    <!-- {% if names.groups %}
+    <h3 class="h3">Groups</h3>
+    {% for g in names.groups %}
+    <div>    <span>{{g.name}} [{{g.id}}]</span>
+    </div>
+    {% endfor %}
+    {% endif %} -->
+
+
+
+    {% if names.groups %}
+<div class="container-fluis m-0 mt-3 p-0">
+    <h5 class="h5">Groups</h5>
+
+    <ul class="list-group" id="suggestions_groups">
+        {% for g in names.groups %}
+        <!-- DISPLAY EACH GROUP: ID - Name - Count -->
+        <li class="suggestions_group_item list-group-item group_list_item_ list-group-item-sm d-flex justify-content-between align-items-center" onclick="toggleItemSelect('{{g.id}}')" id="li_suggestions_group_{{g.id}}">{{g.id}} {{g.name}}
+        <span class="badge badge-primary badge-pill" id="group_count_badge_{{g.id}}">{{g.count}}</span> </li>
+        {% endfor %}
+    </ul>
+    </div>
+    {% endif %}
+
+    <!-- {% if names.singles %}
+    <h3 class="h3">Singles</h3>
+    {% for s in names.singles %}
+    <div>    <span>{{s.person.name}} [{{s.person.id}}]</span>
+    </div>
+    {% endfor %}
+    {% endif %} -->
+
+    {% if names.singles %}
+  
+    <div class="container-fluis m-0 mt-3 p-0">
+        <h5 class="h5">Singles</h5>
+    
+        <ul class="list-group" id="suggestions_singles">
+
+{% for s in names.singles %}
+    <li class="suggestions_singles_item list-group-item single-list-item group_list_item_ list-group-item-sm d-flex justify-content-between align-items-center" id="single_suggestions_list_item_{{s.person.id}}" onclick="toggleSingleSelect('{{s.person.id}}')">
+        {{s.person.name}}, {{s.person.first_name}}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+</div>
+

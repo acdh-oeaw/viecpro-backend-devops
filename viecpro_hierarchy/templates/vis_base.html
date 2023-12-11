@@ -1,0 +1,461 @@
+{% extends "webpage/base.html" %}
+{% load static %}
+{% block content %}
+
+    <link href="/static/vis/css/main.css" rel="stylesheet" type="text/css">
+
+    <script src="/static/vis/js/tree_new.js"></script>
+    <script src="/static/vis/js/autocomplete.js"></script>
+
+    <script src="/static/vis/js/d3.js"></script>
+    <link href="/static/vis/css/style.css" rel="stylesheet" type="text/css">
+    <link href="/static/vis/css/autocomplete.css" rel="stylesheet" type="text/css">
+
+    <script src="https://unpkg.com/canvg@3.0.1/lib/umd.js"></script>
+
+    <script src="https://sharonchoong.github.io/svg-exportJS/svg-export.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/pdfkit@0.11.0/js/pdfkit.min.js"></script>
+    <script src="https://github.com/devongovett/blob-stream/releases/download/v0.1.3/blob-stream.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg-to-pdfkit@0.1.8/source.min.js"></script>
+
+    <div id="vis_content">
+        <div id="tree">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+   let BASE_URL = "{{ BASE_URL|escapejs }}";
+</script>
+
+    <div id="tooltip"></div>
+    <div class="info_card" id="graph_card">
+        <div id="tab">
+            <button class="tablinks" class="toolbox" id="graph_info_tab_style" onclick="showTab('graph_info_tab')">Graph</button>
+            <button class="tablinks" class="toolbox" id="graph_display_tab_style" onclick="showTab('graph_display_tab')">Display</button>
+            <button class="tablinks" class="toolbox" id="graph_selection_tab_style"  onclick="showTab('graph_selection_tab')">selection</button>
+        </div>
+        <div class="tabcontent" id="graph_info_tab">
+            <table class="card_table" id="table_graph">
+
+            </table>
+        </div>
+        <div class="tabcontent" id="graph_display_tab">
+            <div class="graph_toolbar_content">
+                <label for="button_hide_labels" class="toolbar_label">Labels</label>
+                <div>
+                    <button id="button_hide_labels" class="toolbar" onclick="switch_label_visibility()" type="Button">on
+                    </button>
+                </div>
+            </div>
+            <div class="graph_toolbar_content">
+                <label for="button_orientation" class="toolbar_label">Graph</label>
+                <div>
+                    <button id="button_orientation" class="toolbar" onclick="switchOrientation()" type="Button">vertical
+                    </button>
+
+                </div>
+            </div>
+            <div class="graph_toolbar_content">
+                <label id="colorTypeLabel"  class="toolbar_label">Nodes</label>
+
+                <div id="node_color_examples">
+
+                </div>
+            </div>
+
+            <div class="graph_toolbar_content">
+                <div id="slider_div">
+                    <div>
+                        <label for="slidecontainer" class="toolbar_label">Depth</label>
+                        <div id="slidecontainer" class="slider_label"></div>
+                    </div>
+                    <div>
+                        <label for="textslide" class="toolbar_label">Labels</label>
+                        <div id="textslide" class="slider_label"><input type="range" id="textRange" min="12" max="34"
+                                                                        step="1" value="12"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tabcontent"   id="graph_selection_tab">
+        <table class="card_table" id="table_selection">
+{#            <label id="selection_header">Info on Selected Entity</label>#}
+
+        </table>
+    </div>
+
+    </div>
+
+
+
+    <div id="vis_toolbar">
+        <div id="vis_toolbar_left">
+            <div id="search_upper">
+                <input id="input_search" name="input_search" placeholder="search for entity"
+                       type="search">
+                <button id="button_submit" onclick="send_request()" type="Button">create</button>
+            </div>
+            <div id="search_lower">
+                <div id="selections_div">
+                    <select id="graph_options"  name="graph_options">
+                    </select>
+
+                </div>
+                <div>
+                    <select id="direction_select"  name="direction_select">
+                        <option value="down">create hierarchy downwards</option>
+                        <option value="up">create hierarchy upwards</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div id="dots_div">
+            <div>
+                <label id="loading_text" width="200">loading</label>
+            </div>
+
+        </div>
+
+        <div id="window_toolbar" width="auto">
+
+            <div class="window_toolbar_content">
+                <label for="button_hide_graphbox" class="w_toolbar_label">Info-Box</label>
+                <div>
+                    <button id="button_hide_graphbox" class="toolbar" onclick="hideGraphBox()">visible</button>
+                </div>
+            </div>
+            <div class="window_toolbar_content">
+                <label for="button_hide_top_nav" class="w_toolbar_label">Header</label>
+                <div>
+                    <button id="button_hide_top_nav" class="toolbar" onclick="hideTopNav()">visible</button>
+                </div>
+            </div>
+             <div class="window_toolbar_content">
+                <label for="button_download_svg" class="w_toolbar_label">Download</label>
+                <div>
+                    <button id="button_download_svg" class="toolbar" onclick="download_svg()">SVG</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--    <div id="div_download">-->
+    <!--<button id="button_download_svg" onclick="download_svg()">Download as SVG</button>-->
+    <!--<button id="button_download_png" onclick="download_png()">Download as PNG</button>-->
+    <!--<button id="button_download_jpeg" onclick="download_jpeg()">Download as JPEG</button>-->
+    <!--    </div>-->
+    <script>
+
+        let navbarVisible = true;
+        let individualNodeColors;
+        let horizontal = false;
+        let firstCall = true;
+        let boxVisibility;
+
+        function hideGraphBox() {
+            let box = d3.select("#graph_card");
+            let button = d3.select("#button_hide_graphbox");
+            if (firstCall){
+                boxVisibility = "hidden";
+                firstCall = false;
+            } else {
+                boxVisibility = box.style("visibility");
+            }
+            if (boxVisibility === "visible") {
+                box.style("visibility", "hidden");
+                box.selectAll("button").style("transition", "0s");
+                box.selectAll("*").style("visibility", "hidden");
+                button.html("hidden");
+                boxVisibility = box.style("visibility");
+
+            } else {
+                box.style("visibility", "visible");
+                box.selectAll("button").style("transition", "0.3s");
+
+                box.selectAll("*").style("visibility", "visible");
+                boxVisibility = box.style("visibility");
+                if (!makeTree.displayed_ent) {
+                    d3.select("#graph_selection_tab_style").style("visibility", "hidden").style("transition", "0s");
+                }
+
+                button.html("visible");
+            }
+        }
+
+
+        function switchOrientation() {
+            if (horizontal) {
+                horizontal = false;
+                makeTree.update();
+            } else {
+                horizontal = true;
+                makeTree.update();
+            }
+        }
+
+        let last_tab;
+        function showTab(tabName){
+            // show which button is active, by styling it differently in here
+            // switch content
+            ///*oben, rechts, unten, links.*/
+
+            if (last_tab){
+                last_tab.style("background-color", "#f1f1f1").style("color", "black");
+            }
+            last_tab = d3.select(`#${tabName}_style`);
+            d3.select(`#${tabName}_style`).style("background-color", "steelblue").style("color", "white");
+
+            d3.selectAll(".tabcontent").style("display", "none");
+            d3.select(`#${tabName}`).style("display", "flex");
+        }
+
+        // todo: note: i think i can make elements disappear by settings display to none instead of visibility to hidden
+
+        function hideTopNav() {
+            let graphCard = d3.select("#graph_card");
+            let toolbar = d3.select("#vis_toolbar");
+            let navbar = d3.select("#wrapper-navbar");
+            let button = d3.select("#button_hide_top_nav");
+            if (navbar.style("visibility") === "visible") {
+                navbar.style("visibility", "hidden");
+                toolbar.style("top", "0px");
+                navbarVisible = false;
+                button.html("hidden");
+                graphCard.style("top","132px");
+            } else {
+                navbar.style("visibility", "visible");
+                toolbar.style("top", "88px");
+                graphCard.style("top","220px");
+
+                navbarVisible = true;
+                button.html("visible");
+
+
+            }
+        }
+
+        //     pattern = /entity_type/pk/graph_option/direction
+        let labelVisState = true;
+        let labelHighlight = false;
+
+        function switch_label_highlight() {
+            if (labelHighlight) {
+                labelHighlight = false;
+            } else {
+                labelHighlight = true;
+            }
+        }
+
+        function switch_label_visibility() {
+            let text_attr = d3.selectAll(".node text");
+            let button = d3.select("#button_hide_labels");
+
+            if (text_attr.style("visibility") === "visible") {
+                text_attr.style("visibility", "hidden");
+                labelVisState = false;
+                button.html("off");
+            } else {
+                text_attr.style("visibility", "visible");
+                labelVisState = true;
+                button.html("on");
+            }
+        }
+
+        let dot_anim = document.getElementById("dots_div");
+        let selectionDATA = null;
+        let submitButton = d3.select("#button_submit")
+
+        // store last request in var; to not load the same data again;
+        let last_request;
+
+        //make request from here: viecpro_hierarchy/api/json/query_method/data/style/direction
+        async function send_request(req) {
+            if (!req) {
+
+                let ent = selectionDATA[0];
+                let type = selectionDATA[1];
+                let pk = selectionDATA[2];
+                let direction = d3.select("#direction_select").property("value");
+                let options = d3.select("#graph_options").property("value");
+                if (!options) {
+                    options = "normal";
+                }
+
+
+// /entity_type/pk/graph_option/direction
+                req = `${BASE_URL}/visualisations/api/${type}/${pk}/${options}/${direction}`;
+            }
+            ;
+
+
+            if (last_request !== req) {
+                dot_anim.style.visibility = "visible";
+
+
+                await fetch(req).then(function (d) {
+                    if (!d.ok) {
+                        dot_anim.style.visibility = "hidden";
+
+                        alert("Query Failed WHYYYY")
+
+                        return false
+                    } else {
+                        let data = d.text();
+
+                        return data
+                    }
+                }).then(function (d) {
+                    if (d) {
+                        makeTree(d);
+                        //document.getElementById("selection_card").visibility = "hidden";
+                        showTab("graph_display_tab");
+                        dot_anim.style.visibility = "hidden";
+                        input.value = "";
+                        show_graph_options({});
+                        if (firstCall){
+                              hideGraphBox();
+                        }
+                        d3.select("#graph_options")
+
+
+                        last_request = req;
+                    }
+                }).catch((err) => {
+                    dot_anim.style.visibility = "hidden";
+                    alert(`Query Failed - Try Again\n${err}`)
+                });
+            } else {
+                dot_anim.style.visibility = "hidden";
+
+            }
+        }
+
+        function download_svg() {
+
+            let test = document.getElementById("tree");
+            svgExport.downloadSvg(
+                test, // SVG DOM Element object to be exported. Alternatively, a string of the serialized SVG can be passed
+                makeTree.graphRoot, // chart title: file name of exported image
+                {width: 1000, height: 1000} // options (optional, please see below for a list of option properties)
+            );
+        };
+
+        function download_png() {
+            let test = document.getElementById("tree").outerHTML;
+            let svg_string = test.replace(">", ">"); // need to add css here
+
+            svgExport.downloadPng(test, "chart title name", {
+                height: 3000, width: 3000, scale: 5, useCSS:true
+            });
+        }
+
+        function download_jpeg() {
+            let test = document.getElementById("tree");
+
+            svgExport.downloadJpeg(test, "Viecpro Vis JPEG", {width: 800, height: 1000, useCSS: true});
+
+        }
+
+
+        let input = document.getElementById("input_search");
+
+
+        async function suggestions() {
+            await fetch(`${BASE_URL}/visualisations/entityautocomplete/`, function (d) {
+                if (!d.ok) {
+                    alert("ERROR\nFailed to load autocomplete data.\n Please try reloading the page.");
+                    return false
+                } else {
+
+                    return d
+
+                }
+            }).then((d) => {
+                return d.text()
+            }).then((data) => call_auto(data)).catch((err) => {
+                    dot_anim.style.visibility = "hidden";
+                    alert(err)
+                }
+            )
+        };
+
+
+        function call_auto(data) {
+            let suggestions_data = JSON.parse(data);
+            suggestions_data = suggestions_data.context;
+            global_suggestions = suggestions_data;
+            dot_anim.style.visibility = "hidden";
+            submitButton.disabled = false;
+
+            autocomplete({
+                input: input,
+                fetch: function (text, update) {
+                    text = text.toLowerCase();
+                    // you can also use AJAX requests instead of preloaded data
+
+                    let suggestions = suggestions_data.filter(n => n.label.toLowerCase().startsWith(text))
+                    update(suggestions);//.slice(0, 6));
+                },
+                onSelect: function (item) {
+                    input.value = item.label; //item value is array of [e.name, "Institution|Person|Funktion", a.pk]
+                    selectionDATA = item.value;
+                    show_graph_options(item.value);
+                }
+            });
+        }
+
+        suggestions();
+        submitButton.disabled = true;
+        dot_anim.style.visibility = "visible";
+
+
+        function show_graph_options(data) {
+            let type = "";
+            let select = d3.select("#graph_options");
+            let selections_div = d3.select("#selections_div");
+            let directionSelect = d3.select("#direction_select");
+            if (data) {
+                type = data[1];
+            }
+
+            if (type === "Institution") {
+                select.selectAll("option").remove();
+                selections_div.style("visibility", "visible");
+                directionSelect.style("visibility", "visible");
+                directionSelect.property("value", "down");
+
+
+                select.append("option").attr("text", "show only institutions").html("show only institutions");
+                select.append("option").attr("text", "add functions").html("add functions");
+                select.append("option").attr("text", "add functions and persons").html("add functions and persons");
+            } else if (type === "Funktion") {
+                select.selectAll("option").remove();
+                select.append("option").attr("text", "show institution-hierarchy").html("show institution hierarchy");
+                select.append("option").attr("text", "show amt and persons").html("show amt and persons");
+                selections_div.style("visibility", "visible");
+                directionSelect.style("visibility", "hidden");
+
+
+            } else { //if (type === "Funktion" || type === "Person"){
+                select.selectAll("option").remove();
+                selections_div.style("visibility", "hidden");
+                directionSelect.style("visibility", "hidden");
+
+                select.append("option").attr("text", "normal").html("normal");
+            }
+
+        }
+
+        function go_to_entity() {
+            window.open(go_to_entity.URL, '_blank').focus();
+
+        }
+
+        go_to_entity.URL = null;
+    </script>
+{% endblock content %}

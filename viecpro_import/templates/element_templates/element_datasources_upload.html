@@ -1,0 +1,16 @@
+<div class="container-fluid w-100" id="crispy_row_form">
+    <div class="row w-100 mb-2">
+        <div class="col-md-12 text-center">
+            <h3 class="h3"> Create new DataSource </h3>
+        </div>
+    </div>
+    <div class="row w-100">
+        <div class="col-md-12">
+            <form method="post" enctype="multipart/form-data"  id="post-upload">
+                {% load crispy_forms_tags %}
+                {% csrf_token %}
+                {% crispy form %}
+            </form>
+        </div>
+    </div>
+</div>

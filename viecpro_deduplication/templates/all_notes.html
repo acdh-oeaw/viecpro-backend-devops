@@ -1,0 +1,42 @@
+<div class="container-fluid">
+    {% if groups%}
+    <h3>Groups With Notes</h3>
+
+    <ul class="list-group" id="groups_with_notes">
+        
+    {% for g in groups %}
+    <!-- DISPLAY EACH GROUP: ID - Name - Count -->
+    <li class="list-group-item group_list_item_ list-group-item-sm d-flex justify-content-between align-items-center left_group_list_item" onclick="noteClickHandler('{{g.id}}', 'group', 'null')" id="li_group_{{g.id}}">{{g.id}} {{g.name}}
+    <span class="badge badge-primary badge-pill" id="group_count_badge_{{g.id}}">{{g.count}}</span> </li>
+    {% endfor %}
+</ul>
+
+    {% endif %}
+
+    <!-- {% if members %}
+    <h3>Group-Members With Notes</h3>
+    <ul class="list-group" id="singles_with_notes">
+
+
+
+    {% for s in members%}
+    <li class="left_singles_item list-group-item group_list_item_ single-list-item list-group-item-sm d-flex justify-content-between align-items-center" id="single_list_item_{{s.id}}" onclick="noteClickHandler('{{s.id}}', 'member', '{{group_id}}')">
+        {{s.name}}</li>
+    {% endfor %}
+</ul>
+
+    {% endif %} -->
+
+    {% if singles %}
+    <h3>Singles With Notes</h3>
+    <ul class="list-group" id="singles_with_notes">
+
+
+    {% for s in singles %}
+    <li class="left_singles_item list-group-item group_list_item_ single-list-item list-group-item-sm d-flex justify-content-between align-items-center" id="single_list_item_{{s.id}}" onclick="noteClickHandler('{{s.id}}', 'single', 'null')">
+        {{s.name}}</li>
+    {% endfor %}
+</ul>
+
+    {% endif %}
+</div>

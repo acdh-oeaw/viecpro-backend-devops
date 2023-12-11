@@ -1,0 +1,1636 @@
+{% extends "webpage/base.html" %}
+{% load static %}
+{% load stats_extras %}
+{% load webpage_extras %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/viecpro_deduplication/css/deduplication.css" type="text/css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<div class="container-fluid w-100">
+    <div class="row w-100">
+        <div class="col-md-3 px-2 py-4">
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleBrowser()" id="toggleBrowserButton"><i
+                    class="fa fa-arrow-left"></i></button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="hideNavbar()" id="hideNavbarButton">Hide
+                Navbar</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleRelationsData()"
+                id="toggleRelationsData">Relations</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="togglePersonNames()"
+                id="togglePersonNames">Names</button>
+
+
+        </div>
+    </div>
+    <div class="row w-100 justify-content-center">
+        <div style="display:flex; flex-direction:column;   align-items: center;
+        justify-content: center;">
+            <h3 id="loading_anim">Performing manual merge / re-merge...</h3>
+            <button onclick="CloseTable()" id="remove_tables_button" style="visibility:hidden; width: 4rem;"
+                class="btn-sm btn-primary mb-3">Close</button>
+        </div>
+
+    </div>
+    <div class="row w-100 justify-content-center">
+
+        <div id="table_test">
+
+
+        </div>
+    </div>
+    <div class="row w-100 pt-5 pb-3">
+        <div class="col-md-3" id="browser_header">
+
+            <div id="manu_navigation">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="groups-tab" data-toggle="tab" href="#groups_section"
+                            role="tab">Groups</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="singles-tab" data-toggle="tab" href="#singles_section"
+                            role="tab">Singles</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="marked-tab" data-toggle="tab" href="#marked_section"
+                            onclick="getAllNotesJson()" role="tab">Marked</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4 pl-4" id="selection_header">
+            <span class="d-flex justify-content-start align-items-center">
+                <h2 class="pl-0">Selected</h2>
+                <button class="btn btn-primary group_action_button m-0 ml-4" onclick="mergeGroups()"
+                    id="button_merge">merge all</button>
+                <button class="btn btn-primary group_action_button m-0 ml-4" onclick="createNewGroup()"
+                    id="cross_group_create_button">group selections</button>
+            </span>
+        </div>
+        <div class="col-md-5 pl-0" id="detail_header">
+            <span class="d-flex ">
+                <h2 class="pl-4">Detail / Suggestions</h2>
+                <button class="btn btn-sm btn-outline-secondary ml-4" onclick="clearSuggestions()"
+                    id="clearSuggestions">Clear</button>
+            </span>
+
+
+        </div>
+    </div>
+
+    <div class="row w-100">
+        <div class="col-md-3" id="browser_content">
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="groups_section" role="tabpanel">
+                    <label>Gender:</label>
+                    <span class="d-flex justify-content-start align-items-center mb-3">
+
+                        <div class="form-check form-check-inline mx-1">
+                            <input checked class="form-check-input" type="radio" name="genderCheckGroup"
+                                id="genderCheckboxGROUPMale" value="Male">
+                            <label class="form-check-label mr-2" for="genderCheckboxGROUPMale">
+                                Male
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline mx-1">
+                            <input class="form-check-input" type="radio" name="genderCheckGroup"
+                                id="genderCheckboxGROUPFemale" value="Female">
+                            <label class="form-check-label mr-2" for="genderCheckboxGROUPFemale">
+                                Female
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline mx-1">
+                            <input class="form-check-input" type="radio" name="genderCheckGroup"
+                                id="genderCheckboxGROUPOther" value="Other">
+                            <label class="form-check-label mr-2" for="genderCheckboxGROUPOther">
+                                Other/None
+                            </label>
+                        </div>
+                    </span>
+                    <span class="d-flex justify-content-start align-items-center mb-3"> <label
+                            class="m-0 mr-4 p-1 my-2">Status:</label>
+
+                        {% for b in Buttons %}
+                        {% if forloop.first %}
+                        <label class="border border-dark rounded-left m-0 my-2 p-1 my_checkbox" value="undefined"
+                            onclick="toggleStatusButton('{{b.id}}')" id="status_button_filter_{{b.id}}"
+                            style="background-color:inherit;"><small>{{b.short}}</small></label>
+                        {% elif forloop.last %}
+                        <label class="border border-dark rounded-right m-0 my-2 p-1 my_checkbox" value="undefined"
+                            onclick="toggleStatusButton('{{b.id}}')" id="status_button_filter_{{b.id}}"
+                            style="background-color:inherit;"><small>{{b.short}}</small></label>
+
+                        {% else %}
+                        <label class="border border-dark m-0 my-2 p-1 my_checkbox" value="undefined"
+                            onclick="toggleStatusButton('{{b.id}}')" id="status_button_filter_{{b.id}}"
+                            style="background-color:inherit;"><small>{{b.short}}</small></label>
+
+                        {% endif %}
+
+                        {% endfor %}
+                    </span>
+
+                    <span class="d-flex justify-content-center align-items-center">
+                        <input class="form-control mr-4 rounded-right" type="search" placeholder="Search for Groups"
+                            id="search_groups">
+                    </span>
+                    <span class="d-flex px-1 my-2 justify-content-start align-content-center"
+                        id="group_label_span"><label class="mr-2">Count:</label><label
+                            id="group_count_container">0</label></span>
+
+                    <div class="container-fluid mt-5" style="overflow-y: scroll; height: 80vh;"
+                        id="group_list_container">
+
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="singles_section" role="tabpanel">
+                    <label>Gender:</label>
+                    <span class="d-flex justify-content-start align-items-center mb-3">
+
+                        <div class="form-check form-check-inline mx-1">
+                            <input checked class="form-check-input" type="radio" name="genderCheckSingle"
+                                id="genderCheckboxSINGLEMale" value="Male">
+                            <label class="form-check-label mr-2" for="genderCheckboxSINGLEMale">
+                                Male
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline mx-1">
+                            <input class="form-check-input" type="radio" name="genderCheckSingle"
+                                id="genderCheckboxSINGLEFemale" value="Female">
+                            <label class="form-check-label mr-2" for="genderCheckboxSINGLEFemale">
+                                Female
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline mx-1">
+                            <input class="form-check-input" type="radio" name="genderCheckSingle"
+                                id="genderCheckboxSINGLEOther" value="Other">
+                            <label class="form-check-label mr-2" for="genderCheckboxSINGLEOther">
+                                Other/None
+                            </label>
+                        </div>
+                    </span>
+                    <span class="d-flex px-1 my-2 justify-content-start align-content-center"><input aria-label="Search"
+                            class="form-control mr-4 rounded-right" id="input_search" placeholder="Name" type="search">
+                        <input aria-label="Search" class="form-control mr-4 rounded-right" id="filter_first_name"
+                            placeholder="First Name" type="search"></span>
+                    <span class="d-flex px-1 my-2 justify-content-start align-content-center"><label
+                            class="mr-2">Count:</label><label id="filtered_count">0</label></span>
+                    <div class="container-fluid pt-2" style="overflow-y: scroll; height: 80vh;">
+
+                        <ul class="list-group mt-3" id="singles_container">
+                            <!-- <ul class="list-group" id="all_singles_list">
+                    {% for s in singles %}
+                    <li class="list-group-item single-list-item list-group-item-sm d-flex justify-content-between align-items-center" id="single_list_item_{{s.id}}">
+                        {{s.person.name}}, {{s.person.first_name}}
+                    </li>
+                </ul>
+                    {% endfor %} -->
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="marked_section" role="tabpanel">
+                    Not implemented yet
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-4 pl-4 pb-5" id="relations_section" style="width: 100%; overflow-y: scroll; height: 80vh;">
+            <div class="w-100 m-0 p-0" id="relations_group_section"></div>
+            <h4 class="h4 pt-5" id="singles_header">Singles</h4>
+
+            <div class="w-100 m-0 p-0" id="relations_single_section"></div>
+
+
+        </div>
+        <div class="col-md-5 pl-4 pb-5" id="detail_section" style="width: 100%; overflow-y: scroll; height: 80vh;">
+
+        </div>
+    </div>
+    <script>
+        let SELECTED_MEMBERS = {};
+        let SELECTED_GROUPS = [];
+        let SELECTED_SINGLES = [];
+        let BTN_MERGE = $("#button_merge");
+        let BROWSER_VISIBLE = true;
+        let NAV_VISIBLE = true;
+        let REL_TOGGLE = false;
+        let NAMES_TOGGLE = true;
+        let LOADING_FLAG = false;
+        let AWAIT_REMERGE_RESULT = false;
+
+        const CELERY_ENDPOINTS_viecpro_deduplication = {
+            // redundant routes, legacy from when I thought these would be needed to be different.
+            "remerge_group": "{% url 'viecpro_deduplication:get_task_status' %}",
+            "merge_groups": "{% url 'viecpro_deduplication:get_task_status' %}"
+
+        }
+
+        const pollCeleryStatus = (task_id, url, task_name) => {
+            // this scope preservers key, url  and task name value for re-polling
+            // task_name is not really a name given to the celery task yet, 
+            // only needed in frontend atm to distinguish callbacks on success
+            console.log("task name in pollCelery", task_name)
+            return $.ajax({
+                url: url,
+                type: "POST",
+                data: { "task_id": task_id },
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (response) {
+                    console.log(response.status)
+                    if (response.status === "PENDING") {
+                        // after initial wait, repoll every 2.5 sec.
+                        setTimeout(pollCeleryStatus, 2500, task_id, url, task_name);
+
+                    } else {
+                        // callbacks handling the rendering of the computations outcome are grouped by task_name 
+                        // ! task_name is not set in task, only here in frontend, for this purpose only !
+
+                        switch (task_name) {
+                            case "remerge_group":
+                                console.log(response.result)
+                                renderRemergeOutcome(response.result)
+                                break
+                            case "merge_groups":
+                                // add merge groups callback here
+                                console.log("called MergeGroupsAndRemergeDispatcher in switch")
+                                MergeGroupsAndRemergeDispatcher(response.result)
+                                break
+                            default:
+                                alert("Implementation error. No task matched given task in pollCeleryStatus switch.")
+                                break
+                        }
+
+                    }
+
+                }
+            })
+        }
+
+
+
+
+        function clearSuggestions() {
+            $("#detail_section").empty()
+        }
+
+
+        function renderRemergeOutcome(response) {
+            // renders the outcome of remerge once celery task finished.
+
+            toggleLoading("hidden");
+
+            function append_to_table_div(element) {
+                //document.getElementById("table_test").insertAdjacentHTML("beforeend", element);
+                document.getElementById("table_test").innerHTML += element;
+            };
+            let vorfin_title = `<h3 class='text-center'> Report after Remerge for: ${response.new_vorfin} (${response.new_vorfin_id})</h3>`
+            let changed_header = `<h3 class='text-start'>${response.rels_changed.title}</h3>`;
+            let changed_table = response.rels_changed.table;
+            let added_header = `<h3 class='text-start'>${response.rels_added.title}</h3>`;
+            let added_table = response.rels_added.table;
+
+            console.log(response)
+            console.log(response.rels_added.table)
+            element_array = [vorfin_title, changed_header, changed_table, added_header, added_table];
+            element_array.forEach((el) => {
+                append_to_table_div(el)
+            });
+
+
+            $("#remove_tables_button").css("visibility", "visible");
+            alert(response.msg);
+            //alert("attempting redraw of singles and items AND getGroupAjax of new group!")
+            //getGroupAjax(response.new_vorfin_id)
+            //renderItemSelect();
+            //renderSinglesSelect();
+            if (AWAIT_REMERGE_RESULT) {
+                console.log("set await remerge result to False")
+                AWAIT_REMERGE_RESULT = false;
+            }
+
+        }
+
+        function toggleLoading(set_state = false) {
+            let loading_div = $("#loading_anim");
+            //alert("called toggle")
+
+            if (!set_state) {
+                //alert("set state was false")
+
+                if (loading_div.css("visibility") === "hidden") {
+                    loading_div.css("visibility", "visible")
+                } else {
+                    loading_div.css("visibility", "hidden")
+
+                }
+            } else {
+                //alert("set state was: ", set_state)
+                loading_div.css("visibility", set_state)
+            }
+
+        }
+
+        function remergeGroup(g_id, groups_to_delete = false, ask_for_confirmation = true) {
+            /** when called from button click, ask for confirmation. When called from merge_groups function, 
+             * don't ask for confirmation to remerge.
+             * Also, when called from merge_groups, pass on list of groups_to_delete (because those groups got combined to 
+             * a new group in merge_groups and are obsolete.)
+            */
+
+            if (ask_for_confirmation) {
+                proceed = confirm(`Do you want to re-merge group ${g_id}?`)
+            } else {
+                proceed = true
+            }
+
+            if (proceed) {
+                let url = "{% url 'viecpro_deduplication:remerge_group' g_id='99999999' %}".replace('99999999', g_id);
+
+
+
+                //$("#loading_anim").toggle(); //css("visibility") = "visible."
+                toggleLoading("visible")
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: { "data": groups_to_delete ? groups_to_delete : [] },
+                    beforeSend: function (request) {
+                        let csrftoken = getCookie("csrftoken");
+                        request.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    success: function (response) {
+                        //console.log(data.msg);
+                        if (response.success) {
+                            // get task_id from initial response
+                            task_id = response.task_id;
+                            // call first poll of celery status, after 20 seconds (min-time computation takes)
+                            setTimeout(pollCeleryStatus, 9000, task_id = task_id, url = CELERY_ENDPOINTS_viecpro_deduplication.remerge_group, task_name = "remerge_group");
+                        } else {
+                            toggleLoading("hidden");
+                            alert(response.msg)
+                        }
+
+
+                    }
+                })
+
+            } else {
+                alert("aborted")
+                toggleLoading("hidden");
+            }
+        }
+
+        function CloseTable() {
+            document.getElementById("table_test").innerHTML = ""
+            $("#remove_tables_button").css("visibility", "hidden");
+        }
+
+        function hideNavbar() {
+
+            if (NAV_VISIBLE) {
+                $("#wrapper-navbar").hide();
+                NAV_VISIBLE = false;
+                $("#hideNavbarButton").html("Show Navbar");
+
+            } else {
+                $("#wrapper-navbar").show();
+                NAV_VISIBLE = true;
+                $("#hideNavbarButton").html("Hide Navbar");
+
+
+            }
+        }
+
+        function hideDeatails() {
+            // todo not implemented yet
+            $("#detail_section").children().each((el) => { el.hide });
+        }
+
+        function getStatusButtonStatus() {
+            let values = {};
+            $("[id^=status_button_filter]").each(function () {
+                let el = $(this);
+                let id = $(this).attr("id").split("_");
+                //console.log(typeof(id))
+                id = id[id.length - 1]
+                if ($(this).attr("value") !== "undefined") {
+                    values[id] = $(this).attr("value");
+                }
+            })
+            //console.log(values)
+            return values
+        }
+
+        function toggleStatusButton(b_id) {
+            let el = $(`#status_button_filter_${b_id}`);
+            let curr_val = el.attr("value");
+
+            switch (curr_val) {
+                case "undefined":
+                    el.attr("value", "true");
+                    el.css("background-color", "lightblue")
+                    break;
+                case "true":
+                    el.attr("value", "false");
+                    el.css("background-color", "lightpink")
+
+                    break;
+                case "false":
+                    el.attr("value", "undefined");
+                    el.css("background-color", "inherit")
+
+                    break
+                default:
+                //console.log("no selection pssibel in toggleStatusButton")
+            }
+
+            //console.log(el.attr("value"), "before:", curr_val)
+            getStatusButtonStatus();
+
+        }
+
+        function togglePersonNames() {
+            let sel = $('.person_names');
+            // note __g.pirgie__ This toggle doesn't work, as it is overwritten by bootstraps collapse implementation; If this functionality is wanted, it needs a workaround.
+
+            if (!NAMES_TOGGLE) {
+                sel.each(function () {
+                    $(this).addClass("d-flex").show(); // __g.pirgie__ not working; overwritten by bootstrap
+                    //console.log($(this))
+                })
+                NAMES_TOGGLE = true;
+            } else {
+                sel.each(function () {
+                    $(this).removeClass("d-flex").hide(); // __g.pirgie__ not working; overwritten by bootstrap
+                })
+                NAMES_TOGGLE = false;
+            }
+        }
+
+        function toggleRelationsData() {
+            //console.log("Called toggleRelationsData")
+            let test = $('[id^="data_div_"]');
+            //console.log(test)
+            if (!REL_TOGGLE) {
+                test.each(function () {
+                    $(this).addClass("show");
+
+                })
+                REL_TOGGLE = true;
+            } else {
+                test.each(function () {
+                    $(this).removeClass("show");
+
+                })
+                REL_TOGGLE = false;
+
+            }
+        }
+
+        function toggleBrowser() {
+
+            //header
+            let b_h = $("#browser_header");
+            let d_h = $("#detail_header");
+            let s_h = $("#selection_header");
+
+            //content
+            let b_c = $("#browser_content");
+            let d_c = $("#detail_section");
+            let s_c = $("#relations_section");
+
+            let elements = [d_h, s_h, d_c, s_c];
+            let col_4 = [s_h, s_c];
+            let col_5 = [d_h, d_c];
+
+            if (BROWSER_VISIBLE) {
+                b_h.hide();
+                b_c.hide();
+                elements.forEach((el) => {
+                    //console.log("el:", el)
+                    el.removeClass("col-md-4").removeClass("col-md-5").addClass("col-md-6");
+                })
+                $("#toggleBrowserButton").html("<i class='fa fa-arrow-right'>")
+                BROWSER_VISIBLE = false;
+
+
+            } else {
+                b_h.show();
+                b_c.show();
+                col_4.forEach((el) => {
+                    el.removeClass("col-md-6").addClass("col-md-4");
+
+                })
+
+                col_5.forEach((el) => {
+                    el.removeClass("col-md-6").addClass("col-md-5");
+                })
+
+
+                $("#toggleBrowserButton").html("<i class='fa fa-arrow-left'>")
+
+
+                BROWSER_VISIBLE = true
+
+
+
+            }
+
+        }
+
+        function unbind_group_form(event) {
+            $(this).find('button').attr("disabled", true);
+            event.preventDefault();
+            event.stopPropagation();
+
+            let url = $(this).attr("action");
+            let formData = $(this).serialize();
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: formData,
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (data) {
+                    //console.log(data.msg);
+                    $("#detail_section").empty();
+                    getNoteJson(data.inst_id, data.type)
+                }
+            }
+            )
+
+        }
+
+
+        function removeFromArray(arr, value) {
+
+            return arr.filter(function (el) {
+                return el != value;
+            });
+        }
+
+        function abortNoteEdit(inst_id, type) {
+            $("#detail_section").empty();
+            getNoteJson(inst_id, type);
+
+        }
+
+        function getNoteJson(inst_id, type) {
+
+            let url = "{% url 'viecpro_deduplication:get_note_json' inst_id='12345678' type='kkkkkkkk' %}".replace("12345678", inst_id).replace("kkkkkkkk", type)
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (res) {
+
+                    //console.log("in done part of getNOtejSon")
+                    $("#detail_section").html(res.html);
+                }
+            })
+
+        }
+
+        function getPersonDetail(per_id) {
+            let url = "{% url 'viecpro_deduplication:get_person_detail' per_id='66666666' %}".replace("66666666", per_id);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (res) {
+                    $("#detail_section").html(res.html);
+                }
+            })
+        }
+
+
+        function noteClickHandler(g_id, type, group_id) {
+            getNoteJson(g_id, type);
+            //console.log("in CLickHAndler", group_id)
+
+            if (type === "group") {
+                toggleItemSelect(g_id);
+            } else if (type === "single") {
+                toggleSingleSelect(g_id);
+            } else {
+                //console.log("in else in handler");
+                toggleItemSelect(group_id);
+            }
+        }
+
+        function getAllNotesJson() {
+            let url = "{% url 'viecpro_deduplication:get_all_notes' %}"
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (res) {
+                    $("#marked_section").html(res.html);
+                }
+
+            })
+        }
+        function getPersonSuggestions(per_id) {
+            let url = "{% url 'viecpro_deduplication:get_person_suggestions' per_id='66666666' %}".replace("66666666", per_id);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (res) {
+                    $("#detail_section").html(res.html);
+                    renderItemSelect();
+                    renderSinglesSelect();
+                }
+            })
+        }
+
+        function getGroupSuggestions(g_id) {
+            let url = "{% url 'viecpro_deduplication:get_group_suggestions' group_id='66666666' %}".replace("66666666", g_id);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (res) {
+                    $("#detail_section").html(res.html);
+                    renderItemSelect();
+                    renderSinglesSelect();
+                }
+            })
+        }
+
+        function checkSinglesHeader() {
+            if (SELECTED_SINGLES.length > 0) {
+                $("#singles_header").show();
+
+            } else {
+                $("#singles_header").hide();
+
+            }
+        }
+
+        function isGroupDisplayed(id) {
+            //console.log($(`#group_data_${id}`))
+            if ($(`#group_data_${id}`).length >= 1) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function checkButtonResponse(btn_id, group_id) {
+            let url = "{%url 'viecpro_deduplication:update_group_checkboxes' btn_id='123456' group_id='9999999' %}".replace("123456", btn_id).replace("9999999", group_id);
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (data) {
+                    //console.log("data arrived as", data);
+
+                    $(`#div_group_status_buttons_${group_id}`).html(data.html);
+                }
+
+
+            })
+        }
+
+        function renderItemSelect() {
+            $.merge($(".suggestions_group_item"), $(".left_group_list_item")).each(function (d, el) {
+                //console.log(el.id);
+                let id = el.id.split("_").pop();
+                ////console.log("id of element is: ", id, typeof(id), typeof(SELECTED_GROUPS[0]));
+                if (SELECTED_GROUPS.includes(id)) {
+                    //console.log("TRUE", id, "is in", SELECTED_GROUPS);
+                    el.style.backgroundColor = "lightblue";
+                    el.onmouseenter = (event) => {
+
+                        //todo: render the background change on hover
+                        //console.log(event.target)
+                        //console.log(this);
+                        // this.style.backgroundColor = "red"
+                    };
+                } else {
+                    //console.log("FALSE");
+                    el.style.backgroundColor = "white";
+
+                }
+            })
+
+
+        }
+
+        function toggleItemSelect(id) {
+
+            if (SELECTED_GROUPS.includes(id)) {
+                SELECTED_GROUPS = removeFromArray(SELECTED_GROUPS, id);
+                delete SELECTED_MEMBERS[id];
+                $(`#group_data_${id}`).remove();
+
+            } else {
+                SELECTED_GROUPS.push(id);
+                getGroupAjax(id);
+
+            }
+
+            renderItemSelect();
+            checkMergeButton();
+        }
+
+        function toggleSingleSelect(id) {
+            //console.log("called toggle Single select")
+            id = id.toString()
+            if (SELECTED_SINGLES.includes(id)) {
+                //console.log("id was in selected singles, TRUE")
+                SELECTED_SINGLES = removeFromArray(SELECTED_SINGLES, id);
+                $(`#single_data_${id}`).remove();
+
+                if (SELECTED_MEMBERS["singles"]) {
+                    SELECTED_MEMBERS["singles"] = removeFromArray(SELECTED_MEMBERS["singles"], id);
+                    if (SELECTED_MEMBERS["singles"].length == 0) {
+                        delete SELECTED_MEMBERS["singles"];
+
+                    }
+
+                }
+
+            } else {
+                //console.log("id was not in selected singles, FALSE")
+
+                SELECTED_SINGLES.push(id);
+                getSinglesAjax(id);
+
+            }
+
+            renderSinglesSelect();
+            checkMergeButton();
+            checkGroupButton();
+            checkSinglesHeader();
+
+        }
+
+        function renderSinglesSelect() {
+            //console.log("called render single select");
+
+            $.merge($(".suggestions_singles_item"), $(".left_singles_item")).each(function (d, el) {
+                let id = el.id.split("_").pop();
+                ////console.log("el is:", el)
+                ////console.log("id of element is: ", id, typeof(id), typeof(SELECTED_SINGLES[0]));
+                if (SELECTED_SINGLES.includes(id)) {
+                    //console.log("TRUE", id, "is in", SELECTED_SINGLES);
+                    el.style.backgroundColor = "lightblue";
+                    el.onmouseenter = (event) => {
+
+                        //todo: render the background change on hover
+                        //console.log(event.target)
+                        //console.log(this);
+                        // this.style.backgroundColor = "red"
+                    };
+                } else {
+                    //console.log("FALSE");
+                    el.style.backgroundColor = "white";
+
+                }
+            })
+
+        }
+        function toggleItemSelectOLD(id) {
+            //console.log("clicked, id is:", id)
+            let target_item = document.getElementById(`li_group_${id}`);
+            //console.log(target_item);
+
+            if (!target_item && SELECTED_GROUPS.includes(id)) {
+                $(`#group_data_${id}`).remove();
+                SELECTED_GROUPS = removeFromArray(SELECTED_GROUPS, id);
+                delete SELECTED_MEMBERS[id];
+
+            }
+
+            else if (target_item.style.backgroundColor != "lightblue") {
+                target_item.style.backgroundColor = "lightblue";
+                if (!SELECTED_GROUPS.includes(id)) {
+                    SELECTED_GROUPS.push(id);
+                }
+                //console.log("PUSHED ID TO SELECTED_GROUPS", SELECTED_GROUPS);
+
+
+                //console.log(isGroupDisplayed(id));
+                getGroupAjax(id);
+            } else {
+                $(`#group_data_${id}`).remove();
+                target_item.style.backgroundColor = "white";
+                //console.log(isGroupDisplayed(id));
+                //SELECTED_GROUPS.pop(id); // TODO: CHANGE THIS
+                SELECTED_GROUPS = removeFromArray(SELECTED_GROUPS, id);
+                delete SELECTED_MEMBERS[id];
+
+            }
+            //console.log("clicked: ", id);
+            //SELECTED_MEMBERS[id]=[];
+            checkMergeButton();
+
+        }
+
+        function checkMergeButton() {
+            //console.log("check merge button called")
+            if (SELECTED_GROUPS.length > 1 || SELECTED_SINGLES.length > 1 || (SELECTED_SINGLES.length === 1 && SELECTED_GROUPS.length === 1)) {
+                BTN_MERGE.show();
+            } else {
+                BTN_MERGE.hide();
+            }
+        }
+
+        function getGroupAjax(id, update = false) {
+            let url = "{% url 'viecpro_deduplication:get_group_ajax' g_id='12345' %}".replace("12345", id);
+            //console.log("Get Group Ajax Called");
+            //console.log(url);
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (data) {
+                    if (update) {
+                        $(`#group_data_${id}`).replaceWith(data.html);
+                    } else {
+                        if (!isGroupDisplayed(id)) {
+                            $("#relations_group_section").append(data.html);
+                        } else {
+                            $(`#group_data_${id}`).replaceWith(data.html);
+                        }
+
+                    }
+                }
+
+            })
+        }
+
+        function addGroupToList(id, name, count) {
+            console.log("---->>>", id, name, count)
+            $("#all_groups_list").prepend(
+                `<li class=" left_group_list_item list-group-item group_list_item_ list-group-item-sm d-flex justify-content-between align-items-center" onclick="toggleItemSelect('${id}')" id="li_group_${id}">${id} ${name}
+            <span class="badge badge-primary badge-pill" id="group_count_badge_${id}">${count}</span> </li>`
+            )
+
+        }
+
+
+        function editNote(group_id, type) {
+
+            let url = "{% url 'viecpro_deduplication:handle_note_form' g_id='55555555' type='abcdefgh'%}".replace("55555555", group_id).replace("abcdefgh", type);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (data) {
+                    $("#detail_section").empty().html(data.html);
+                    $(`.NoteForm `).submit(unbind_group_form);
+
+                }
+            })
+
+        }
+
+        function updateGroupCountBadges(id, count) {
+
+            if (count === 0) {
+                $(`#li_group_${id}`).remove();
+            }
+            else {
+                let badge = $(`#group_count_badge_${id}`)
+                badge.html(count)
+            }
+        }
+
+        function suggestGroupName(merge = true) {
+            //console.log("called suggestGroupName")
+            let name;
+            if (merge) {
+                name = $(".group_id_name :first-child").first().text();
+
+            } else {
+                let values = Object.values(SELECTED_MEMBERS).flat()
+                name = $('[data-target^="#data_div_"]')
+                    .filter(function () {
+                        let id = $(this).text().split("["); id = id[1].trim().slice(0, -1);
+                        if (values.includes(id)) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    }).first().text().split("[")
+
+
+                //let name = $('[data-target^="#data_div_"]').first().text().split("[");
+                //console.log(name)
+
+                name = name[0]
+                // todo filter by id against selected members (keys in SM are group ids or the key singles, values is an array of string ids for all)
+                // select name by selection on merge == false
+
+                //name = $('[data-target^="#data_div_"]').filter(function(){let id = $(this).text().split("["); id = id[1].trim().slice(0,-1);//console.log(id);})
+
+                //console.log(name)
+            }
+
+            return name
+        }
+
+
+        function createNewGroup() {
+            let url = "{% url 'viecpro_deduplication:create_new_group' %}";
+            let sug = suggestGroupName(false);
+
+            let name = prompt("Please Enter Name for New Group", sug);
+            //console.log("create new group called", name)
+
+
+            let data = JSON.stringify({ "data": SELECTED_MEMBERS, "singles": SELECTED_SINGLES, "new_name": name });
+
+            if (name === null || name == "") {
+                //console.log("prompt was null");
+            } else {
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    beforeSend: function (request) {
+                        let csrftoken = getCookie("csrftoken");
+                        request.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    dataType: "json",
+                    data: { "DATA": data },
+                    success: function (response) {
+                        res = response.data;
+                        addGroupToList(res.new_group_id, res.new_group, res.new_group_count)
+                        let cross_btn = $("#cross_group_create_button");
+
+                        //console.log("in response of create new group");
+                        //console.log("response data is: ", res)
+
+                        for ([k, v] of Object.entries(res.group_updates)) {
+                            //console.log("TEST for group updates afer creat", k,v);
+                            updateGroupCountBadges(k, v);
+                            if (v > 0) {
+                                getGroupAjax(k, true);
+                            } else {
+                                $(`#group_data_${k}`).remove();
+                                //SELECTED_GROUPS.pop(k); // TODO: CHANGE THIS
+                                SELECTED_GROUPS = removeFromArray(SELECTED_GROUPS, k)
+
+                            }
+                        }
+                        //console.log("former singles")
+                        //console.log(response.data.former_singles)
+                        response.data.former_singles.forEach((s) => {
+                            ////console.log("for each called for: ", s, "section:", `single_data_${s}`);
+                            $(`#single_data_${s}`).remove();
+                            $(`#single_list_item_${s}`).remove();
+                            // SELECTED_SINGLES.pop(s); // TODO: CHANGE THIS
+                            SELECTED_SINGLES = removeFromArray(SELECTED_SINGLES, s);
+
+                        })
+
+                        SELECTED_MEMBERS = {};
+                        cross_btn.hide();
+                        checkGroupButton();
+                        checkSinglesHeader();
+
+
+                    }
+                })
+
+            }
+        }
+    </script>
+
+    <script>
+        function removeMember(group_id, per_id) {
+            let url = "{% url 'viecpro_deduplication:remove_member' group_id='111111' per_id='222222' %}".replace("111111", group_id).replace("222222", per_id);
+
+            //console.log("in remove Member");
+            //console.log(url);
+
+            let test = confirm(`do you really want to delete: Member ${per_id} from group: ${group_id} ?`);
+
+            if (test) {
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    beforeSend: function (request) {
+                        let csrftoken = getCookie("csrftoken");
+                        request.setRequestHeader("X-CSRFToken", csrftoken);
+                    }, success: function (data) {
+                        //console.log(JSON.stringify(data));
+                        updates = data.data;
+                        for ([k, v] of Object.entries(updates)) {
+                            if (v != 0) {
+                                //getGroupAjax(group_id, true);
+                                $(`#group_member_item_${per_id}`).remove();
+                            } else {
+                                $(`#group_data_${k}`).remove();
+                                //SELECTED_GROUPS.pop(group_id);  // TODO: CHANGE THIS
+                                SELECTED_GROUPS = removeFromArray(SELECTED_GROUPS, group_id);
+
+                            }
+                            updateGroupCountBadges(k, v);
+                        }
+
+                        if (SELECTED_MEMBERS[group_id].length == 1) {
+                            delete SELECTED_MEMBERS[group_id];
+                        } else {
+                            //SELECTED_MEMBERS[group_id].pop(per_id); // TODO: CHANGE THIS
+                            //console.log("in remove member, before selected members set")
+                            SELECTED_MEMBERS[group_id] = removeFromArray(SELECTED_MEMBERS[group_id], per_id);
+                            // let keep = [...SELECTED_MEMBERS[group_id]];
+                            // delete SELECTED_MEMBERS[group_id];
+                            // SELECTED_MEMBERS[group_id].forEach((id) => {
+                            //     document.getElementById(`select_toggle_button_${id}`).style.backgroundColor="lightblue";
+
+                            // })
+                        }
+
+                        checkGroupButton();
+
+                    }
+                })
+            }
+        }
+    </script>
+
+    <script>
+
+        function MergeGroupsAndRemergeDispatcher(response) {
+            merge_groups_data = response.group_data
+            new_group_id = merge_groups_data.add[0]
+            console.log("in MergeGroups Dispatcher, new_group_id: ", new_group_id, typeof (new_group_id))
+
+            console.log(merge_groups_data)
+            groups_to_delete = merge_groups_data.groups_to_delete
+            RenderMergeGroupsOutcome(merge_groups_data)
+            AWAIT_REMERGE_RESULT = true
+            remergeGroup(new_group_id, groups_to_delete = groups_to_delete, ask_for_confirmation = false)
+
+            function PingRemergeResult(merge_groups_data) {
+                if (AWAIT_REMERGE_RESULT) {
+                    console.log("waiting for result....")
+                    setTimeout(PingRemergeResult, 1000, merge_groups_data = merge_groups_data)
+
+                } else {
+                    RenderMergeGroupsOutcome(merge_groups_data)
+                }
+            }
+            console.log("set initial timeout to ping for remerge result")
+            setTimeout(PingRemergeResult, 10000, merge_groups_data = merge_groups_data)
+        }
+
+        function RenderMergeGroupsOutcome(data) {
+            addGroupToList(data.add[0], data.add[1], data.add[2]);
+            $("#relations_group_section").empty();
+            $("#relations_single_section").empty();
+            $("#detail_section").empty();
+
+            SELECTED_GROUPS = [];
+            SELECTED_MEMBERS = {};
+            SELECTED_SINGLES = [];
+            data.remove_groups.forEach(el => { $(`#li_group_${el}`).remove(); })
+
+            data.remove_singles.forEach(el => { $(`#single_list_item_${el}`).remove(); })
+            checkMergeButton();
+            checkSinglesHeader();
+
+            //console.log("data.add zero is: ", data.add[0])
+            toggleItemSelect(`${data.add[0]}`);
+            renderItemSelect();
+            renderSinglesSelect();
+        }
+
+
+
+
+        function mergeGroups() {
+            let url = "{% url 'viecpro_deduplication:merge_groups' %}";
+            //console.log("Selected Groups is:", SELECTED_GROUPS);
+            //console.log("SELECTED_GROUPS after adding singles is:", SELECTED_GROUPS)
+            let sug = suggestGroupName();
+
+            let name = prompt("INFO: this will create a new group from all visible groups and singles.\nThe new group will also be merged into a new vorfin. Existing vorfin-rels will be preserved. But all old vorfins of groups in this merge will be deleted after the new vorfin is created.\n\nEnter new name for merged Group (Note: this is not the name of the resulting vorfin):", sug);
+            data = JSON.stringify({ "groups": SELECTED_GROUPS, "singles": SELECTED_SINGLES, "new_name": name })
+            if (name === null || name == "") {
+                //console.log("prompt was null");
+            } else {
+                toggleLoading("visible");
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    dataType: "json",
+                    data: { "DATA": data },
+                    beforeSend: function (request) {
+                        let csrftoken = getCookie("csrftoken");
+                        request.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    success: function (response) {
+
+                        setTimeout(pollCeleryStatus, 2000, task_id = response.task_id, url = CELERY_ENDPOINTS_viecpro_deduplication.merge_groups, task_name = "merge_groups")
+                    }
+                })
+            }
+        }
+
+        // function mergeGroupsOLD() {
+        //     let url = "{% url 'viecpro_deduplication:merge_groups' %}";
+        //     //console.log("Selected Groups is:", SELECTED_GROUPS);
+        //     //console.log("SELECTED_GROUPS after adding singles is:", SELECTED_GROUPS)
+        //     let sug = suggestGroupName();
+
+        //     let name = prompt("INFO: this will create a new group from all visible groups and singles.\nThe new group will also be merged into a new vorfin. Existing vorfin-rels will be preserved. But all old vorfins of groups in this merge will be deleted after the new vorfin is created.\n\nEnter new name for merged Group (Note: this is not the name of the resulting vorfin):", sug);
+        //     data = JSON.stringify({ "groups": SELECTED_GROUPS, "singles": SELECTED_SINGLES, "new_name": name })
+        //     if (name === null || name == "") {
+        //         //console.log("prompt was null");
+        //     } else {
+        //         toggleLoading("visible");
+        //         $.ajax({
+        //             url: url,
+        //             type: "POST",
+        //             dataType: "json",
+        //             data: { "DATA": data },
+        //             beforeSend: function (request) {
+        //                 let csrftoken = getCookie("csrftoken");
+        //                 request.setRequestHeader("X-CSRFToken", csrftoken);
+        //             },
+        //             success: function (response_dict) {
+        //                 // TODO: add polling here to
+
+        //                 // THIS LINE IS NEW, to map to the subdict
+        //                 data = response_dict.group_data
+
+        //                 addGroupToList(data.add[0], data.add[1], data.add[2]);
+        //                 $("#relations_group_section").empty();
+        //                 $("#relations_single_section").empty();
+        //                 $("#detail_section").empty();
+
+        //                 SELECTED_GROUPS = [];
+        //                 SELECTED_MEMBERS = {};
+        //                 SELECTED_SINGLES = [];
+        //                 data.remove_groups.forEach(el => { $(`#li_group_${el}`).remove(); })
+
+        //                 data.remove_singles.forEach(el => { $(`#single_list_item_${el}`).remove(); })
+        //                 checkMergeButton();
+        //                 checkSinglesHeader();
+
+        //                 //console.log("data.add zero is: ", data.add[0])
+        //                 toggleItemSelect(`${data.add[0]}`);
+        //                 renderItemSelect();
+        //                 renderSinglesSelect();
+
+        //                 // THIS LINE IS NEW, to map to subdict of remerge data
+        //                 remerge_data = response_dict.remerge_data
+
+
+        //                 // THIS LINE IS NEW; to render remerge outcume
+        //                 renderRemergeOutcome(rem_data)
+        //                 //todo: create listspan; empty selection_section, request newly created group
+        //             }
+        //         })
+        //     }
+        // }
+    </script>
+
+    <script>
+        function manageSelection(group_id, member_id) {
+
+            if (SELECTED_MEMBERS[group_id]) {
+                //console.log("group existed in selected members");
+                SELECTED_MEMBERS[group_id].push(member_id);
+            } else {
+                //console.log("group didn't exist in selected members");
+                SELECTED_MEMBERS[group_id] = [member_id];
+            }
+        }
+
+
+
+
+        // function toggleSingleSelectOLD(id){
+        //     //console.log("clicked Toggle Single Select for id: ", id);
+
+        //     let target_item = document.getElementById(`single_list_item_${id}`);
+        //     //console.log("target item is:", target_item);
+        //     //console.log("element is in selected Singles", SELECTED_SINGLES.includes(parseInt(id)));
+
+        //     if (!target_item && SELECTED_SINGLES.includes(parseInt(id))){
+        //         $(`#single_data_${id}`).remove();
+        //         SELECTED_SINGLES = removeFromArray(SELECTED_SINGLES, id);
+
+        //         //SELECTED_MEMBERS["singles"].pop(id); // TODO: CHANGE THIS
+        //         if (SELECTED_MEMBERS["singles"]){
+        //         SELECTED_MEMBERS["singles"] = removeFromArray(SELECTED_MEMBERS["singles"], id);
+        //         if (SELECTED_MEMBERS["singles"].length == 0) {
+        //             delete SELECTED_MEMBERS["singles"];
+
+
+        //     }
+        //     }
+        // }
+        //     else if (target_item.style.backgroundColor != "lightblue") {
+        //         target_item.style.backgroundColor = "lightblue";
+
+        //         if (!SELECTED_SINGLES.includes(id)){
+        //         SELECTED_SINGLES.push(id);
+
+        //     getSinglesAjax(id);
+        //         }
+        //     } else {
+        //         $(`#single_data_${id}`).remove();
+        //         target_item.style.backgroundColor = "white";
+        //         //SELECTED_SINGLES.pop(id); // TODO CHANGE THIS!!!!
+        //         SELECTED_SINGLES = removeFromArray(SELECTED_SINGLES, id);
+
+        //         //SELECTED_MEMBERS["singles"].pop(id); // TODO: CHANGE THIS
+        //         if (SELECTED_MEMBERS["singles"]){
+        //         SELECTED_MEMBERS["singles"] = removeFromArray(SELECTED_MEMBERS["singles"], id);
+        //         if (SELECTED_MEMBERS["singles"].length == 0) {
+        //             delete SELECTED_MEMBERS["singles"];
+        //         }
+        //     }
+
+        //     }
+        //     //console.log("clicked: ", id);
+        //     checkMergeButton();
+        //     checkGroupButton();
+        //     checkSinglesHeader();
+
+
+        // }
+
+
+        function renameGroup(group_id, group_name) {
+            let new_name = prompt("Rename Group to:", group_name);
+            let url = "{% url 'viecpro_deduplication:rename_group' %}";
+            let data = JSON.stringify({ "new_name": new_name, "g_id": group_id });
+            if (new_name) {
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: { "data": data },
+                    beforeSend: function (request) {
+                        let csrftoken = getCookie("csrftoken");
+                        request.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    success: function (res) {
+
+                        getGroupAjax(group_id, update = true);
+                        $(`#li_group_${group_id}`).replaceWith(`<li class="left_group_list_item list-group-item group_list_item_ list-group-item-sm d-flex justify-content-between align-items-center" onclick="toggleItemSelect('${group_id}')" id="li_group_${group_id}">${group_id} ${res.data.new_name}
+            <span class="badge badge-primary badge-pill" id="group_count_badge_${group_id}">${res.data.count}</span> </li>`)
+                        renderItemSelect();
+                        // todo: implement callback on renaming Groups 
+
+                    }
+
+                })
+            } else {
+            }
+
+        }
+
+        $(".member_list_class").mouseenter(function (el) {
+            //console.log("el:", el)
+            el.children().each((d) => {
+                d.hide();
+            })
+        })
+        function getSinglesAjax(single_id) {
+            let url = "{% url 'viecpro_deduplication:get_single_ajax' s_id='123456' %}".replace("123456", single_id);
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function (request) {
+                    let csrftoken = getCookie("csrftoken");
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (data) {
+                    $("#relations_single_section").append(data.html);
+
+                }
+            })
+        }
+
+
+        function checkGroupButton() {
+            let cross_btn = $("#cross_group_create_button");
+
+            let select_count = 0;
+            Object.entries(SELECTED_MEMBERS).forEach(function ([key, value]) {
+                select_count += value.length;
+            })
+
+            if (select_count > 1) {
+                //console.log("checkGroup Button is True")
+                cross_btn.show();
+
+            } else {
+                //console.log("checkGroup Button is False")
+                cross_btn.hide();
+            }
+        }
+
+        function toggleMemberSelect(group_id, member_id) {
+            let el = event.target;
+
+            //let action_span = $(`#span_group_actions_${group_id}`);
+            let cross_btn = $("#cross_group_create_button");
+            if (el.style.backgroundColor != "lightblue") {
+                manageSelection(group_id, member_id);
+
+                el.style.backgroundColor = "lightblue";
+                //let test = action_span.children(".group_action_button").show();
+                //cross_btn.show();
+            }
+            else {
+                el.style.backgroundColor = "inherit";
+                //SELECTED_MEMBERS[group_id].pop(member_id); // TODO: CHANGE THIS
+                SELECTED_MEMBERS[group_id] = removeFromArray(SELECTED_MEMBERS[group_id], member_id);
+
+                if (SELECTED_MEMBERS[group_id].length == 0) {
+                    delete SELECTED_MEMBERS[group_id];
+                    //let test = action_span.children(".group_action_button").hide();
+                    //     if (Object.keys(SELECTED_MEMBERS).length <= 1){
+                    //     cross_btn.hide();}
+
+
+                }
+            }
+            checkGroupButton();
+
+            //console.log(SELECTED_MEMBERS);
+        }
+    </script>
+
+
+    <script>
+
+        let singlesData = "{{singles|escapejs}}";
+
+        function filterSingles() {
+            let text = $("#input_search").val();
+            text = text.toLowerCase();
+            let filteredData = singlesData.filter((n) =>
+                n[1].toLowerCase().startsWith(text)
+            );
+
+            renderSingles(filteredData);
+        }
+
+    </script>
+
+    <script>
+        // function getSinglesData(){
+        //     let url= "{% url 'viecpro_deduplication:get_singles' %}";
+        //     $.ajax({
+        //         url: url,
+        //         type:"GET",
+        //         beforeSend: function (request){
+        //             let csrftoken = getCookie("csrftoken");
+        //             request.setRequestHeader("X-CSRFToken", csrftoken);
+        //         },
+        //         success: function(data){
+        //             singlesData = data.singles;
+        //             //console.log("singlesData set");
+        //             renderSingles(singlesData);
+        //         }
+        //     })
+        // }
+
+        function renderSingles(data) {
+            let container = $("#singles_container");
+            let count = data.length
+
+            $("#filtered_count").text(count);
+
+            container.empty();
+
+            data.forEach((el) => {
+                container.append(`<li class="left_singles_item list-group-item group_list_item_ single-list-item list-group-item-sm d-flex justify-content-between align-items-center" id="single_list_item_${el[0]}" onclick="toggleSingleSelect(${el[0]})">
+                         ${el[1]}, ${el[2]}</li>`)
+            })
+
+            // todo: check if this is still needed
+
+            // SELECTED_SINGLES.forEach((id) => {
+            //     let target_item = document.getElementById(`single_list_item_${id}`);
+            //     if (target_item){
+            //     target_item.style.backgroundColor = "lightblue";
+            //     } else{
+            //         //console.log("in render singles, target item was false for: ", id);
+            //     }
+
+
+            // }
+            //     );
+
+            // for ([k, v] of Object.entries(data)){
+            //     container.append(`<li class="list-group-item single-list-item list-group-item-sm d-flex justify-content-between align-items-center" id="single_list_item_${k}">
+            //                 ${v.name}, ${v.first_name}
+            //             </li>`)
+            // }
+        }
+
+        $("#input_search").on("keyup", function (e) {
+            // if ($("#input_search").val().length >= 2){
+            // filterSingles();
+            // }
+            if (e.key === "Enter" || e.keyCode === 13) {
+                //filterSingles();
+                //let text = $("#input_search").val();
+
+                requestSingles();
+            }
+        })
+
+        $("#search_groups").on("keyup", function (e) {
+            // if ($("#input_search").val().length >= 2){
+            // filterSingles();
+            // }
+            if (e.key === "Enter" || e.keyCode === 13) {
+                //filterSingles();
+                //let text = $("#input_search").val();
+
+                requestGroups();
+            }
+        })
+
+        function getInputVal() {
+            let name = $("#input_search").val();
+            let first_name = $("#filter_first_name").val();
+
+            name = name ? name : false;
+            first_name = first_name ? first_name : false;
+
+            if (name) {
+                name = name.replaceAll(" ", "__");
+            }
+            if (first_name) {
+                first_name = first_name.replaceAll(" ", "__");
+            }
+            return [name, first_name]
+
+        }
+
+        $("#filter_first_name").on("keyup", function (e) {
+            // if ($("#input_search").val().length >= 2){
+            // filterSingles();
+            // }
+            if (e.key === "Enter" || e.keyCode === 13) {
+                //filterSingles();
+                //let text = $("#filter_first_name").val();
+
+                requestSingles();
+            }
+        })
+
+        function requestSingles() {
+            let values = getInputVal();
+            let gender = $('input[name=genderCheckSingle]:checked').val()
+
+
+            if (true) {
+                let url = "{% url 'viecpro_deduplication:get_singles' val_name='xxxxx' val_first='yyyyy' gender='ffffffff'%}".replace("xxxxx", values[0]).replace("yyyyy", values[1]).replace('ffffffff', gender);
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    beforeSend: function (request) {
+                        let csrftoken = getCookie("csrftoken");
+                        request.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    success: function (response) {
+                        renderSingles(response.singles);
+                        renderSinglesSelect();
+                    }
+
+                })
+            }
+
+        }
+
+        function requestGroups() {
+            let value = $("#search_groups").val();
+            value = value.replaceAll(" ", "__");
+
+
+            let gender = $('input[name=genderCheckGroup]:checked').val()
+            //console.log("request Groups called")
+
+            let status_values = JSON.stringify(getStatusButtonStatus())
+
+
+            if (value.length === 0 || value === "") {
+                value = "get_all_groups"
+                //console.log("value was: ", value)
+
+            }
+
+            if (true) {
+                let url = "{% url 'viecpro_deduplication:get_groups' val='xxxxx' gender='ffffffff' %}".replace("xxxxx", value).replace("ffffffff", gender);
+
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    data: { "data": status_values },
+                    beforeSend: function (request) {
+                        let csrftoken = getCookie("csrftoken");
+                        request.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    success: function (response) {
+                        let container = $("#group_list_container");
+                        container.html(response.html);
+                        $("#group_count_container").html(response.group_count)
+                        renderItemSelect();
+                        checkMergeButton();
+                        // SELECTED_GROUPS.forEach((id) => {
+                        //     let target_item = document.getElementById(`li_group_${id}`);
+
+                        //     if (target_item){
+                        //     target_item.style.backgroundColor = "lightblue";
+                        //     }
+                        //toggleItemSelect(id)
+                    }
+                    //             );
+                    //    }
+
+                })
+            }
+        }
+
+
+
+
+
+    </script>
+
+    <style>
+        #table_test {
+            font-size: 13px !important;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        #loading_anim {
+            visibility: hidden;
+            /* -webkit-animation: fadeInFromNone 0.5s ease-out;
+            -moz-animation: fadeInFromNone 0.5s ease-out;
+            -o-animation: fadeInFromNone 0.5s ease-out; */
+            animation: fadeInFadeOut 2s linear alternate infinite;
+        }
+
+
+
+        @keyframes fadeInFadeOut {
+            0% {
+                opacity: .1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+
+    {% endblock %}

@@ -1,0 +1,62 @@
+<div class="container-fluid h-100 mt-5">
+    <div class="container h-100" id="container_nav_process">
+    <ul class="nav nav-tabs m-0 p-0 justify-content-center" id="pills-tab" role="tablist">
+        <li class="nav-item">
+            <a aria-controls="pills-edited" aria-selected="false"
+               class="nav-link"
+               data-toggle="pill" href="#progress_edited_section"
+               id="pills-edited-tab"
+               role="tab">Edited</a>
+        </li>
+        <li class="nav-item">
+            <a aria-controls="pills-profile" aria-selected="false" class="nav-link"
+               data-toggle="pill" href="#progress_created_section"
+               id="pills-created_tab"
+               role="tab">Created</a>
+        </li>
+        <!-- todo: not implemented yet -->
+        <li class="nav-item">
+            <a aria-controls="pills-contact" aria-selected="false" class="nav-link"
+               data-toggle="pill" href="#progress_deleted_section" id="pills-deleted-tab"
+               role="tab">Deleted</a>
+        </li>
+    </ul>
+        </div>
+    <div class="tab-content" id="pills-tabContent"> <!-- style="background-color: #f1f1f1" -->
+        <div aria-labelledby="pills-edited-tab" class="tab-pane fade"
+             id="progress_edited_section"
+             role="tabpanel">
+             {% if edited_html %}
+             {{edited_html}}
+            {% else %}
+            <div class="container text-center" style="background-color:white; height:100rem">
+                <h5 class="py-5">Nothing to show yet.</h5>
+            </div>
+            {% endif %}
+        </div>
+        <div aria-labelledby="pills-created-tab" class="tab-pane fade"
+             id="progress_created_section"
+             role="tabpanel">
+
+             {% if created_html %}
+            {{created_html}}
+            {% else %}
+            <div class="container text-center" style="background-color:white; height:100rem">
+                <h5 class="py-5">Nothing to show yet.</h5>
+            </div>
+            {% endif %}
+        </div>
+        <!-- todo: not implemented yet -->
+        <div aria-labelledby="pills-deleted-tab" class="tab-pane fade"
+             id="progress_deleted_section"
+             role="tabpanel">
+            {% if delete_html %}
+            {{deleted_html}}
+            {% else %}
+            <div class="container text-center h-auto" style="background-color:white;"> <!--    height:100rem"> -->
+                <h5 class="py-5">Not implemented yet</h5>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
