@@ -1,4 +1,4 @@
-from .utils import F, C
+from .utils import F, C, format_and_orient_relation, to_rel
 from apis_core.apis_entities.models import Person
 from dataclasses import dataclass, asdict, field
 from typing import List
@@ -62,15 +62,15 @@ person_schema = {
 }
 
 
-def to_rel(l):
-    """
-    Helper that maps a label to a kind of relation-like datastructure. 
-    Note that the name of the fields are changed.
-    """
-    return {"name": l.label, "start_date": l.start_date_written or "", "end_date": l.end_date_written or ""}
+# def to_rel(l):
+#     """
+#     Helper that maps a label to a kind of relation-like datastructure. 
+#     Note that the name of the fields are changed.
+#     """
+#     return {"name": l.label, "start_date": l.start_date_written or "", "end_date": l.end_date_written or ""}
 
 
-def parse_labels(p, res):
+def parse_person_labels(p, res):
     """
     Parses all person labels by matching against exact label-types.
     Takes, appends to and returns the result-dict.
@@ -104,31 +104,31 @@ def parse_labels(p, res):
     return res
 
 
-def format_and_orient_relation(rel: AbstractRelation, reverse=False):
-    """
-    Returns a nested structure that represents a relation. Maps keys and re-orients the relation
-    if the reverse flag is set.
+# def format_and_orient_relation(rel: AbstractRelation, reverse=False):
+#     """
+#     Returns a nested structure that represents a relation. Maps keys and re-orients the relation
+#     if the reverse flag is set.
 
-    Background:
-    Relations are oriented from entity a to b. In the ui, they are shown always from the 
-    view of the selected entity, i.e. with the selected entity in A-position (subject if you will).
-    So if a relation has the selected entity in target position, it gets reversed here.
-    """
-    if reverse:
-        target_entity = getattr(rel, rel.get_related_entity_field_nameA())
-        relation_type = rel.relation_type.name_reverse
-    else:
-        target_entity = getattr(rel, rel.get_related_entity_field_nameB())
-        relation_type = rel.relation_type.name
-    target = {
-        "name": str(target_entity),
-        "object_id": str(target_entity.id),
-        "model": str(target_entity.__class__.__name__)}
+#     Background:
+#     Relations are oriented from entity a to b. In the ui, they are shown always from the 
+#     view of the selected entity, i.e. with the selected entity in A-position (subject if you will).
+#     So if a relation has the selected entity in target position, it gets reversed here.
+#     """
+#     if reverse:
+#         target_entity = getattr(rel, rel.get_related_entity_field_nameA())
+#         relation_type = rel.relation_type.name_reverse
+#     else:
+#         target_entity = getattr(rel, rel.get_related_entity_field_nameB())
+#         relation_type = rel.relation_type.name
+#     target = {
+#         "name": str(target_entity),
+#         "object_id": str(target_entity.id),
+#         "model": str(target_entity.__class__.__name__)}
 
-    return {"relation_type": relation_type, "target": target, "start_date": rel.start_date_written or "", "end_date": rel.end_date_written or ""}
+#     return {"relation_type": relation_type, "target": target, "start_date": rel.start_date_written or "", "end_date": rel.end_date_written or ""}
 
 
-def check_relation_type(rel):
+def check_person_relation_type(rel):
     """
     Helper that returns the first match from  list of parts of label-types that
     are present in a relation.
@@ -152,7 +152,7 @@ def check_relation_type(rel):
     return False
 
 
-def parse_relations(p, res):
+def parse_person_relations(p, res):
 
     for rel in p.get_related_relation_instances():
         model_name = rel.__class__.__name__
@@ -164,7 +164,7 @@ def parse_relations(p, res):
             temp_rel = format_and_orient_relation(rel)
 
         if model_name == "PersonPerson":
-            check = check_relation_type(rel)
+            check = check_person_relation_type(rel)
             if check:
                 res[perper_map[check]].append(temp_rel)
 
@@ -206,8 +206,8 @@ def main(offset=0):
             print(f"{idx}/{count}")
 
         res = c.to_empty_result_dict()
-        res = parse_labels(instance, res)
-        res = parse_relations(instance, res)
+        res = parse_person_labels(instance, res)
+        res = parse_person_relations(instance, res)
         res["id"] = f"detail_{model._meta.model_name}_{instance.id}"
         res["object_id"] = str(instance.id)
         res["model"] = model.__name__
