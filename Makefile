@@ -7,6 +7,9 @@ run:
 test: 
 	python manage.py test
 
+shell: 
+	python manage.py shell_plus 
+	
 notebook:
 	python manage.py shell_plus --notebook
 
