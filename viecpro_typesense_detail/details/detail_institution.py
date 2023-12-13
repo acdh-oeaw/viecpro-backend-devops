@@ -17,7 +17,7 @@ institution_fields = [
     F("duration"),
     F("alternative_names"),
     F("sources"),
-    F("personell"),
+    F("personnel"),
     F("locations"),
     F("hierarchy"),
 
@@ -27,7 +27,7 @@ institution_fields = [
 def parse_institution_relations(i:Institution, res)->List[Any]: 
     """
     parse for: 
-    - person-instituton (personell)
+    - person-instituton (personnel)
     - institution-place (locations)
     - institution-institution (hierarchy)
     """

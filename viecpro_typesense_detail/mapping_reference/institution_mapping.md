@@ -28,7 +28,7 @@
 
 --> Mabye header "Relationen" (Relations)
 
-- Personalliste (Personell)
+- Personalliste (Personnel)
 
 - Standorte (Locations)
 
