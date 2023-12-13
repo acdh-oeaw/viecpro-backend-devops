@@ -1,6 +1,9 @@
 from dataclasses import dataclass, asdict, field
 from typing import List
-
+from django.contrib.contenttypes.models import ContentType
+from apis_bibsonomy.models import Reference
+from apis_core.apis_relations.models import AbstractRelation
+import json 
 
 @dataclass
 class F:
@@ -87,4 +90,19 @@ def format_and_orient_relation(rel: AbstractRelation, reverse=False):
         "model": str(target_entity.__class__.__name__)}
 
     return {"relation_type": relation_type, "target": target, "start_date": rel.start_date_written or "", "end_date": rel.end_date_written or ""}
+
+
+
+def get_references_for_instance(instance):
+    ct = ContentType.objects.get_for_model(instance._meta.model)
+    references = Reference.objects.filter(content_type=ct, object_id=instance.id)
+    if not references: 
+        return []
+    else: 
+        return [{
+            "start_page": r.pages_start,
+            "end_page": r.pages_end,
+            "folio": r.folio,
+            "bibtex":  "null" if not r.bibtex else json.loads(r.bibtex),
+            } for r in references]
 

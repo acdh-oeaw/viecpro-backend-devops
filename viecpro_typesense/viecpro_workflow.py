@@ -6,6 +6,7 @@ from datetime import date
 import os
 from pathlib import Path
 from viecpro_typesense_detail.details.detail_person import main as person_detail_main
+from viecpro_typesense_detail.details.detail_institution import main as institution_detail_main
 
 
 def main(send=False, local=True):
@@ -60,17 +61,30 @@ def main(send=False, local=True):
         vc.send_to_server()
         print("send data to server")
 
+    ###### Handle Detail Collections #######
     person_detail_data = person_detail_main()
     person_detail_schema = person_detail_data["schema"]
     person_detail_docs = person_detail_data["results"]
 
-    try:
-        client.collections[person_detail_schema["name"]].delete()
-    except Exception as e:
-        pass
+    institution_detail_data = institution_detail_main()
+    institution_detail_schema = institution_detail_data["schema"]
+    institution_detail_docs = institution_detail_data["results"]
 
-    client.collections.create(person_detail_schema)
-    client.collections[person_detail_schema["name"]].documents.import_(
-        person_detail_docs, {"action": "create"}
-    )
+    for collection_name in [person_detail_schema["name"], institution_detail_schema["name"]]:
+        try:
+            client.collections[collection_name].delete()
+        except Exception as e:
+            pass
+
+    if send:
+        client.collections.create(person_detail_schema)
+        client.collections[person_detail_schema["name"]].documents.import_(
+            person_detail_docs, {"action": "create"}
+        )
+
+        client.collections.create(institution_detail_schema)
+        client.collections[institution_detail_schema["name"]].documents.import_(
+            institution_detail_docs, {"action": "create"}
+        )
+
     return vc
