@@ -20,7 +20,7 @@ court_fields = [
 
 ]
 
-def parse_court_relations(i:Place, res)->List[Any]: 
+def parse_place_relations(p:Place, res)->List[Any]: 
     """
     parse for: 
 
@@ -30,7 +30,7 @@ def parse_court_relations(i:Place, res)->List[Any]:
     return res
 
 
-def parse_court_labels(i:Place, res)->List[Any]: 
+def parse_place_labels(p:Place, res)->List[Any]: 
     """
     parse for: 
 
@@ -56,8 +56,8 @@ def main(offset:int=0) -> Dict[str, Any]:
             print(f"{idx}/{count}")
 
         res = c.to_empty_result_dict()
-        res = parse_court_labels(instance, res)
-        res = parse_court_relations(instance, res)
+        res = parse_place_labels(instance, res)
+        res = parse_place_relations(instance, res)
         res["id"] = f"detail_{model._meta.model_name}_{instance.id}"
         res["object_id"] = str(instance.id)
         res["model"] = model.__name__

@@ -17,7 +17,7 @@ court_fields = [
 
 ]
 
-def parse_court_relations(i:Institution, res)->List[Any]: 
+def parse_court_relations(c:Institution, res)->List[Any]: 
     """
     parse for: 
 
@@ -27,7 +27,7 @@ def parse_court_relations(i:Institution, res)->List[Any]:
     return res
 
 
-def parse_court_labels(i:Institution, res)->List[Any]: 
+def parse_court_labels(c:Institution, res)->List[Any]: 
     """
     parse for: 
 
@@ -42,7 +42,8 @@ def main(offset:int=0) -> Dict[str, Any]:
 
     results = []
     model = Institution 
-    data = model.objects.all().prefetch_related("institutioninstitution_set", "institutionplace_set", "personinstitution_set")
+    # TODO: filter only courts from the institution-model
+    data = model.objects.all()
 
     count = len(data)
     for idx, instance in enumerate(data): 

@@ -15,7 +15,7 @@ institution_fields = [
     F("resolution", type="string"),
     F("category", type="string"),
     F("alternative_names"),
-    F("sources"),
+    F("sources"), # TODO: give robin example of how to display sources, and format this accordingly
     F("personnel"),
     F("locations"),
     F("hierarchy"),
@@ -30,7 +30,8 @@ def parse_institution_relations(i:Institution, res:Dict[str,Any])->Dict[str, Any
         else: 
             res["hierarchy"].append(format_and_orient_relation(rel))
         if model_name == "PersonInstitution": 
-            res["personnel"].append(format_and_orient_relation(rel))
+            # Note: relation needs to be reversed, as institution is always in target position, but we want the related person
+            res["personnel"].append(format_and_orient_relation(rel, reverse=True))
         if model_name == "InstitutionPlace": 
             res["locations"].append(format_and_orient_relation(rel))
 
@@ -53,12 +54,13 @@ def parse_institution_labels(i:Institution, res:Dict[str, Any])->Dict[str, Any]:
     return res
 
 def main(offset:int=0) -> Dict[str, Any]: 
-    c = C(name="viecpro_detail_institution", fields=institution_fields)
-    schema = c.to_schema()
+    ts_collection = C(name="viecpro_detail_institution", fields=institution_fields)
+    schema = ts_collection.to_schema()
 
     results = []
     model = Institution 
     # TODO: filter out courts (which have their own detail pages)
+    # TODO: filter out summarisches personal, maybe put in a special box.
     data = model.objects.all()
 
     count = len(data)
@@ -69,7 +71,7 @@ def main(offset:int=0) -> Dict[str, Any]:
         if idx % 100 == 0:
             print(f"{idx}/{count}")
 
-        res = c.to_empty_result_dict()
+        res = ts_collection.to_empty_result_dict()
      
         res["id"] = f"detail_{model._meta.model_name}_{instance.id}"
         res["model"] = model.__name__
