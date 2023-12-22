@@ -29,6 +29,6 @@ def autocomplete_view(request):
 
     result = [{"label":a[0], "value":list(a), "group":a[1], "pk":a[2]} for a in temp]
 
-    response_data = {"context":result} #json.dumps(result)
+    response_data = {"context":result} 
     return JsonResponse(response_data)
 
