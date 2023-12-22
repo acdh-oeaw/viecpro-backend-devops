@@ -14,7 +14,7 @@ jobs:
   setup_workflow_env:
     runs-on: ubuntu-latest
     outputs:
-      image_tagged: apis-devops
+      image_tagged: viecpro-backend-devops
       registry_root: ghcr.io/acdh-oeaw/
       default_port: "5000"
       APP_ROOT: "/"
