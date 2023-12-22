@@ -90,13 +90,13 @@ jobs:
     secrets: inherit
     with:
       DOCKER_TAG: ${{ needs.setup_workflow_env.outputs.registry_root }}${{ needs.setup_workflow_env.outputs.image_tagged }}/${{ github.ref_name }}
-      #APP_NAME: ${{ vars.APP_NAME}}
+      environment: "viecpro_backend_prod"
+      APP_NAME: ${{ vars.APP_NAME}}
       APP_ROOT: ${{ needs.setup_workflow_env.outputs.APP_ROOT }}
       #SERVICE_ID: ${{ vars.SERVICE_ID }}
       PUBLIC_URL: "https://viecpro-backend.acdh-ch-dev.oeaw.ac.at"
-      environment: "viecpro_backend_prod"
       default_port: "${{ needs.setup_workflow_env.outputs.default_port}}"
-      #KUBE_NAMESPACE: ${{ vars.KUBE_NAMESPACE }}
+      KUBE_NAMESPACE: ${{ vars.KUBE_NAMESPACE }}
       #POSTGRES_ENABLED: false
       #POSTGRES_HOST: ""
 
