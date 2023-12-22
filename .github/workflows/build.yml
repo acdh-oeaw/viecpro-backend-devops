@@ -97,6 +97,6 @@ jobs:
       environment: "viecpro_backend_prod"
       default_port: "${{ needs.setup_workflow_env.outputs.default_port}}"
       KUBE_NAMESPACE: ${{ vars.KUBE_NAMESPACE }}
-      DJANGO_SETTINGS_MODULE: ${{ vars.DJANGO_SETTINGS_MODULE }}
-      MYSQL_HOST: ${{ vars.MYSQL_HOST }}
-      CELERY_BROKER_URL: ${{ vars.CELERY_BROKER_URL }}
+      #DJANGO_SETTINGS_MODULE: ${{ vars.DJANGO_SETTINGS_MODULE }}
+      #MYSQL_HOST: ${{ vars.MYSQL_HOST }}
+      #CELERY_BROKER_URL: ${{ vars.CELERY_BROKER_URL }}
