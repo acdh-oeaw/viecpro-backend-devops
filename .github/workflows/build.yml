@@ -18,7 +18,7 @@ jobs:
       registry_root: ghcr.io/acdh-oeaw/
       default_port: "5000"
       APP_ROOT: "/"
-      POSTGRES_ENABLED: "false"
+      POSTGRES_ENABLED: false
     steps:
       - run: "/bin/true"
   build_and_push_to_registry:
