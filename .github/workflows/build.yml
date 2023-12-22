@@ -19,7 +19,6 @@ jobs:
       default_port: "5000"
       APP_ROOT: "/"
       POSTGRES_ENABLED: false
-      DEPLOY_DATABASE: false
     steps:
       - run: "/bin/true"
   build_and_push_to_registry:
