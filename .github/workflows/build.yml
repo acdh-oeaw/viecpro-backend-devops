@@ -18,7 +18,7 @@ jobs:
       registry_root: ghcr.io/acdh-oeaw/
       default_port: "5000"
       APP_ROOT: "/"
-      POSTGRES_ENABLED: false
+      #POSTGRES_ENABLED: false
     steps:
       - run: "/bin/true"
   build_and_push_to_registry:
@@ -90,15 +90,15 @@ jobs:
     secrets: inherit
     with:
       DOCKER_TAG: ${{ needs.setup_workflow_env.outputs.registry_root }}${{ needs.setup_workflow_env.outputs.image_tagged }}/${{ github.ref_name }}
-      APP_NAME: ${{ vars.APP_NAME}}
+      #APP_NAME: ${{ vars.APP_NAME}}
       APP_ROOT: ${{ needs.setup_workflow_env.outputs.APP_ROOT }}
-      SERVICE_ID: ${{ vars.SERVICE_ID }}
+      #SERVICE_ID: ${{ vars.SERVICE_ID }}
       PUBLIC_URL: "https://viecpro-backend.acdh-ch-dev.oeaw.ac.at"
       environment: "viecpro_backend_prod"
       default_port: "${{ needs.setup_workflow_env.outputs.default_port}}"
-      KUBE_NAMESPACE: ${{ vars.KUBE_NAMESPACE }}
-      POSTGRES_ENABLED: false
-      POSTGRES_HOST: ""
+      #KUBE_NAMESPACE: ${{ vars.KUBE_NAMESPACE }}
+      #POSTGRES_ENABLED: false
+      #POSTGRES_HOST: ""
 
       #DJANGO_SETTINGS_MODULE: ${{ vars.DJANGO_SETTINGS_MODULE }}
       #MYSQL_HOST: ${{ vars.MYSQL_HOST }}
