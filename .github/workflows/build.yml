@@ -19,6 +19,7 @@ jobs:
       default_port: "5000"
       APP_ROOT: "/"
       POSTGRES_ENABLED: false
+      DEPLOY_DATABASE: false
     steps:
       - run: "/bin/true"
   build_and_push_to_registry:
@@ -98,6 +99,7 @@ jobs:
       default_port: "${{ needs.setup_workflow_env.outputs.default_port}}"
       KUBE_NAMESPACE: ${{ vars.KUBE_NAMESPACE }}
       POSTGRES_ENABLED: false
+      DEPLOY_DATABASE: false
 
       #DJANGO_SETTINGS_MODULE: ${{ vars.DJANGO_SETTINGS_MODULE }}
       #MYSQL_HOST: ${{ vars.MYSQL_HOST }}
