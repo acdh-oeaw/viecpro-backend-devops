@@ -10,7 +10,7 @@ from apis_core.apis_vocabularies.models import VocabsBaseClass
 
 
 # each field in the collection directly corresponds to a section of data in the detail page
-court_fields = [
+place_fields = [
     # if no type is given, default is "object[]" which is the typesense signature for an array of objects
     F("id", type="string", index=True, optional=False),
     F("model", type="string", index=True, optional=False),
@@ -45,7 +45,7 @@ def main(offset:int=0) -> Dict[str, Any]:
 
     results = []
     model = Place 
-    data = model.objects.all().prefetch_related() #TODO: add relations to prefetch
+    data = model.objects.all().prefetch_related() 
 
     count = len(data)
     for idx, instance in enumerate(data): 
