@@ -1,5 +1,4 @@
 **.eggs/
-*.ipynb
 *.pyc
 *.idea
 
@@ -25,6 +24,7 @@ apis_core.egg-info
 
 apis_core/openrefine/reconcile.json
 
+.github/workflows/compare.yml
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,django,python,visualstudiocode,jupyternotebooks,node,linux
 
