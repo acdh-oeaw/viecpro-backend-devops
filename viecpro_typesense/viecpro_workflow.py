@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from viecpro_typesense_detail.details.detail_person import main as person_detail_main
 from viecpro_typesense_detail.details.detail_institution import main as institution_detail_main
-
+from viecpro_typesense_detail.details.detail_place import main as place_detail_main
 
 def main(send=False, local=True):
     print("process starting")
@@ -70,6 +70,11 @@ def main(send=False, local=True):
     institution_detail_schema = institution_detail_data["schema"]
     institution_detail_docs = institution_detail_data["results"]
 
+    place_detail_data = place_detail_main()
+    place_detail_schema = place_detail_data["schema"]
+    place_detail_docs = place_detail_data["results"]
+
+
     for collection_name in [person_detail_schema["name"], institution_detail_schema["name"]]:
         try:
             client.collections[collection_name].delete()
@@ -85,6 +90,10 @@ def main(send=False, local=True):
         client.collections.create(institution_detail_schema)
         client.collections[institution_detail_schema["name"]].documents.import_(
             institution_detail_docs, {"action": "create"}
+        )
+        client.collections.create(place_detail_schema)
+        client.collections[place_detail_schema["name"]].documents.import_(
+            place_detail_docs, {"action": "create"}
         )
 
     return vc
