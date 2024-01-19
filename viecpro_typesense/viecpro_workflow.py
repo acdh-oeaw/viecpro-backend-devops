@@ -8,6 +8,8 @@ from pathlib import Path
 from viecpro_typesense_detail.details.detail_person import main as person_detail_main
 from viecpro_typesense_detail.details.detail_institution import main as institution_detail_main
 from viecpro_typesense_detail.details.detail_place import main as place_detail_main
+from viecpro_typesense_detail.details.detail_court import main as court_detail_main
+
 
 def main(send=False, local=True):
     print("process starting")
@@ -74,8 +76,12 @@ def main(send=False, local=True):
     place_detail_schema = place_detail_data["schema"]
     place_detail_docs = place_detail_data["results"]
 
+    court_detail_data = court_detail_main()
+    court_detail_schema = court_detail_data["schema"]
+    court_detail_docs = court_detail_data["results"]
 
-    for collection_name in [person_detail_schema["name"], institution_detail_schema["name"]]:
+
+    for collection_name in [person_detail_schema["name"], institution_detail_schema["name"], place_detail_schema["name"], court_detail_schema["name"]]:
         try:
             client.collections[collection_name].delete()
         except Exception as e:
@@ -95,5 +101,11 @@ def main(send=False, local=True):
         client.collections[place_detail_schema["name"]].documents.import_(
             place_detail_docs, {"action": "create"}
         )
+
+        client.collections.create(court_detail_schema)
+        client.collections[court_detail_schema["name"]].documents.import_(
+            court_detail_docs, {"action": "create"}
+        )
+
 
     return vc
