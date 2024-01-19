@@ -12,8 +12,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         client = remote_client
 
-
-
         institution_detail_data = main()
         institution_detail_schema = institution_detail_data["schema"]
         institution_detail_docs = institution_detail_data["results"]
