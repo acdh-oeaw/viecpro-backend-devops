@@ -54,7 +54,7 @@ class DataSource(models.Model):
         :rtype: str
         """
 
-        base_path = settings.viecpro_import_IIIF_BASE_URL
+        base_path = settings.VIECPRO_IMPORT_IIIF_BASE_URL
 
         if not base_path.endswith("/"):
             base_path += "/"

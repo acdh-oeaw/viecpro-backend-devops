@@ -119,7 +119,7 @@ ROBOTS_TXT_FOLDER = os.path.join(BASE_DIR, "robots_template")
 TEMPLATES[0]["DIRS"] += [ROBOTS_TXT_FOLDER, ]
 
 
-viecpro_import_IIIF_BASE_URL = "https://iiif.acdh-dev.oeaw.ac.at/iiif/images/viecpro/"
+VIECPRO_IMPORT_IIIF_BASE_URL = "https://iiif.acdh-dev.oeaw.ac.at/iiif/images/viecpro/"
 
 
 # Bibsonomy Settings
