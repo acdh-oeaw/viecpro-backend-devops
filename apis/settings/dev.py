@@ -126,7 +126,7 @@ VIECPRO_IMPORT_IIIF_BASE_URL = "https://iiif.acdh-dev.oeaw.ac.at/iiif/images/vie
 # TODO: change this!!!
 APIS_BIBSONOMY = [{
     'type': 'zotero',  # or zotero
-    'url': 'https://zotero.org/',  # url of the bibsonomy instance or zotero.org
+    'url': 'https://api.zotero.org/',  # url of the bibsonomy instance or zotero.org
     # for zotero use the user id number found in settings
     'user': os.getenv("ZOTERO_USER"),
     'API key': os.getenv("ZOTERO_API_KEY"),
