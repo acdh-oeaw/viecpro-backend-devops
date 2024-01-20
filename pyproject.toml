@@ -64,6 +64,7 @@ django-summernote = "^0.8.11"
 djangorestframework-jsonschema = "^0.1.1"
 django-admin-csvexport = "^1.9"
 tqdm = "*"
+openpyxl = "^3.1.2"
 
 
 [build-system]

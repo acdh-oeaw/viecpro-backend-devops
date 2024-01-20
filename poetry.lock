@@ -751,6 +751,14 @@ offline = ["drf-spectacular-sidecar"]
 sidecar = ["drf-spectacular-sidecar"]
 
 [[package]]
+name = "et-xmlfile"
+version = "1.1.0"
+description = "An implementation of lxml.xmlfile for the standard library"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.0"
 description = "Backport of PEP 654 (exception groups)"
@@ -1449,6 +1457,17 @@ description = "Fundamental package for array computing in Python"
 category = "main"
 optional = false
 python-versions = ">=3.9"
+
+[[package]]
+name = "openpyxl"
+version = "3.1.2"
+description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+et-xmlfile = "*"
 
 [[package]]
 name = "overrides"
@@ -2252,7 +2271,7 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "24abcc5489b28c1c675f5d19c071856f0ae2559f9b6f9142ad020a2cbc2587b8"
+content-hash = "712104d2c01f16d676f0833fe8d159b22b988cdfd0382d0babfda125dfc0ec57"
 
 [metadata.files]
 acdh-django-charts = []
@@ -2313,6 +2332,7 @@ djangorestframework-csv = []
 djangorestframework-jsonschema = []
 djangorestframework-xml = []
 drf-spectacular = []
+et-xmlfile = []
 exceptiongroup = []
 executing = []
 fastjsonschema = []
@@ -2359,6 +2379,7 @@ netaddr = []
 notebook = []
 notebook-shim = []
 numpy = []
+openpyxl = []
 overrides = []
 packaging = []
 pandas = []
