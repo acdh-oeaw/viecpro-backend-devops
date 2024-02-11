@@ -1,7 +1,8 @@
 from dataclasses import dataclass, asdict, field
-from typing import List
+from typing import List, Dict, Any
+from apis_core.apis_labels.models import Label
 from django.contrib.contenttypes.models import ContentType
-from apis_bibsonomy.models import Reference
+from apis_bibsonomy.models import Reference  # type: ignore
 from apis_core.apis_relations.models import AbstractRelation
 import json 
 
@@ -28,7 +29,7 @@ class F:
     def to_dict(self):
         return asdict(self)
 
-    def to_empty_result_dict(self):
+    def to_empty_result_dict(self) -> Dict[str, Any]:
         return {self.name: [] if "[]" in self.type else {} if self.type == "object" else ""}
 
 
@@ -58,7 +59,7 @@ class C:
 
 
 
-def to_rel(l):
+def to_rel(l:Label)-> Dict[str, Any]:
     """
     Helper that maps a label to a kind of relation-like datastructure. 
     Note that the name of the fields are changed.
@@ -68,7 +69,7 @@ def to_rel(l):
 
 
 
-def format_and_orient_relation(rel: AbstractRelation, reverse=False):
+def format_and_orient_relation(rel: AbstractRelation, reverse:bool=False)-> Dict[str, Any]:
     """
     Returns a nested structure that represents a relation. Maps keys and re-orients the relation
     if the reverse flag is set.
@@ -79,11 +80,11 @@ def format_and_orient_relation(rel: AbstractRelation, reverse=False):
     So if a relation has the selected entity in target position, it gets reversed here.
     """
     if reverse:
-        target_entity = getattr(rel, rel.get_related_entity_field_nameA())
-        relation_type = rel.relation_type.name_reverse
+        target_entity = getattr(rel, rel.get_related_entity_field_nameA())  # type: ignore
+        relation_type = rel.relation_type.name_reverse  # type: ignore
     else:
-        target_entity = getattr(rel, rel.get_related_entity_field_nameB())
-        relation_type = rel.relation_type.name
+        target_entity = getattr(rel, rel.get_related_entity_field_nameB())  # type: ignore
+        relation_type = rel.relation_type.name  # type: ignore
     target = {
         "name": str(target_entity),
         "object_id": str(target_entity.id),
@@ -93,7 +94,7 @@ def format_and_orient_relation(rel: AbstractRelation, reverse=False):
 
 
 
-def get_references_for_instance(instance):
+def get_references_for_instance(instance:Any)-> List[Dict[str, Any]]:
     ct = ContentType.objects.get_for_model(instance._meta.model)
     references = Reference.objects.filter(content_type=ct, object_id=instance.id)
     if not references: 

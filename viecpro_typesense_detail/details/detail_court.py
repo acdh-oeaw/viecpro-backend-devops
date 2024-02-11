@@ -1,10 +1,10 @@
 from .utils import F, C
 from apis_core.apis_entities.models import Institution
-from typing import Dict, Any, List
+from typing import Dict, Any, List, TypeVar
 from apis_core.apis_relations.models import AbstractRelation
 from apis_core.apis_vocabularies.models import VocabsBaseClass
 from viecpro_typesense_detail.details.utils import format_and_orient_relation, get_references_for_instance, to_rel
-
+from apis_core.apis_labels.models import Label
 
 """
 
@@ -41,6 +41,8 @@ Standorte: Institution Placce
 Hierarchie: InstitutionInstitution rel data
 """
 
+
+
 # each field in the collection directly corresponds to a section of data in the detail page
 court_fields = [
     # if no type is given, default is "object[]" which is the typesense signature for an array of objects
@@ -59,8 +61,8 @@ court_fields = [
 
 ]
 
-def parse_court_relations(i:Institution, res: List[Any])->List[Any]: 
-    
+def parse_court_relations(i:Institution, res: Dict[str, Any])->Dict[str, Any]: 
+    rel: Any
     for rel in i.get_related_relation_instances(): 
         model_name = rel.__class__.__name__
 
@@ -84,8 +86,9 @@ def parse_court_relations(i:Institution, res: List[Any])->List[Any]:
     
 
 
-def parse_court_labels(i:Institution, res)->List[Any]: 
+def parse_court_labels(i:Institution, res:Dict[str, Any])->Dict[str, Any]: 
   
+    label: Label
     for label in i.label_set.all(): 
         match label.label_type.name: 
             case "name": 
