@@ -5,17 +5,23 @@ from typing import List
 from collections import defaultdict
 from apis_core.apis_relations.models import AbstractRelation
 from apis_core.apis_vocabularies.models import VocabsBaseClass
-from apis_core.apis_relations.models import PersonPerson, PlacePlace, EventEvent, WorkWork, InstitutionInstitution
+from apis_core.apis_relations.models import (
+    PersonPerson,
+    PlacePlace,
+    EventEvent,
+    WorkWork,
+    InstitutionInstitution,
+)
 
 
 # maps certain occurrences of label_types to keys in the result dictionary
 perper_map = {
-    'Berufliche Beziehung >> Tätigkeiten für ausländische Höfe': "non_court_functions",
-    'Berufliche Beziehung': "person_relations_court",
-    'Doubletten Beziehung': "duplicates",
-    'Verwandtschaftliche Beziehung': "marriages_and_family_relations",
-    'Kirchl. Amtsbeziehung': "relations_to_church_and_orders",
-    'Dynastische Beziehung': "non_court_functions"
+    "Berufliche Beziehung >> Tätigkeiten für ausländische Höfe": "non_court_functions",
+    "Berufliche Beziehung": "person_relations_court",
+    "Doubletten Beziehung": "duplicates",
+    "Verwandtschaftliche Beziehung": "marriages_and_family_relations",
+    "Kirchl. Amtsbeziehung": "relations_to_church_and_orders",
+    "Dynastische Beziehung": "non_court_functions",
 }
 
 # all fields of the person_detail collection
@@ -46,28 +52,32 @@ person_fields = [
     F("marriages_and_family_relations"),
     # label_data and RelData Kirchliche Amtsbeziehung
     F("relations_to_church_and_orders"),
-    F("non_court_functions")  # labelData other jobs
+    F("non_court_functions"),  # labelData other jobs
 ]
 
 # unused atm, we only build the person collection (for now)
-collections = [f"viecpro_{model}_detail" for model in [
-    "person", "institution", "place", "work", "source", "court"]]
+collections = [
+    f"viecpro_{model}_detail"
+    for model in ["person", "institution", "place", "work", "source", "court"]
+]
 
 person_schema = {
     "name": "viecpro_person_detail",
     "enable_nested_fields": True,
-    "fields": [
-        f.to_dict() for f in person_fields
-    ]
+    "fields": [f.to_dict() for f in person_fields],
 }
 
 
 def to_rel(l):
     """
-    Helper that maps a label to a kind of relation-like datastructure. 
+    Helper that maps a label to a kind of relation-like datastructure.
     Note that the name of the fields are changed.
     """
-    return {"name": l.label, "start_date": l.start_date_written or "", "end_date": l.end_date_written or ""}
+    return {
+        "name": l.label,
+        "start_date": l.start_date_written or "",
+        "end_date": l.end_date_written or "",
+    }
 
 
 def parse_labels(p, res):
@@ -89,11 +99,18 @@ def parse_labels(p, res):
                 res["confession"].append(l.label)
             case "Adelstitel / -prädikat" | "Auszeichnung" | "Stand":
                 res["honorary_titles"].append(to_rel(l))
-            case "Schreibvariante Nachname verheiratet" | "Schreibvariante Nachname verheiratet (2. Ehe)":
+            case (
+                "Schreibvariante Nachname verheiratet"
+                | "Schreibvariante Nachname verheiratet (2. Ehe)"
+            ):
                 res["married_names"].append(to_rel(l))
-            case 'Nachname verheiratet (1. Ehe)':
+            case "Nachname verheiratet (1. Ehe)":
                 res["first_marriage"] = l.label
             case "Sonstiger Hofbezug":
+                res["other_relations_court"].append(to_rel(l))
+            case "Sonstiger Hofbezug (Rat)":
+                res["other_relations_court"].append(to_rel(l))
+            case "Sonstiger Hofbezug (AV)":
                 res["other_relations_court"].append(to_rel(l))
             case "Akadem. Titel":
                 res["academic_titles"].append(to_rel(l))
@@ -110,7 +127,7 @@ def format_and_orient_relation(rel: AbstractRelation, reverse=False):
     if the reverse flag is set.
 
     Background:
-    Relations are oriented from entity a to b. In the ui, they are shown always from the 
+    Relations are oriented from entity a to b. In the ui, they are shown always from the
     view of the selected entity, i.e. with the selected entity in A-position (subject if you will).
     So if a relation has the selected entity in target position, it gets reversed here.
     """
@@ -123,9 +140,15 @@ def format_and_orient_relation(rel: AbstractRelation, reverse=False):
     target = {
         "name": str(target_entity),
         "object_id": str(target_entity.id),
-        "model": str(target_entity.__class__.__name__)}
+        "model": str(target_entity.__class__.__name__),
+    }
 
-    return {"relation_type": relation_type, "target": target, "start_date": rel.start_date_written or "", "end_date": rel.end_date_written or ""}
+    return {
+        "relation_type": relation_type,
+        "target": target,
+        "start_date": rel.start_date_written or "",
+        "end_date": rel.end_date_written or "",
+    }
 
 
 def check_relation_type(rel):
@@ -137,12 +160,12 @@ def check_relation_type(rel):
     """
     hierarchy = str(VocabsBaseClass.objects.get(id=rel.relation_type.id))
     checklist = [
-        'Berufliche Beziehung >> Tätigkeiten für ausländische Höfe',
-        'Berufliche Beziehung',
-        'Doubletten Beziehung',
-        'Verwandtschaftliche Beziehung',
-        'Kirchl. Amtsbeziehung',
-        'Dynastische Beziehung',
+        "Berufliche Beziehung >> Tätigkeiten für ausländische Höfe",
+        "Berufliche Beziehung",
+        "Doubletten Beziehung",
+        "Verwandtschaftliche Beziehung",
+        "Kirchl. Amtsbeziehung",
+        "Dynastische Beziehung",
     ]
 
     for check in checklist:
@@ -191,11 +214,22 @@ def main(offset=0):
     c = C(name="viecpro_detail_person", fields=person_fields)
     schema = c.to_schema()
 
-
     results = []
     model = Person
-    data = model.objects.all().prefetch_related(*[f"{m._meta.model_name}_set" for m in model.get_related_relation_classes(
-    ) if m not in [PersonPerson, PlacePlace, EventEvent, WorkWork, InstitutionInstitution]])
+    data = model.objects.all().prefetch_related(
+        *[
+            f"{m._meta.model_name}_set"
+            for m in model.get_related_relation_classes()
+            if m
+            not in [
+                PersonPerson,
+                PlacePlace,
+                EventEvent,
+                WorkWork,
+                InstitutionInstitution,
+            ]
+        ]
+    )
     count = len(data)
 
     for idx, instance in enumerate(data):

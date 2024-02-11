@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import ToplevelFunction, AlternativeFunctionName
+
+admin.site.register(ToplevelFunction)
+admin.site.register(AlternativeFunctionName)

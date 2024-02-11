@@ -1,1 +1,692 @@
-{"viecpro_events": {"name": "viecpro_events", "enable_nested_fields": true, "fields": [{"name": "id", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "object_id", "index": true, "optional": false, "facet": false, "sort": false, "type": "int64"}, {"name": "start_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "start", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "model", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "name", "index": true, "optional": true, "facet": true, "sort": false, "type": "string"}, {"name": "labels", "index": true, "optional": true, "facet": false, "sort": false, "type": "object[]"}, {"name": "kind", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}]}, "viecpro_institutions": {"name": "viecpro_institutions", "enable_nested_fields": true, "fields": [{"name": "id", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "object_id", "index": true, "optional": false, "facet": false, "sort": false, "type": "int64"}, {"name": "start_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "start", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "model", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "name", "index": true, "optional": true, "facet": true, "sort": false, "type": "string"}, {"name": "labels", "index": true, "optional": true, "facet": false, "sort": false, "type": "object[]"}, {"name": "kind", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}]}, "viecpro_persons": {"name": "viecpro_persons", "enable_nested_fields": true, "fields": [{"name": "id", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "object_id", "index": true, "optional": false, "facet": false, "sort": false, "type": "int64"}, {"name": "start_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "start", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "model", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "name", "index": true, "optional": true, "facet": true, "sort": false, "type": "string"}, {"name": "labels", "index": true, "optional": true, "facet": false, "sort": false, "type": "object[]"}, {"name": "first_name", "index": true, "optional": true, "facet": false, "sort": true, "type": "string"}, {"name": "fullname", "index": true, "optional": false, "facet": false, "sort": true, "type": "string"}, {"name": "gender", "index": true, "optional": true, "facet": true, "sort": false, "type": "string"}, {"name": "titles", "index": true, "optional": true, "facet": false, "sort": false, "type": "object[]"}]}, "viecpro_places": {"name": "viecpro_places", "enable_nested_fields": true, "fields": [{"name": "id", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "object_id", "index": true, "optional": false, "facet": false, "sort": false, "type": "int64"}, {"name": "start_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "start", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "model", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "name", "index": true, "optional": true, "facet": true, "sort": false, "type": "string"}, {"name": "labels", "index": true, "optional": true, "facet": false, "sort": false, "type": "object[]"}, {"name": "kind", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "lat", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "long", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}]}, "viecpro_references": {"name": "viecpro_references", "enable_nested_fields": true, "fields": [{"name": "id", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "start_page", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "end_page", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "folio", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "model", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "title", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "shortTitle", "index": true, "optional": true, "facet": true, "sort": false, "type": "string"}, {"name": "kind", "index": true, "optional": true, "facet": true, "sort": false, "type": "string"}, {"name": "related_doc", "index": true, "optional": true, "facet": true, "sort": false, "type": "object"}]}, "viecpro_relations": {"name": "viecpro_relations", "enable_nested_fields": true, "fields": [{"name": "id", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "object_id", "index": true, "optional": false, "facet": false, "sort": false, "type": "int64"}, {"name": "start_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "start", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "model", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "source", "index": true, "optional": false, "facet": false, "sort": false, "type": "object"}, {"name": "source_kind", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "target", "index": true, "optional": false, "facet": false, "sort": false, "type": "object"}, {"name": "target_kind", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "relation_type_id", "index": true, "optional": true, "facet": false, "sort": false, "type": "int64"}, {"name": "relation_type", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "relation_type_hierarchy", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "relation_reverse", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}]}, "viecpro_courts": {"name": "viecpro_courts", "enable_nested_fields": true, "fields": [{"name": "id", "index": true, "optional": true, "facet": false, "sort": false, "type": "string"}, {"name": "name", "index": true, "optional": true, "facet": true, "sort": true, "type": "string"}, {"name": "owner", "index": true, "optional": true, "facet": true, "sort": false, "type": "object[]"}, {"name": "main_owner", "index": true, "optional": true, "facet": true, "sort": false, "type": "object"}, {"name": "object_id", "index": true, "optional": false, "facet": false, "sort": false, "type": "int64"}, {"name": "start_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end_date", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "start", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "end", "index": true, "optional": false, "facet": false, "sort": false, "type": "string"}, {"name": "model", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "kind", "index": true, "optional": false, "facet": true, "sort": false, "type": "string"}, {"name": "labels", "index": true, "optional": true, "facet": false, "sort": false, "type": "object[]"}]}}
+{
+    "viecpro_events": {
+        "name": "viecpro_events",
+        "enable_nested_fields": true,
+        "fields": [
+            {
+                "name": "id",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "object_id",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "int64"
+            },
+            {
+                "name": "start_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "start",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "model",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "name",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "labels",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "object[]"
+            },
+            {
+                "name": "kind",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            }
+        ]
+    },
+    "viecpro_institutions": {
+        "name": "viecpro_institutions",
+        "enable_nested_fields": true,
+        "fields": [
+            {
+                "name": "id",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "object_id",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "int64"
+            },
+            {
+                "name": "start_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "start",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "model",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "name",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "labels",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "object[]"
+            },
+            {
+                "name": "kind",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            }
+        ]
+    },
+    "viecpro_persons": {
+        "name": "viecpro_persons",
+        "enable_nested_fields": true,
+        "fields": [
+            {
+                "name": "id",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "object_id",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "int64"
+            },
+            {
+                "name": "start_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "start",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "model",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "name",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "labels",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "object[]"
+            },
+            {
+                "name": "first_name",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": true,
+                "type": "string"
+            },
+            {
+                "name": "fullname",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": true,
+                "type": "string"
+            },
+            {
+                "name": "gender",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "titles",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "object[]"
+            }
+        ]
+    },
+    "viecpro_places": {
+        "name": "viecpro_places",
+        "enable_nested_fields": true,
+        "fields": [
+            {
+                "name": "id",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "object_id",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "int64"
+            },
+            {
+                "name": "start_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "start",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "model",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "name",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "labels",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "object[]"
+            },
+            {
+                "name": "kind",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "lat",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "long",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            }
+        ]
+    },
+    "viecpro_references": {
+        "name": "viecpro_references",
+        "enable_nested_fields": true,
+        "fields": [
+            {
+                "name": "id",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "start_page",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end_page",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "folio",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "model",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "title",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "shortTitle",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "kind",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "related_doc",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "object"
+            }
+        ]
+    },
+    "viecpro_relations": {
+        "name": "viecpro_relations",
+        "enable_nested_fields": true,
+        "fields": [
+            {
+                "name": "id",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "object_id",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "int64"
+            },
+            {
+                "name": "start_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "start",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "model",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "source",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "object"
+            },
+            {
+                "name": "source_kind",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "target",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "object"
+            },
+            {
+                "name": "target_kind",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "relation_type_id",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "int64"
+            },
+            {
+                "name": "relation_type",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "relation_type_hierarchy",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "relation_reverse",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            }
+        ]
+    },
+    "viecpro_courts": {
+        "name": "viecpro_courts",
+        "enable_nested_fields": true,
+        "fields": [
+            {
+                "name": "id",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "name",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": true,
+                "type": "string"
+            },
+            {
+                "name": "owner",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "object[]"
+            },
+            {
+                "name": "main_owner",
+                "index": true,
+                "optional": true,
+                "facet": true,
+                "sort": false,
+                "type": "object"
+            },
+            {
+                "name": "object_id",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "int64"
+            },
+            {
+                "name": "start_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end_date",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "start",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "end",
+                "index": true,
+                "optional": false,
+                "facet": false,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "model",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "kind",
+                "index": true,
+                "optional": false,
+                "facet": true,
+                "sort": false,
+                "type": "string"
+            },
+            {
+                "name": "labels",
+                "index": true,
+                "optional": true,
+                "facet": false,
+                "sort": false,
+                "type": "object[]"
+            }
+        ]
+    }
+}

@@ -5,10 +5,10 @@ import os
 
 REDIS_HOST = "redis"
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_BACKEND = "django-db"
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -30,15 +30,16 @@ ALLOWED_HOSTS = re.sub(
     r"https?://",
     "",
     os.environ.get(
-        "ALLOWED_HOSTS", "localhost,127.0.0.1,viecpro-dev.acdh-dev.oeaw.ac.at,.acdh-cluster.arz.oeaw.ac.at"),
+        "ALLOWED_HOSTS",
+        "localhost,127.0.0.1,viecpro-dev.acdh-dev.oeaw.ac.at,.acdh-cluster.arz.oeaw.ac.at",
+    ),
 ).split(",")
 
 
 # You need to allow '10.0.0.0/8' for service health checks.
 ALLOWED_CIDR_NETS = ["10.0.0.0/8", "127.0.0.0/8"]
 
-CSP_DEFAULT_SRC = CSP_DEFAULT_SRC + \
-    ("sharonchoong.github.io", "github.com/devongovett")
+CSP_DEFAULT_SRC = CSP_DEFAULT_SRC + ("sharonchoong.github.io", "github.com/devongovett")
 
 DEBUG = True
 DEV_VERSION = False
@@ -47,19 +48,31 @@ SPECTACULAR_SETTINGS["COMPONENT_SPLIT_REQUEST"] = True
 SPECTACULAR_SETTINGS["COMPONENT_NO_READ_ONLY_REQUIRED"] = True
 
 
-INSTALLED_APPS += ["django_extensions", "viecpro_import", "debug_toolbar", "apis_bibsonomy", "apis_ampel",
-                   "viecpro_deduplication", "viecpro_hierarchy", "viecpro_typesense", "viecpro_typesense_detail", "django_celery_results"]
+INSTALLED_APPS += [
+    "django_extensions",
+    "viecpro_import",
+    "debug_toolbar",
+    "apis_bibsonomy",
+    "apis_ampel",
+    "viecpro_deduplication",
+    "viecpro_hierarchy",
+    "viecpro_typesense",
+    "viecpro_typesense_detail",
+    "django_celery_results",
+    "viecpro_function_register",
+]
 
 
-DATABASES = {"default":
-             {
-                 "ENGINE": "django.db.backends.mysql",
-                 "NAME": os.getenv('MYSQL_DATABASE'),
-                 "USER": os.getenv('MYSQL_USER'),
-                 "PASSWORD": os.getenv('MYSQL_PASSWORD'),
-                 "HOST": "db",
-                 "PORT": "3306",
-             }}
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("MYSQL_DATABASE"),
+        "USER": os.getenv("MYSQL_USER"),
+        "PASSWORD": os.getenv("MYSQL_PASSWORD"),
+        "HOST": "db",
+        "PORT": "3306",
+    }
+}
 
 
 LANGUAGE_CODE = "de"
@@ -76,8 +89,7 @@ APIS_RELATIONS_FILTER_EXCLUDE = [
     "*collection*",
     "*published*",
     "*_set",
-    "*_set__*"
-    "_ptr",
+    "*_set__*" "_ptr",
     "baseclass",
     "*id",
     "*written*",
@@ -115,7 +127,9 @@ viecpro_hierarchy_BASE_URI = "https://viecpro-dev.acdh-dev.oeaw.ac.at/"
 ROBOTS_TXT_FOLDER = os.path.join(BASE_DIR, "robots_template")
 
 # register above folder as a template-dir
-TEMPLATES[0]["DIRS"] += [ROBOTS_TXT_FOLDER, ]
+TEMPLATES[0]["DIRS"] += [
+    ROBOTS_TXT_FOLDER,
+]
 
 
 VIECPRO_IMPORT_IIIF_BASE_URL = "https://iiif.acdh-dev.oeaw.ac.at/iiif/images/viecpro/"
@@ -124,14 +138,16 @@ VIECPRO_IMPORT_IIIF_BASE_URL = "https://iiif.acdh-dev.oeaw.ac.at/iiif/images/vie
 # Bibsonomy Settings
 
 # TODO: change this!!!
-APIS_BIBSONOMY = [{
-    'type': 'zotero',  # or zotero
-    'url': 'https://api.zotero.org/',  # url of the bibsonomy instance or zotero.org
-    # for zotero use the user id number found in settings
-    'user': os.getenv("ZOTERO_USER"),
-    'API key': os.getenv("ZOTERO_API_KEY"),
-    'group':  os.getenv("ZOTERO_GROUP"),
-}]
+APIS_BIBSONOMY = [
+    {
+        "type": "zotero",  # or zotero
+        "url": "https://api.zotero.org/",  # url of the bibsonomy instance or zotero.org
+        # for zotero use the user id number found in settings
+        "user": os.getenv("ZOTERO_USER"),
+        "API key": os.getenv("ZOTERO_API_KEY"),
+        "group": os.getenv("ZOTERO_GROUP"),
+    }
+]
 
 DJANGO_TYPESENSE = {
     "client": {
