@@ -2,6 +2,7 @@ from viecpro_typesense import Schema, CollectionAdapter
 from .clients import local_client, remote_client
 from .collections import create_entity_collections, create_relation_collections, ReferenceCollection, HofstaatCollection
 from .handlers import ErrorCount
+from .utils import process_detail_collection
 from datetime import date
 import os
 from pathlib import Path
@@ -9,6 +10,7 @@ from viecpro_typesense_detail.details.detail_person import main as person_detail
 from viecpro_typesense_detail.details.detail_institution import main as institution_detail_main
 from viecpro_typesense_detail.details.detail_place import main as place_detail_main
 from viecpro_typesense_detail.details.detail_court import main as court_detail_main
+from viecpro_typesense_detail.details.detail_source import main as source_detail_main
 
 
 def main(send=False, local=True):
@@ -63,49 +65,52 @@ def main(send=False, local=True):
         vc.send_to_server()
         print("send data to server")
 
-    ###### Handle Detail Collections #######
-    person_detail_data = person_detail_main()
-    person_detail_schema = person_detail_data["schema"]
-    person_detail_docs = person_detail_data["results"]
+    # ###### Handle Detail Collections #######
+    # person_detail_data = person_detail_main()
+    # person_detail_schema = person_detail_data["schema"]
+    # person_detail_docs = person_detail_data["results"]
 
-    institution_detail_data = institution_detail_main()
-    institution_detail_schema = institution_detail_data["schema"]
-    institution_detail_docs = institution_detail_data["results"]
+    # institution_detail_data = institution_detail_main()
+    # institution_detail_schema = institution_detail_data["schema"]
+    # institution_detail_docs = institution_detail_data["results"]
 
-    place_detail_data = place_detail_main()
-    place_detail_schema = place_detail_data["schema"]
-    place_detail_docs = place_detail_data["results"]
+    # place_detail_data = place_detail_main()
+    # place_detail_schema = place_detail_data["schema"]
+    # place_detail_docs = place_detail_data["results"]
 
-    court_detail_data = court_detail_main()
-    court_detail_schema = court_detail_data["schema"]
-    court_detail_docs = court_detail_data["results"]
+    # court_detail_data = court_detail_main()
+    # court_detail_schema = court_detail_data["schema"]
+    # court_detail_docs = court_detail_data["results"]
 
 
-    for collection_name in [person_detail_schema["name"], institution_detail_schema["name"], place_detail_schema["name"], court_detail_schema["name"]]:
-        try:
-            client.collections[collection_name].delete()
-        except Exception as e:
-            pass
+    # for collection_name in [person_detail_schema["name"], institution_detail_schema["name"], place_detail_schema["name"], court_detail_schema["name"]]:
+    #     try:
+    #         client.collections[collection_name].delete()
+    #     except Exception as e:
+    #         pass
 
-    if send:
-        client.collections.create(person_detail_schema)
-        client.collections[person_detail_schema["name"]].documents.import_(
-            person_detail_docs, {"action": "create"}
-        )
+    # if send:
+    #     client.collections.create(person_detail_schema)
+    #     client.collections[person_detail_schema["name"]].documents.import_(
+    #         person_detail_docs, {"action": "create"}
+    #     )
 
-        client.collections.create(institution_detail_schema)
-        client.collections[institution_detail_schema["name"]].documents.import_(
-            institution_detail_docs, {"action": "create"}
-        )
-        client.collections.create(place_detail_schema)
-        client.collections[place_detail_schema["name"]].documents.import_(
-            place_detail_docs, {"action": "create"}
-        )
+    #     client.collections.create(institution_detail_schema)
+    #     client.collections[institution_detail_schema["name"]].documents.import_(
+    #         institution_detail_docs, {"action": "create"}
+    #     )
+    #     client.collections.create(place_detail_schema)
+    #     client.collections[place_detail_schema["name"]].documents.import_(
+    #         place_detail_docs, {"action": "create"}
+    #     )
 
-        client.collections.create(court_detail_schema)
-        client.collections[court_detail_schema["name"]].documents.import_(
-            court_detail_docs, {"action": "create"}
-        )
+    #     client.collections.create(court_detail_schema)
+    #     client.collections[court_detail_schema["name"]].documents.import_(
+    #         court_detail_docs, {"action": "create"}
+    #     )
+        
+    for process in [person_detail_main, court_detail_main, source_detail_main, institution_detail_main, place_detail_main]:
+        process_detail_collection(process, client, send=send)
 
 
     return vc
