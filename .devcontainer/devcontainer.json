@@ -18,7 +18,8 @@
 				"esbenp.prettier-vscode",
 				"Gruntfuggly.todo-tree",
 				"junstyle.vscode-django-support",
-				"ms-python.autopep8"
+				"ms-python.autopep8",
+				"ms-python.black-formatter"
 			]
 		}
 	},
