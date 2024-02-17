@@ -66,8 +66,7 @@ def main(offset: int = 0) -> Dict[str, Any]:
 
     results = []
     model = Event
-    # TODO: filter out courts (which have their own detail pages)
-    # TODO: filter out summarisches personal, maybe put in a special box.
+
     data = model.objects.all()
 
     count = len(data)

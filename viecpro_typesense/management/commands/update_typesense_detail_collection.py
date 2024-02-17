@@ -4,7 +4,7 @@ from viecpro_typesense.utils import process_detail_collection
 from viecpro_typesense.clients import local_client, remote_client
 from typing import Dict, Any, List
 
-processing_map = {
+collection_processing_map = {
     "person": process_detail_person_collection,
     "place": process_detail_place_collection,
     "court": process_detail_court_collection,
@@ -15,6 +15,7 @@ processing_map = {
 
 class Command(BaseCommand):
     help = "Command to update one or several detail collections on remote or local typesense server."
+    collection_choices = list(collection_processing_map.keys())
 
     def add_arguments(self, parser: CommandParser):
         parser.add_argument(
@@ -26,6 +27,7 @@ class Command(BaseCommand):
             "collection",
             nargs="+",
             type=str,
+            choices=self.collection_choices,
             help="Name of the collection entity to update. f.e. 'person' - which would update the 'viecpro_detail_person' - collection. Accepts one or multiple collections to update.",
         )
 
@@ -43,7 +45,7 @@ class Command(BaseCommand):
             col_name = col.lower()
             try:
                 process_detail_collection(
-                    processing_map[col_name], client, send=True, col_name=col_name
+                    collection_processing_map[col_name], client, send=True, col_name=col_name
                 )
             except Exception as e:
                 print("FAILED: ", e)

@@ -6,8 +6,7 @@ import pathlib
 
 if __name__ == "__main__":
     if os.getenv("DJANGO_SETTINGS_MODULE") is None:
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE",
-                              "apis.settings.dev")
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apis.settings.dev")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:
@@ -38,9 +37,11 @@ if __name__ == "__main__":
         import dal_select2
 
         file_to_fix = dal_select2.__file__.replace(
-            "/__init__.py", "/static/autocomplete_light/select2.js")
+            "/__init__.py", "/static/autocomplete_light/select2.js"
+        )
         min_file_to_fix = dal_select2.__file__.replace(
-            "/__init__.py", "/static/autocomplete_light/select2.min.js")
+            "/__init__.py", "/static/autocomplete_light/select2.min.js"
+        )
 
         try:
             with open(file_to_fix, "r") as f:
@@ -48,21 +49,25 @@ if __name__ == "__main__":
 
             for i, line in enumerate(lines):
 
-                if \
-                        line == "                processResults: function (data, page) {\n" and \
-                        lines[i+1] == "                    if ($element.attr('data-tags')) {\n" and \
-                        lines[i+2] == "                        $.each(data.results, function (index, value) {\n" and \
-                        lines[i+3] == "                            value.id = value.text;\n":
+                if (
+                    line == "                processResults: function (data, page) {\n"
+                    and lines[i + 1]
+                    == "                    if ($element.attr('data-tags')) {\n"
+                    and lines[i + 2]
+                    == "                        $.each(data.results, function (index, value) {\n"
+                    and lines[i + 3]
+                    == "                            value.id = value.text;\n"
+                ):
 
-                    lines[i+3] = "                            value.id = value.id;\n"
+                    lines[i + 3] = "                            value.id = value.id;\n"
 
             with open(file_to_fix, "w") as f:
                 f.write("".join(lines))
 
         except FileNotFoundError:
             raise Exception(
-                "Could not find select2.js file to inject bug workaround into.\n" +
-                "Maybe the dal_select library has changed and this workaround is not necessary anymore?"
+                "Could not find select2.js file to inject bug workaround into.\n"
+                + "Maybe the dal_select library has changed and this workaround is not necessary anymore?"
             )
 
         try:
@@ -72,8 +77,8 @@ if __name__ == "__main__":
                 f.write(f_out)
         except FileNotFoundError:
             raise Exception(
-                "Could not find select2.min.js file to inject bug workaround into.\n" +
-                "Maybe the dal_select library has changed and this workaround is not necessary anymore?"
+                "Could not find select2.min.js file to inject bug workaround into.\n"
+                + "Maybe the dal_select library has changed and this workaround is not necessary anymore?"
             )
 
     work_around_dal_select2_bug()
