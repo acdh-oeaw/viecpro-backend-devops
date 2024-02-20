@@ -4,9 +4,9 @@ ARG USERNAME=app
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-# Create the user
+# Create the user & install tmux
 RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && apt-get update && apt-get install -y tmux && rm -rf /var/lib/apt/lists/*
 WORKDIR /app/
 # https://docs.python.org/3/using/cmdline.html#envvar-PYTHONDONTWRITEBYTECODE
 # Prevents Python from writing .pyc files to disk
