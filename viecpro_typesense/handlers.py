@@ -102,7 +102,7 @@ class ParseFunctionsHandler(Handler):
 
 
 class ParsePersonInstitutionHandler(Handler):
-    def func(x): return [f.name for f in x.personinstitution_set.all()]
+    def func(x): return [f.related_institution.name for f in x.personinstitution_set.all()]
 
 
 class GenericDocIDHandler(Handler):
