@@ -80,7 +80,7 @@ def create_entity_collections():
 
             base_fields = deepcopy(shared_fields(m))
             base_fields.update({"name": StringField("name", options=O(
-                facet=True)), "labels": LabelsNestedObjectField("id", pass_instance=True)})
+                facet=False)), "labels": LabelsNestedObjectField("id", pass_instance=True)})
 
             if m is not Person:
                 base_fields.update(
