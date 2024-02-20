@@ -1,7 +1,7 @@
 from .handlers import GenericDocIDHandler
 from viecpro_typesense import Collection, StaticField, CollectionConfig, O
 from copy import deepcopy
-from .fields import StringField, FullNameField, TitlesNestedObjectField, RelationTypeHierarchyHandler, WrittenDateField, BibtexShortTitleHandler, BibtexTitleHandler, BibtexTypeHandler, RelatedReferenceDocField, ObjectIDField, DateObjectDateField, LabelsNestedObjectField, KindField, SourceField, TargetField, HofstaatsinhaberField, MainOwnerField
+from .fields import StringField, FullNameField, TitlesNestedObjectField, RelationTypeHierarchyHandler, WrittenDateField, BibtexShortTitleHandler, BibtexTitleHandler, BibtexTypeHandler, RelatedReferenceDocField, ObjectIDField, DateObjectDateField, LabelsNestedObjectField, KindField, SourceField, TargetField, HofstaatsinhaberField, MainOwnerField, FunctionsArrayField, PersonInstitutionArrayField
 from apis_bibsonomy.models import Reference
 from apis_core.apis_relations.models import AbstractRelation
 from apis_core.apis_entities.models import AbstractEntity, Institution, Person, Place, Event, Work
@@ -99,7 +99,8 @@ def create_entity_collections():
                     "fullname": FullNameField(("name", "first_name"), options=O(sort=True)),
                     "gender": StringField("gender", options=O(facet=True, optional=True, type="string")),
                     "titles": TitlesNestedObjectField("id", pass_instance=True),
-                    # "functions": FunctionsArrayField("id", pass_instance=True),# TODO: need to remove need to pass field param to field with pass_instance. id won't be accessed here, its a dummy
+                    "functions": FunctionsArrayField("id", pass_instance=True, options=O(facet=True)),# TODO: need to remove need to pass field param to field with pass_instance. id won't be accessed here, its a dummy
+                    "institutions": PersonInstitutionArrayField("id", pass_instance=True, options=O(facet=True)),
                 }
                 base_fields.update(per_fields)
             detail_fields = get_entity_specific_detail_fields(

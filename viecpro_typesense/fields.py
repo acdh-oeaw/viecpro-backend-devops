@@ -40,8 +40,15 @@ class TextsNestedObjectField(Field):
 
 
 class FunctionsArrayField(Field):
-    handler = ParseFunctionsHandler
-    options = O(type="object", optional=True)
+    class Config:
+        handler = ParseFunctionsHandler
+        options = O(type="string[]", optional=True)
+
+
+class PersonInstitutionArrayField(Field):
+    class Config:
+        handler = ParsePersonInstitutionHandler
+        options = O(type="string[]", optional=True)
 
 
 class SourceField(Field):
