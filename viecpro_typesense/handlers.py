@@ -2,11 +2,15 @@ from apis_core.apis_vocabularies.models import VocabsBaseClass
 from viecpro_typesense.classes import Handler
 import json
 import django
+import re
 from collections import defaultdict
 from apis_core.apis_relations.models import PersonInstitution
 
 django.setup()
 
+REG_SKL = re.compile(r"\<.*?\>")
+REG_EKL = re.compile(r"\[.*?\]")
+REG_GKL = re.compile(r"\{.*?\}")
 
 OwnerLookup = defaultdict(list)
 
@@ -16,12 +20,20 @@ OwnerLookup = defaultdict(list)
             "end_date": el.end_date_written.split("<")[0] if el.end_date_written else "", }) for el in PersonInstitution.objects.filter(relation_type__name="hatte den Hofstaat")]
 
 
+def fixstring(string):
+    string = str(string)
+    string = re.sub(REG_SKL, "", string)
+    string = re.sub(REG_EKL, "", string)
+    string = re.sub(REG_GKL, "", string)
+    return string
+
+
 class ErrorCount:
     reference_doc = 0
 
 
 class StringHandler(Handler):
-    def func(x): return str(x) if x else ""
+    def func(x): return fixstring(x) if x else ""
 
 
 RelatedIDHandler = StringHandler
@@ -40,7 +52,7 @@ class KindHandler(Handler):
 
 
 class FullNameHandler(Handler):
-    def func(x, y): return f"{x}, {y}"
+    def func(x, y): return f"{fixstring(x)}, {fixstring(y)}"
 
 
 class DateWrittenHandler(Handler):
