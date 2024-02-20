@@ -211,6 +211,9 @@ def main(offset=0):
         res["id"] = f"detail_{model._meta.model_name}_{instance.id}"
         res["object_id"] = str(instance.id)
         res["model"] = model.__name__
+        res["ampel"] = ""
+        if ampel := getattr(instance, "ampel"):
+            res["ampel"] = ampel.status
         results.append(res)
 
     return {"schema": schema, "results": results}
