@@ -123,7 +123,7 @@ def create_entity_collections():
             detail_fields = get_entity_specific_detail_fields(
                 m.__name__.lower())
             base_fields["ampel"] = StringField("ampel", pass_instance=True, options=O(facet=True), handler=ampelhandler)
-            base_fields["alternativenames"] = Field("alternativenames", pass_instance=True, handler=labelhandler, options=O(facet=True, type="string[]", optional=True))
+            base_fields["alternativenames"] = Field("alternativenames", pass_instance=True, handler=labelhandler, options=O(type="string[]", optional=True))
             base_fields.update(detail_fields)
 
             cls = collection_factory(
