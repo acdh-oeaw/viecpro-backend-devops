@@ -1,4 +1,4 @@
-from .utils import F, C
+from .utils import F, C, ampel
 from typing import Dict, Any, List
 from apis_core.apis_entities.models import Event
 from apis_core.apis_relations.models import AbstractRelation
@@ -86,6 +86,7 @@ def main(offset: int = 0) -> Dict[str, Any]:
         res = parse_event_relations(instance, res)
         # NOTE: sources contain the bibtex json directly, they could be parsed to a) conform to the naming scheme and b) get rid of uneccessary data
         res["sources"] = get_references_for_instance(instance)
+        res["ampel"] = ampel(instance)
 
         results.append(res)
 

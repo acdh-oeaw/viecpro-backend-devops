@@ -1,4 +1,4 @@
-from .utils import F, C, format_and_orient_relation, to_rel
+from .utils import F, C, format_and_orient_relation, to_rel, ampel
 from apis_core.apis_entities.models import Person
 from apis_core.apis_relations.models import PersonInstitution
 from typing import List, Dict, Any
@@ -212,6 +212,7 @@ def main(offset:int=0):
         res["id"] = f"detail_{model._meta.model_name}_{instance.id}" # type: ignore
         res["object_id"] = str(instance.id) # type: ignore
         res["model"] = model.__name__
+        res["ampel"] = ampel(instance)
         results.append(res)
 
     return {"schema": schema, "results": results}
