@@ -81,7 +81,7 @@ def genderhandler(x):
 def labelhandler(x):
     label_types = ["Bezeichnung, alternativ", "Nachname verheiratet", "Nachname verheiratet (1. Ehe)", "Nachname verheiratet (2. Ehe)", "Nachname verheiratet (3. Ehe)", "Schreibvariante Nachname", "Schreibvariante Nachname verheiratet", "Schreibvariante Nachname verheiratet (1. Ehe)", "Schreibvariante Nachname verheiratet (2. Ehe)", "Schreibvariante Vorname"]
     labels = x.label_set.all()
-    return [label.label for label in labels if label.label_type in label_types]
+    return [label.label for label in labels if label.label_type.name in label_types]
 
 
 def create_entity_collections():
