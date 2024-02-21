@@ -67,6 +67,13 @@ def get_entity_specific_detail_fields(entity):
     return fields
 
 
+def genderhandler(x):
+    match getattr(x, "gender", None):
+        case "male": return "männlich"
+        case "female": return "weiblich"
+        case _: return "unbekannt"
+
+
 def create_entity_collections():
     res = []
     for m in AbstractEntity.get_all_entity_classes():
@@ -97,7 +104,7 @@ def create_entity_collections():
                 per_fields = {
                     "first_name": StringField("first_name", options=O(sort=True)),
                     "fullname": FullNameField(("name", "first_name"), options=O(sort=True)),
-                    "gender": StringField("gender", options=O(facet=True, optional=True, type="string")),
+                    "gender": StringField("gender", pass_instance=True, handler=genderhandler, options=O(facet=True, optional=True, type="string")),
                     "titles": TitlesNestedObjectField("id", pass_instance=True),
                     "functions": FunctionsArrayField("id", pass_instance=True, options=O(facet=True)),# TODO: need to remove need to pass field param to field with pass_instance. id won't be accessed here, its a dummy
                     "institutions": PersonInstitutionArrayField("id", pass_instance=True, options=O(facet=True)),
