@@ -19,7 +19,7 @@ remote_client = typesense.Client({
     'nodes': [{
         'host': os.getenv("REMOTE_TYPESENSE_HOST"),
         'port': os.getenv("REMOTE_TYPESENSE_PORT"),
-        'protocol': 'https'
+        'protocol': os.getenv("REMOTE_TYPESENSE_PROTO", 'https'),
     }],
     'api_key': os.getenv("REMOTE_TYPESENSE_API_KEY"),
     'connection_timeout_seconds': 350
