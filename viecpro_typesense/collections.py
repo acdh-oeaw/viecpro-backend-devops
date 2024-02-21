@@ -43,7 +43,7 @@ def shared_fields(m): return {
     "end_date": WrittenDateField("end_date_written"),
     "start": DateObjectDateField("start_date"),
     "end": DateObjectDateField("end_date"),
-    "model": StaticField(value=m.__name__, options=O(facet=True)),
+    "model": StaticField(value=m.__name__, options=O(facet=False)),
 }
 
 
