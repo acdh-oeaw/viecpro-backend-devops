@@ -1,4 +1,4 @@
-from .utils import F, C, format_and_orient_relation
+from .utils import F, C, format_and_orient_relation, ampel
 from apis_core.apis_entities.models import Place
 from dataclasses import dataclass, asdict, field
 from typing import Dict, Any, List
@@ -92,6 +92,7 @@ def main(offset:int=0) -> Dict[str, Any]:
         res["id"] = f"detail_{model._meta.model_name}_{instance.id}"
         res["object_id"] = str(instance.id)
         res["model"] = model.__name__
+        res["ampel"] = ampel(instance)
         results.append(res)
 
     return {"schema":schema, "results":results}

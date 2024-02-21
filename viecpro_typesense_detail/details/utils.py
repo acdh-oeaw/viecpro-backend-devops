@@ -5,6 +5,19 @@ from django.contrib.contenttypes.models import ContentType
 from apis_bibsonomy.models import Reference  # type: ignore
 from apis_core.apis_relations.models import AbstractRelation
 import json
+import re
+
+REG_SKL = re.compile(r"\<.*?\>")
+REG_EKL = re.compile(r"\[.*?\]")
+REG_GKL = re.compile(r"\{.*?\}")
+
+
+def fixstring(string):
+    string = str(string)
+    string = re.sub(REG_SKL, "", string)
+    string = re.sub(REG_EKL, "", string)
+    string = re.sub(REG_GKL, "", string)
+    return string
 
 
 @dataclass
@@ -69,8 +82,8 @@ def to_rel(l: Label) -> Dict[str, Any]:
     """
     return {
         "name": l.label,
-        "start_date": l.start_date_written or "",
-        "end_date": l.end_date_written or "",
+        "start_date": fixstring(l.start_date_written) or "",
+        "end_date": fixstring(l.end_date_written) or "",
     }
 
 
@@ -99,10 +112,10 @@ def format_and_orient_relation(
     }
 
     return {
-        "relation_type": relation_type,
+        "relation_type": fixstring(relation_type),
         "target": target,
-        "start_date": rel.start_date_written or "",
-        "end_date": rel.end_date_written or "",
+        "start_date": fixstring(rel.start_date_written) or "",
+        "end_date": fixstring(rel.end_date_written) or "",
     }
 
 
@@ -123,3 +136,9 @@ def get_references_for_instance(instance: Any) -> List[Dict[str, Any]]:
             }
             for r in references
         ]
+
+
+def ampel(instance: Any) -> str:
+    if ampel := getattr(instance, "ampel", False):
+        return ampel.status
+    return ""
