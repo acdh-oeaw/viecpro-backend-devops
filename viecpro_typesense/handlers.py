@@ -98,11 +98,11 @@ class GenericTextFieldHandler(Handler):
 
 
 class ParseFunctionsHandler(Handler):
-    def func(x): return [f.name for f in x.institution_relationtype_set.all()]
+    def func(x): return list({f.name for f in x.institution_relationtype_set.all()})
 
 
 class ParsePersonInstitutionHandler(Handler):
-    def func(x): return [f.related_institution.name for f in x.personinstitution_set.all()]
+    def func(x): return list({f.related_institution.name for f in x.personinstitution_set.all()})
 
 
 class GenericDocIDHandler(Handler):
