@@ -56,7 +56,7 @@ class FullNameHandler(Handler):
 
 
 class DateWrittenHandler(Handler):
-    def func(x): return x.split("<")[0] if x else ""
+    def func(x): return fixstring(x.split("<")[0]) if x else ""
 
 
 class RelatedRelationEntityFieldHandler(Handler):
