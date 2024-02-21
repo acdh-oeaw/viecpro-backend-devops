@@ -46,6 +46,10 @@ def shared_fields(m): return {
     "model": StaticField(value=m.__name__, options=O(facet=False)),
 }
 
+def ampelhandler(x):
+    if hasattr(x, "ampel"):
+        return x.ampel.status
+    return ""
 
 def get_entity_specific_detail_fields(entity):
     fields = {}
@@ -112,6 +116,7 @@ def create_entity_collections():
                 base_fields.update(per_fields)
             detail_fields = get_entity_specific_detail_fields(
                 m.__name__.lower())
+            base_fields["ampel"] = StringField("ampel", pass_instance=True, options=O(facet=True), handler=ampelhandler)
             base_fields.update(detail_fields)
 
             cls = collection_factory(
