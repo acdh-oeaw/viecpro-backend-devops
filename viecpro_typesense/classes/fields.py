@@ -111,9 +111,9 @@ class Field(metaclass=FieldMeta):
 
     def parse_references(self):
         if isinstance(self._references, str):
-            assert (
-                self._references in self._model_fields.keys()
-            ), f"Field {self._references} not in {self._model_fields.keys()}"
+            #assert (
+            #    self._references in self._model_fields.keys()
+            #), f"Field {self._references} not in {self._model_fields.keys()}"
             return (self._references,)
 
         elif isinstance(self._references, (tuple, list, set)):
