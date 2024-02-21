@@ -1,5 +1,5 @@
 from .handlers import GenericDocIDHandler
-from viecpro_typesense import Collection, StaticField, CollectionConfig, O
+from viecpro_typesense import Collection, StaticField, CollectionConfig, O, Field
 from copy import deepcopy
 from .fields import StringField, FullNameField, TitlesNestedObjectField, RelationTypeHierarchyHandler, WrittenDateField, BibtexShortTitleHandler, BibtexTitleHandler, BibtexTypeHandler, RelatedReferenceDocField, ObjectIDField, DateObjectDateField, LabelsNestedObjectField, KindField, SourceField, TargetField, HofstaatsinhaberField, MainOwnerField, FunctionsArrayField, PersonInstitutionArrayField
 from apis_bibsonomy.models import Reference
@@ -78,6 +78,12 @@ def genderhandler(x):
         case _: return "unbekannt"
 
 
+def labelhandler(x):
+    label_types = ["Bezeichnung, alternativ", "Nachname verheiratet", "Nachname verheiratet (1. Ehe)", "Nachname verheiratet (2. Ehe)", "Nachname verheiratet (3. Ehe)", "Schreibvariante Nachname", "Schreibvariante Nachname verheiratet", "Schreibvariante Nachname verheiratet (1. Ehe)", "Schreibvariante Nachname verheiratet (2. Ehe)", "Schreibvariante Vorname"]
+    labels = x.label_set.all()
+    return [label.label for label in labels if label.label_type in label_types]
+
+
 def create_entity_collections():
     res = []
     for m in AbstractEntity.get_all_entity_classes():
@@ -117,6 +123,7 @@ def create_entity_collections():
             detail_fields = get_entity_specific_detail_fields(
                 m.__name__.lower())
             base_fields["ampel"] = StringField("ampel", pass_instance=True, options=O(facet=True), handler=ampelhandler)
+            base_fields["alternativenames"] = Field("alternativenames", pass_instance=True, handler=labelhandler, options=O(facet=True, type="string[]", optional=True))
             base_fields.update(detail_fields)
 
             cls = collection_factory(
