@@ -211,6 +211,8 @@ class HofstaatCollection(Collection):
     kind = KindField("kind", options=O(facet=True))
     labels = LabelsNestedObjectField("id", pass_instance=True, options=O(facet=False))
     kategorie = Field("kategorie", options=O(type="string[]", facet=True, optional=True), handler=kategorienhandler, pass_instance=True)
+    start_date_int = StringField("start_date_int", handler=get_start_year_or_0, pass_instance=True, options=O(type="int32", optional=True)),
+    end_date_int = StringField("end_date_int", handler=get_end_year_or_5000, pass_instance=True, options=O(type="int32", optional=True)),
 
 
 def unified_fields(m): return {
