@@ -13,10 +13,10 @@ REG_GKL = re.compile(r"\{.*?\}")
 
 
 def fixstring(string):
-    string = str(string)
-    string = re.sub(REG_SKL, "", string)
-    string = re.sub(REG_EKL, "", string)
-    string = re.sub(REG_GKL, "", string)
+    if isinstance(string, str):
+        string = re.sub(REG_SKL, "", string)
+        string = re.sub(REG_EKL, "", string)
+        string = re.sub(REG_GKL, "", string)
     return string
 
 
