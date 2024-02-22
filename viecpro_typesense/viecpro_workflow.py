@@ -13,7 +13,9 @@ from viecpro_typesense_detail.details.detail_court import main as court_detail_m
 from viecpro_typesense_detail.details.detail_source import main as source_detail_main
 
 
-def main(send=False, local=True):
+def main(send=False, local=True, *args, **kwargs):
+    detail_only = kwargs.get("detail_only", False)
+    search_only = kwargs.get("search_only", False)
     print("process starting")
 
     client = local_client
@@ -61,7 +63,7 @@ def main(send=False, local=True):
     vc.schema_to_file(create_schema_name())
 
     print("process finished")
-    if send:
+    if send and not detail_only:
         vc.send_to_server()
         print("send data to server")
 
@@ -109,8 +111,9 @@ def main(send=False, local=True):
     #         court_detail_docs, {"action": "create"}
     #     )
         
-    for process in [person_detail_main, court_detail_main, source_detail_main, institution_detail_main, place_detail_main]:
-        process_detail_collection(process, client, send=send)
+    if not search_only:
+        for process in [person_detail_main, court_detail_main, source_detail_main, institution_detail_main, place_detail_main]:
+            process_detail_collection(process, client, send=send)
 
 
     return vc
