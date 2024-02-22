@@ -141,4 +141,4 @@ def get_references_for_instance(instance: Any) -> List[Dict[str, Any]]:
 def ampel(instance: Any) -> str:
     if ampel := getattr(instance, "ampel", False):
         return ampel.status
-    return ""
+    return "red"

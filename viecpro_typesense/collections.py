@@ -63,7 +63,7 @@ def shared_fields(m): return {
 def ampelhandler(x):
     if hasattr(x, "ampel"):
         return x.ampel.status
-    return ""
+    return "red"
 
 def get_entity_specific_detail_fields(entity):
     fields = {}
