@@ -56,8 +56,8 @@ def shared_fields(m): return {
     "start": DateObjectDateField("start_date"),
     "end": DateObjectDateField("end_date"),
     "model": StaticField(value=m.__name__, options=O(facet=False)),
-    "start_date_int": StringField("start_date_int", handler=get_start_year_or_0, pass_instance=True, options=O(type="int32", optional=True)),
-    "end_date_int": StringField("end_date_int", handler=get_end_year_or_5000, pass_instance=True, options=O(type="int32", optional=True)),
+    #"start_date_int": StringField("start_date_int", handler=get_start_year_or_0, pass_instance=True, options=O(type="int32", optional=True)),
+    #"end_date_int": StringField("end_date_int", handler=get_end_year_or_5000, pass_instance=True, options=O(type="int32", optional=True)),
 }
 
 def ampelhandler(x):
