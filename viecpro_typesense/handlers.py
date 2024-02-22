@@ -61,7 +61,7 @@ class DateWrittenHandler(Handler):
 
 class RelatedRelationEntityFieldHandler(Handler):
     def func(x): return {
-        "name": str(x),
+        "name": fixstring(str(x)),
         "object_id": str(x.id),
         "model": str(x.__class__.__name__),
     }
