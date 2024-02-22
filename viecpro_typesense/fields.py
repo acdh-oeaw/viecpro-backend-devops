@@ -71,7 +71,7 @@ class WrittenDateField(Field):
 
 class DateObjectDateField(Field):
     class Config:
-        handler = StringHandler
+        handler = DateHandler
         options = O(type="string")
 
 
