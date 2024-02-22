@@ -106,7 +106,7 @@ def format_and_orient_relation(
         target_entity = getattr(rel, rel.get_related_entity_field_nameB())  # type: ignore
         relation_type = rel.relation_type.name  # type: ignore
     target = {
-        "name": str(target_entity),
+        "name": fixstring(str(target_entity)),
         "object_id": str(target_entity.id),
         "model": str(target_entity.__class__.__name__),
     }
