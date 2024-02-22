@@ -1,3 +1,4 @@
+import os
 
 from .collection_meta import CollectionMeta
 
@@ -32,6 +33,8 @@ class Collection(metaclass=CollectionMeta):
 
         if not qs:
             qs = cls.config.queryset()
+        if num := os.environ.get("NUM", False):
+            qs = qs[:int(num)]
 
         result = []
    
