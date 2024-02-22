@@ -36,6 +36,10 @@ class StringHandler(Handler):
     def func(x): return fixstring(x) if x else ""
 
 
+class DateHandler(Handler):
+    def func(x): return str(x) if x else ""
+
+
 RelatedIDHandler = StringHandler
 
 
