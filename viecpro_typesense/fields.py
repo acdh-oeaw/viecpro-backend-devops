@@ -5,13 +5,13 @@ from .handlers import *
 
 class MainOwnerField(Field):
     class Config:
-        options = O(type="object", optional=True, facet=True)
+        options = O(type="object", optional=True, facet=False)
         handler = MainOwnerFieldHandler
 
 
 class HofstaatsinhaberField(Field):
     class Config:
-        options = O(type="object[]", optional=True, facet=True)
+        options = O(type="object[]", optional=True, facet=False)
         handler = HofstaatsinhaberHandler
 
 
