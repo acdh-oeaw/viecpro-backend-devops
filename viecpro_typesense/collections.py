@@ -98,6 +98,11 @@ def labelhandler(x):
     return [label.label for label in labels if label.label_type.name in label_types]
 
 
+def kategorienhandler(x):
+    labels = x.label_set.all()
+    return [label.label for label in labels if label.label_type.name == "Kategorie"]
+
+
 def create_entity_collections():
     res = []
     for m in AbstractEntity.get_all_entity_classes():
@@ -204,7 +209,8 @@ class HofstaatCollection(Collection):
     # Maybe need to change model to hofstaat here
     model = StaticField(value="Hofstaat", options=O(facet=True))
     kind = KindField("kind", options=O(facet=True))
-    labels = LabelsNestedObjectField("id", pass_instance=True)
+    labels = LabelsNestedObjectField("id", pass_instance=True, options=O(facet=False))
+    kategorie = Field("kategorie", options=O(type="string[]", facet=True, optional=True), handler=kategorienhandler, pass_instance=True)
 
 
 def unified_fields(m): return {
