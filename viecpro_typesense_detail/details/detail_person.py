@@ -4,7 +4,7 @@ from apis_core.apis_relations.models import PersonInstitution
 from typing import List, Dict, Any
 from apis_core.apis_labels.models import Label
 from apis_core.apis_vocabularies.models import VocabsBaseClass
-from apis_core.apis_relations.models import PersonPerson, PlacePlace, EventEvent, WorkWork, InstitutionInstitution
+from apis_core.apis_relations.models import PersonPerson, PlacePlace, EventEvent, WorkWork, InstitutionInstitution, PersonPlace
 
 
 # maps certain occurrences of label_types to keys in the result dictionary
@@ -155,6 +155,7 @@ def check_person_relation_type(rel:PersonInstitution):
 def parse_person_relations(p:Person, res:Dict[str, Any])-> Dict[str, Any]:
     rel: Any
     temp_rel: Any
+    res["related_places"] = []
     for rel in p.get_related_relation_instances():
         model_name: Any= rel.__class__.__name__
 
@@ -171,6 +172,9 @@ def parse_person_relations(p:Person, res:Dict[str, Any])-> Dict[str, Any]:
 
         if model_name == "PersonInstitution":
             res["court_functions"].append(temp_rel)
+
+        if model_name == "PersonPlace":
+            res["related_places"].append(temp_rel)
 
         if rel.relation_type.name == "ist geboren in":
             res["place_of_birth"] = temp_rel["target"]
