@@ -93,6 +93,7 @@ def main(offset:int=0) -> Dict[str, Any]:
         res["object_id"] = str(instance.id)
         res["model"] = model.__name__
         res["ampel"] = ampel(instance)
+        res["sameAs"] = [uri.uri for uri in instance.uri_set.all() if not uri.uri.startswith("https://viecpro.acdh.oeaw.ac.at")]
         results.append(res)
 
     return {"schema":schema, "results":results}
