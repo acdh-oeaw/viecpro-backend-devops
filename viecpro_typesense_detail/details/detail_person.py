@@ -217,6 +217,7 @@ def main(offset:int=0):
         res["object_id"] = str(instance.id) # type: ignore
         res["model"] = model.__name__
         res["ampel"] = ampel(instance)
+        res["allowance"] = [text.text for text in instance.text.filter(kind__name="Diverses")]
         results.append(res)
 
     return {"schema": schema, "results": results}
