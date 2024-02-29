@@ -91,6 +91,7 @@ def main(offset: int = 0) -> Dict[str, Any]:
         # NOTE: sources contain the bibtex json directly, they could be parsed to a) conform to the naming scheme and b) get rid of uneccessary data
         res["sources"] = get_references_for_instance(instance)
         res["ampel"] = ampel(instance)
+        res["sameAs"] = [uri.uri for uri in instance.uri_set.all() if not uri.uri.startswith("https://viecpro.acdh.oeaw.ac.at")]
 
         results.append(res)
 
