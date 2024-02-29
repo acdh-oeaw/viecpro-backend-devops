@@ -649,3 +649,4 @@ pyrightconfig.json
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,django,python,visualstudiocode,jupyternotebooks,node,linux
+typesense-schemata
