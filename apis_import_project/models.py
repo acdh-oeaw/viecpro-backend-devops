@@ -51,7 +51,7 @@ class DataSource(models.Model):
         :rtype: str
         """
 
-        base_path = settings.apis_import_project_IIIF_BASE_URL
+        base_path = settings.APIS_IMPORT_PROJECT_IIIF_BASE_URL
 
         if not base_path.endswith("/"):
             base_path += "/"
