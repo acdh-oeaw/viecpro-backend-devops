@@ -48,8 +48,8 @@ SPECTACULAR_SETTINGS["COMPONENT_SPLIT_REQUEST"] = True
 SPECTACULAR_SETTINGS["COMPONENT_NO_READ_ONLY_REQUIRED"] = True
 
 
-INSTALLED_APPS += ["django_extensions", "viecpro_import","apis_bibsonomy", "apis_ampel",
-                   "viecpro_deduplication", "viecpro_hierarchy", "viecpro_typesense", "viecpro_typesense_detail", "django_celery_results"]
+INSTALLED_APPS += ["django_extensions", "apis_import_project","apis_bibsonomy", "apis_ampel",
+                   "dubletten_tool", "viecpro_hierarchy", "viecpro_typesense", "viecpro_typesense_detail", "django_celery_results"]
 
 
 DATABASES = {"default":
@@ -119,7 +119,7 @@ ROBOTS_TXT_FOLDER = os.path.join(BASE_DIR, "robots_template")
 TEMPLATES[0]["DIRS"] += [ROBOTS_TXT_FOLDER, ]
 
 
-VIECPRO_IMPORT_IIIF_BASE_URL = "https://iiif.acdh-dev.oeaw.ac.at/iiif/images/viecpro/"
+apis_import_project_IIIF_BASE_URL = "https://iiif.acdh-dev.oeaw.ac.at/iiif/images/viecpro/"
 
 
 # Bibsonomy Settings

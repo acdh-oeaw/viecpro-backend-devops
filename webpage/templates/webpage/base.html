@@ -247,7 +247,7 @@
                     >
                   </div>
                 </li>
-                {% endif %} {% if "viecpro_import" in APPS%}
+                {% endif %} {% if "apis_import_project" in APPS%}
                 <li class="nav-item dropdown">
                   <a
                     href="#"
@@ -265,12 +265,12 @@
                   >
                     <a
                       class="dropdown-item"
-                      href="{% url 'viecpro_import:project_main' %}"
+                      href="{% url 'apis_import_project:project_main' %}"
                       >Projects</a
                     >
                   </div>
                 </li>
-                {% endif %} {% if "viecpro_deduplication" in APPS%}
+                {% endif %} {% if "dubletten_tool" in APPS%}
                 <li class="nav-item dropdown">
                   <a
                     href="#"
@@ -288,12 +288,12 @@
                   >
                     <a
                       class="nav-link"
-                      href="{% url 'viecpro_deduplication:tool_page' %}"
+                      href="{% url 'dubletten_tool:tool_page' %}"
                       >Dubletten Tool</a
                     >
                     <a
                       class="nav-link"
-                      href="{% url 'viecpro_deduplication:tool_merge' %}"
+                      href="{% url 'dubletten_tool:tool_merge' %}"
                       >Edit Merges</a
                     >
                   </div>

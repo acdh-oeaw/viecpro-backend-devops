@@ -1,0 +1,314 @@
+{% if instance %}
+{% load django_tables2 %}
+{% csrf_token %}
+
+
+
+<div class="col-md-12">
+    <div class="container pt-3 mx-0 text-center justify-content-center">
+
+        <h3 class="h3">Edit Relations</h3>
+        </div>
+    <div class="container-fluid pb-5">
+        <div aria-multiselectable="true" class="card pt-5" id="accordion" role="tablist">
+            <!--                            {% block additional_accordion %}-->
+            <!--                            {% endblock additional_accordion %}-->
+            {% for obj in right_card %}
+            <div class="card card-default">
+                <div class="card-header" id="heading{{forloop.counter}}" role="tab">
+                    <h4 class="card-title">
+                        <a aria-controls="collapse{{forloop.counter}}" aria-expanded="true" data-parent="#accordion"
+                           data-toggle="collapse" href="#collapse{{forloop.counter}}"
+                           role="button">
+                            {{ obj.0 }}
+                        </a>
+                    </h4>
+                </div>
+                <div aria-labelledby="heading{{forloop.counter}}"
+                     class="card-collapse collapse{% if obj.3 %} in{% endif %}"
+                     id="collapse{{forloop.counter}}" role="tabcard">
+                    <div class="card-body" id="tab_{{ obj.2 }}">
+                        {% render_table obj.1 %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+
+{% endif %}
+{% block relation_scripts%}
+{% if instance %}
+<script type="text/javascript">
+    RelationsLoaded = true;
+
+              $(document).ready(function() {
+                $.apScrollTop({
+                    'onInit': function(evt) {
+                        //console.log('apScrollTop: init');
+                    }
+                });
+	$(document).on('submit', 'form.form.pdf_tool_form', custom_unbind_ajax_forms);
+            });
+
+
+
+
+    function GetFormAjax(FormName , ObjectID , ButtonText) {
+        //console.log('in getFormAjax: FormName: ', FormName,'SiteID: ', {{instance.pk}},'ObjectID: ', ObjectID);
+        function add_form(data) {
+            // update our tooltip content with our returned data and cache it
+            $('#tab_'+data.tab).find('div:eq(1)').remove();
+            //console.log("replace in add_form, data.form is", data.form);
+            $('#tab_'+data.tab).append(data.form);
+	    //$('#form_PersonInstitutionForm div:first div:first select').focus();
+            //$(".form.ajax_form").unbind()
+    $("select.listselect2").each(function(index, element){
+        let url = $(this).data("autocomplete-light-url")
+        $(this).select2({
+    escapeMarkup: function(markup) {
+        return markup;
+  },
+  ajax: {
+    url: url,
+    dataType: 'json',
+    // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+  }
+});
+    })
+        };
+
+        //console.log("in GetFormAjax, ApisForms is: ", $.ApisForms)
+        //console.log("instance pk is in getformajax: {{instance_pk}}");
+        if (!$.ApisForms) {
+                        $.ApisForms = {}
+                      };
+        if (ObjectID === undefined) {
+            ObjectID = false;
+            // this code replaces existing forms only!
+            if ($.ApisForms[FormName+'_'+'{{entity_type}}']) {
+              var new_data = $.ApisForms[FormName+'_'+'{{entity_type}}']
+                console.log("new_data.form is:", new_data.form);
+
+              new_data.form = new_data.form
+                  .replace('##ENT_PK##', {{instance.pk}}); // i think here happens the mistake with connecting the wrong person.
+              add_form(new_data);
+              return;
+            };
+        };
+
+        if (ButtonText === undefined) {
+        ButtonText = 'create/modify';
+        };
+        return $.ajax({
+                type: 'POST',
+                url: "{% url 'apis_import_project:relation_get_form' %}",
+            beforeSend: function(request) {
+              var csrftoken = getCookie('csrftoken');
+    request.setRequestHeader("X-CSRFToken", csrftoken);
+  },
+        data: {'FormName':FormName,'SiteID':{{instance.pk}},'ObjectID':ObjectID,'ButtonText':ButtonText, 'entity_type': '{{entity_type}}'},
+        success: function(data) {
+            add_form(data);
+            if (!ObjectID) {
+                  $.ApisForms[FormName+'_'+'{{entity_type}}'] = data;
+                    $.ApisForms[FormName+'_'+'{{entity_type}}'].form = $.ApisForms[FormName+'_'+'{{entity_type}}'].form
+                        .replace('/{{instance.pk}}/', '/##ENT_PK##/');
+                };
+            },
+            error: function(error) {
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+
+
+    function EntityRelationForm_response(response){
+        //console.log("EntityRelationForm_response called with response: ", response);
+
+        if (response.test == false) {
+            $('#'+response.DivID).replaceWith(response.form);
+            //$(".form.ajax_form").unbind();
+            if ($.ApisHigh.tt_instance_detail) {
+            if ($.ApisHigh.tt_instance_detail["__state"] == 'stable') {
+                $.ApisHigh.tt_instance_detail.content(response.form);
+            } }
+        } else {
+            //console.log('test did not fail');
+             $('#tab_'+response.tab).find('div').remove();
+             $('#tab_'+response.tab).append(response.table_html);
+             initiate_compare_tooltip();
+             {% if instance %}
+             if (check_perms_relation()){
+             if (response.right_card) {
+                 //console.log('fetching form');
+                 //console.log(response.tab+'Form');
+             $.ApisForms[response.tab+'Form'+'_'+'{{entity_type}}'] = null;
+             console.log("removed form from apis forms");
+             GetFormAjax(response.tab+'Form');};
+             if ($.ApisHigh){
+             if ($.ApisHigh.tt_instance_detail["__state"] == 'stable') {
+                $.ApisHigh.tt_instance_detail.close()
+             } else {
+
+             $('.reldelete').addClass('disabled')
+           }}}
+             {% endif %}
+        };
+        custom_unbind_compare_forms();
+
+    }
+
+          function custom_unbind_compare_forms(){
+                      POST_PROCESSING = false;
+
+          //console.log("!!!!!!!  CUSTOM UNBIND COMPARE forms called");
+      $("#change-history").parents('form').submit(function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            var formData = $(this).serialize();
+            // formData["project_pk"] = PROJECT_PK;
+            // formData["page_num"] = page_num_js;
+            // formData["datasource_pk"] = ds_pk;
+         if ($.ApisRev.url == 'undefined'){
+              var url = '/'
+         } else {
+              var url = $.ApisRev.url
+          };
+          //console.log("url in unbind compare was: ", url);
+          $.ajax({
+          type: 'GET',
+          url: url,
+          data: formData,
+          //data:formData,
+            })
+          .done(function(response) {
+             $.ApisRev.instance.content(response);
+              custom_unbind_compare_forms();
+          }
+      )})}
+</script>
+<script type="text/javascript">
+    function HighlForm_response(response){
+        if (response.test == false) {
+            $.ApisHigh.tt_instance.content(response.form);
+            //$(".form.ajax_form").unbind()
+        } else {
+             $('#tab_'+response.tab+' div.table-container').remove();
+             $('#tab_'+response.tab).prepend(response.table_html);
+             //GetFormAjax(response.tab+'Form');
+             $('#htxt_'+response.text.id).html($.parseHTML(response.text.text))
+             $.ApisHigh.tt_instance.close()
+             $('html, body').animate({ scrollTop: ($('#'+$.ApisHigh.selected_text.id).offset().top)}, 'slow');
+             $('mark.highlight').off();
+             $('mark.highlight').on("click", highlight_detail);
+             initiate_compare_tooltip();
+        }
+    }
+</script>
+<script type="text/javascript">
+    function PAddRelation_response(response){
+        //console.log("PAddrelation_response called with response: ", response)
+        if (response.test == false) {
+            $.ApisHigh.tt_instance.content(response.form);
+            //$(".form.ajax_form").unbind()
+        } else {
+             $('#htxt_'+response.text.id).html($.parseHTML(response.text.text))
+             $.ApisHigh.tt_instance.close()
+             $('html, body').animate({ scrollTop: ($('#'+$.ApisHigh.selected_text.id).offset().top)}, 'slow');
+             $('mark.highlight').off()
+             $('mark.highlight').on("click", highlight_detail)
+        }
+    }
+</script>
+<script type='text/javascript'>
+    function DeleteTempEntity(pk, kind, app_name=false) {
+
+        let proceed = confirm("Are you sure you want to delete this entry?");
+        if (proceed){
+        if (app_name){
+            var url = '/apis/api/'+app_name+'/'+kind+'/'+pk.toString()
+        } else {
+        var url = '/apis/api/'+kind+'/'+pk.toString()}
+        $.ajax({
+            type: 'DELETE',
+            url: url,
+            beforeSend: function(request) {
+                  var csrftoken = getCookie('csrftoken');
+                    request.setRequestHeader("X-CSRFToken", csrftoken);
+                  },
+            statusCode : {
+                204: function() {
+                    if (kind=='HLAnnotation') {
+                        $('*[data-hl-ann-id="'+pk+'"]').contents().unwrap()
+                    } else {
+                    $('#tempEntity_'+pk).parents('tr').remove()
+                }
+                }
+            }
+        })
+    }}
+
+</script>
+<script type='text/javascript'>
+    function DeleteAnnTempEntity(an_pk, rel_class, rel_pk, app_name) {
+        DeleteTempEntity(an_pk,"HLAnnotation");
+        DeleteTempEntity(rel_pk, rel_class, app_name);
+    };
+</script>
+
+<script type="text/javascript">
+    function check_perms_relation(){
+        {% if instance %}
+        {% if "change" in permissions %}
+        return true
+        {% else %}
+        return false
+        {% endif %}
+        {% endif %}
+    }
+</script>
+<script type="text/javascript">
+ function activate_editing(){
+     if ($.ApisForms){
+         $.ApisForms = {};
+     };
+     {% for obj in right_card %}
+
+        GetFormAjax("{{obj.2|add:'Form'}}");
+        //console.log("in activate editing");
+        //console.log("{{obj.2|add:'Form'}}");
+        //console.log("{{obj.2}}");
+     //console.log($.ApisForms);
+        //unbind_ajax_forms();
+        {% endfor %}
+// {% if highlighter_active %}
+//     init_apis_highlighter(1, {{instance.pk}});
+//     if (typeof $.ApisHigh.vars == 'undefined') {
+//         $.ApisHigh.vars = {}; };
+//         $.ApisHigh.vars.entity_type = '{{entity_type}}';
+//         $.ApisHigh.vars.instance_pk = '{{instance.pk}}';
+//         $.ApisHigh.vars.urls = {};
+//         $.ApisHigh.vars.urls.get_form_ajax = "{% url 'apis:apis_relations:get_form_ajax' %}";
+//         $.ApisHigh.vars.urls.annotatoragreementview = "{% url 'apis:apis_api2:AnnotatorAgreementView' %}";
+//         $.ApisHigh.vars.urls.showoverlappinghighlights = "{% url 'apis:apis_api2:ShowOverlappingHighlights' %}";
+//       activate_context_menu_highlighter();
+//       $('body').on("click", 'mark.highlight', highlight_detail);
+//     {% endif %}
+ };
+function deactivate_editing(){
+}
+{% endif %}
+{% if instance %}
+//{% if permissions.change %}
+activate_editing();
+{% else %}
+//deactivate_editing();
+ //{% endif %}
+{% endif %}
+</script>
+{% endblock relation_scripts %}

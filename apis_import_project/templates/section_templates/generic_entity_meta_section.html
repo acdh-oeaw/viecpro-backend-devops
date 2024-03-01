@@ -1,0 +1,54 @@
+{% load crispy_forms_tags %}
+
+<div class="container p-0 m-0">
+    <div class="container pt-3 mx-0 text-center justify-content-center">
+        {% if instance %}
+
+        <h2 class="h3"><small>Edit </small> <strong>{{ entity_type|title }}</strong>
+        </h2>
+
+        {% else %}
+        <h2>
+            <small>Create </small> <strong>{{ entity_type|title }}</strong>
+        </h2>
+        {% endif %}
+
+    </div>
+    <div class="container-fluid p-5 px-5 mx-2">
+        {% if is_create %}
+        <!-- todo: __gpirgie__ only the update part is used at the moment, the create part is handled through calling itemcreate now and opening that section -->
+        <form action="/apis_import_project/editor/entity/create/{{entity_type}}/"
+              class="form pdf_tool_itemcreate"
+              method="post">
+        {% else %}
+        <form action="/apis_import_project/editor/entity/update/{{entity_type}}/{{instance.pk}}/"
+              class="form pdf_tool_itemcreate"
+              method="post">
+
+            {% endif %}
+            {% if apis_bibsonomy %}
+            <button class="bibsonomy-anker-hidden" data-bibs-contenttype={{
+                    data-bibs-form-elements="{{ apis_bibsonomy }}" data-bibs-object_pk={{instance.pk}}
+                    entity_type
+                    hidden=True }}>Ref
+            </button>
+            {% endif %}
+            <div class="card card-default">
+
+                {% crispy form %}
+
+                {% block editbuttons %}
+                {% if instance %}
+                {% if "change" in permissions and not is_create %}
+                <input class="btn btn-primary" type="submit" value="Update {{entity_type|title }}"/>
+
+                {% endif %}
+                {% elif "create" in permissions and is_create %}
+                <input class="btn btn-primary" type="submit" value="Create {{ entity_type|title }}"/>
+                {% endif %}
+                {% endblock %}
+            </div>
+        </form>
+    </div>
+</div>
+
