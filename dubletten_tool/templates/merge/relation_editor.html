@@ -1,0 +1,330 @@
+<script src="https://unpkg.com/vue@3.0.1/dist/vue.global.prod.js"></script>
+
+{% extends "webpage/base.html" %}
+
+{% block content %}
+<div class="content w-100">
+  <div class="row w-100 py-4" id="person_header_row">
+    <div class="col-md-12">
+        <h3 class="text-center">
+          <a href="{% url 'dubletten_tool:tool_merge' %}">
+            <small>vorfinal</small>
+          </a>{{object}} 
+          {% if user.is_authenticated %}
+          {% if object.get_edit_url %}
+                <a href="{{ edit_url }}">
+                    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                </a>
+            {% endif %}
+            {% endif %} | 
+            <a href="{{ detail_url }}">
+              <i data-feather="eye" title="eye"></i>
+          </a>
+            {% include "ampel/ampel_inline_template.html" with instance=object%} </h3>
+      </div>
+  </div>
+<div id="myvue">
+ 
+        <div class="row w-100">
+            <div class="col-md-12">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                      <a class="nav-link active" id="relations-tab" data-toggle="tab" href="#relations_section" role="tab" aria-controls="Relations" aria-selected="true">Relations</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" id="texts-tab" data-toggle="tab" href="#texts_section" role="tab" aria-controls="Texts" aria-selected="false">Texts</a>
+                    </li>
+         
+                  </ul>
+                  
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="relations_section" role="tabpanel" aria-labelledby="relations-tab">
+                      <button class="btn btn-sm btn-primary m-4" @click=ToggleTabularView()>%[tabular ? 'show duplicat relations' : 'show all relations']%</button>
+                      <div v-if="tabular">
+                        <div class="m-4">
+                          {% comment %} <button @click=ResetFilter()>Reset</button> {% endcomment %}
+                          {% comment %} <button @click=ShowDuplicates()>Duplicates</button> {% endcomment %}
+                          {% comment %} <button @click=SaveChanges()>Save Changes</button> {% endcomment %}
+                            <h3 class=" my-4">Institution</h3>
+                            <table class="table table-sm">
+                                <tr>
+                                  <th> </th>
+                                    <th>Funktion</th>
+                                    <th>Institution</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    {% comment %} <th>Include</th> {% endcomment %}
+                                    {% comment %} <th>Custom</th> {% endcomment %}
+                                </tr>
+                                <tr v-for="el in rels">
+                                    <td><button class="btn-sm btn-danger" @click=DeleteRelation(el)>Delete</button></td>
+                                    {% comment %} 
+                                    <td @click=editSelectField(el,'relation_type__name')>%[el.relation_type__name]%</td>
+                                    <td @click=editSelectField(el,'related_institution__name')>%[el.related_institution__name]%</td> 
+                                    {% endcomment %}
+                                    <td >%[el.relation_type__name]%</td>
+                                    <td >%[el.related_institution__name]%</td>
+                                    <td @click=editDateField(el,'start_date_written')>%[el.start_date_written]%</td>
+                                    <td @click=editDateField(el,'end_date_written')>%[el.end_date_written]%</td>
+                                    {% comment %} <td>    
+                                        <input type="checkbox" v-model="el.include">
+                                    </td> {% endcomment %}
+                                </tr>
+                            </table>
+                        </div>
+                        <div>
+                          <h3 class="m-4 mt-5">Texts</h3>
+                          <div class="m-4">
+                           {% include "./tabbed_texts.html"  %}
+                          </div>
+                          </div>
+                      </div>
+                      <div v-else>
+                        <div class="row w-100">
+                          <div class="col-md-6">  <div v-for="[key, arr] in rels" class="m-4" >
+                            <p>%[key]% <button class="btn-sm btn-success" @click="addRelation(arr[0])">New</button></p>
+                            {% comment %} <span>%[arr]%</span> {% endcomment %}
+                            <p class="ml-5" v-for="val in arr">
+                              <span><button class="btn-sm btn-danger mr-4" @click=DeleteRelation(val)>x</button></span>
+                              <span class="bubble_start px-3 py-2 badge badge-primary badge-pill" @click="editDateField(val, 'start_date_written')"> %[val.start_date_written ? val.start_date_written : 'PLACEHOLDER']% </span>
+                              <span class="bubble_end px-3 py-2 badge badge-primary badge-pill" @click="editDateField(val, 'end_date_written')"> %[val.end_date_written ? val.end_date_written : 'PLACEHOLDER']% </span>
+                         
+                            </p>
+                          </div></div>
+                          <div class="col-md-6"> 
+                            <h3 class="mb-4">Texts</h3>
+                            {% include "./tabbed_texts.html"  %}</div>
+                        </div>
+                     
+                      </div>
+                    </div>
+                    <div class="tab-pane" id="texts_section" role="tabpanel" aria-labelledby="texts-tab">
+                      {% include "./tabbed_texts.html"  %}
+                    </div>
+                  </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <script>
+    const { ref, createApp } = Vue
+
+
+    createApp({
+
+      /** refactor notes: 
+
+      - implement sort in all-relations table at least on function and institution
+      
+      **/
+       
+      setup() {
+        const rels = ref(JSON.parse("{{relations|escapejs}}"))
+        const instance = JSON.parse("{{instance|escapejs}}")
+        const name = instance.name
+        const id = instance.id
+        const tabular = ref(true)
+        const unfiltered = ref(0)
+        const createKey = (el)=>{return el.relation_type__name +" "+ el.related_institution__name}
+
+        console.log(instance)
+
+        function createMapFromRels(){
+
+          var map = new Map();
+          let dubls = new Map();
+          rels.value.forEach(a => map.set(createKey(a), (map.get(createKey(a)) || 0) + 1));
+          rels.value = rels.value.filter(a => map.get(createKey(a)) > 1);
+        
+          Array.from(map.keys()).forEach((k) => dubls.set(k, rels.value.filter((el) => {return (createKey(el) === k)})))
+          Array.from(map.keys()).forEach((k) => {if (map.get(k) === 1) {
+            dubls.delete(k);}
+          })
+       
+          rels.value = dubls;
+          console.log(dubls)
+        }
+
+        function addRelation(el){
+          console.log("add Relation clicked", el)
+          const new_rel = JSON.parse(JSON.stringify(el))
+          new_rel.start_date_written = ""
+          new_rel.end_date_written = ""
+          new_rel.id = ""
+          console.log("new rel",new_rel)
+          $.ajax({
+            type: "POST",
+            url: "{% url 'dubletten_tool:create_relation'%}",
+            data: {
+              "id": id ,
+              "relation": JSON.stringify(new_rel),
+            },
+            beforeSend: function (request) {
+              let csrftoken = getCookie("csrftoken");
+              request.setRequestHeader("X-CSRFToken", csrftoken);
+          },
+            success: function (result) {
+               console.log(result);
+               const rel_id = JSON.parse(result.rel_id)
+               new_rel.id = rel_id
+              if (!tabular.value){
+                console.log("not tabular is true")
+              unfiltered.value.push(new_rel)
+              console.log(unfiltered.value)
+              rels.value = unfiltered.value
+
+              createMapFromRels()
+              }
+            },
+            dataType: "json"
+          });
+
+  
+        }
+
+        function ToggleTabularView(){
+            tabular.value = !tabular.value;
+
+            if (unfiltered.value === 0){
+            unfiltered.value = rels.value;
+
+      
+            createMapFromRels();
+
+            } else {
+              rels.value = unfiltered.value
+              unfiltered.value = 0;
+            }
+            
+        }
+        
+        function DeleteRelation(el){
+          const confirmed = confirm(`Are you sure you want to delete\n${el.relation_type__name}`)
+          console.log(el, confirmed)
+          if (confirmed) {
+            fetch("{% url 'dubletten_tool:delete_relation' rel_id='000000000'%}".replace("000000000", el.id)).then((res)=> res.json()).then((j)=> {
+              if (j.success){
+                if (!tabular.value){
+                  console.log("not tabular")
+                  // delete element from map array for the right key
+                  rels.value.set(createKey(el), rels.value.get(createKey(el)).filter((obj)=> {return obj.id !== el.id}));
+                  // delete element from full list in unfiltered 
+                  unfiltered.value = unfiltered.value.filter((obj)=> {return obj.id !== el.id});
+                }else{
+                  console.log("tabular true")
+                // if in tabular view, which is served by the array of objects, filter deleted object from array
+                rels.value = rels.value.filter((obj)=> { return obj.id !== el.id});
+                }
+               
+              } else {
+                alert(j.msg);
+              }
+
+          })
+        }
+      }
+
+
+
+        function updateFieldResponse(data, fieldName){
+          console.log("update field response called")
+           $.ajax({
+            type:"POST", 
+            url: "{% url 'dubletten_tool:update_field'%}",
+            data: {
+              "id": id,
+              "field_name":fieldName,
+              "relation": JSON.stringify(data),
+            },
+            beforeSend: function (request) {
+              let csrftoken = getCookie("csrftoken");
+              request.setRequestHeader("X-CSRFToken", csrftoken);
+          },
+            success: function (result) {
+               console.log(result);
+               if (!result.success){
+               alert(result.msg)
+               } else {
+                data[fieldName] = result.new_value
+               }
+              
+            },
+            dataType: "json"
+          });
+        }
+        function editDateField(el, t){
+               /* OnclickHandler for relation table fields. Handles updates of fields. */
+
+               console.log(el)
+
+               let data = prompt("Update Field", el[t])
+               if (data){
+                   el[t] = data
+                   new_value = updateFieldResponse(el, t)
+                   console.log(new_value)
+                   if (new_value){
+                    console.log("updated field to ", new_value)
+                    el[t] = new_value
+                   }
+               } else {
+                console.log("data was false:", data)
+               }
+               console.log(rels.value)
+   
+        }
+        
+
+
+        ToggleTabularView();
+    
+        
+        return {
+ 
+          rels,
+          tabular,
+          name,
+          id,
+          editDateField,
+          DeleteRelation,
+          ToggleTabularView,
+          addRelation
+        }
+
+      },
+      delimiters: ["%[", "]%"],
+   
+    }).mount('#myvue')</script>
+    <style>
+        .red {
+            background-color: lightcoral;
+        }
+
+        #person_header_row {
+            background-color: white;
+        }
+        .bubble_start{
+          background-color: lightcoral;
+        }
+
+        .bubble_end{
+          background-color: lightblue;
+        }
+
+        body{
+          height:auto !important;
+      }
+    
+    </style>
+ 
+{% endblock content %}
+
+
+
+

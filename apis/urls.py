@@ -26,13 +26,13 @@ if 'viecpro_hierarchy' in settings.INSTALLED_APPS:
     urlpatterns.insert(0, url(r'^visualisations/', include("viecpro_hierarchy.urls", namespace="viecpro_hierarchy"))
     )
 
-if 'viecpro_import' in settings.INSTALLED_APPS:
+if 'apis_import_project' in settings.INSTALLED_APPS:
     urlpatterns = urlpatterns + [
-         url(r'^viecpro_import/', include("viecpro_import.urls", namespace="viecpro_import"))]
+         url(r'^apis_import_project/', include("apis_import_project.urls", namespace="apis_import_project"))]
 
-if 'viecpro_deduplication' in settings.INSTALLED_APPS:
+if 'dubletten_tool' in settings.INSTALLED_APPS:
     urlpatterns = urlpatterns + [
-        url(r'^dubletten/', include("viecpro_deduplication.urls", namespace="viecpro_deduplication")),
+        url(r'^dubletten/', include("dubletten_tool.urls", namespace="dubletten_tool")),
         ]
 
 if "apis_bibsonomy" in settings.INSTALLED_APPS:

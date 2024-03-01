@@ -1,0 +1,94 @@
+{% extends "webpage/base.html" %}
+{% load static %}
+{% block content %}
+
+
+<script src="/static/apis_import_project/js/autocomplete.js"></script>
+<link href="/static/apis_import_project/css/autocomplete.css" rel="stylesheet" type="text/css">
+<link href="/static/apis_import_project/css/main.css" rel="stylesheet" type="text/css">
+
+
+<div class="container-fluid w-auto mx-5 mt3 mb-5">
+    <div class="row justify-content-center"></div>
+    <div class="col-md-4 mt-5"></div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center">
+            <h6 class="h6 m-0 text-secondary"> Welcome back, {{user.username}}!</h6>
+            <div class="container-fluid">
+                <div class="row justify-content-center my-4 pr-0">
+                    <div class="col-md-4 my-2"></div>
+                    <div class="col-md-4 my-2 text-center">
+                        <h1 class="h1 my-auto">Projects</h1>
+                    </div>
+                    <div class="col-md-4 my-auto text-right pr-0">
+                        <button class="btn  btn-outline-primary my-auto" onclick="GetForm()">New</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-4 rounded pt-4 px-4 pb-2 m-0" id="form_div" style="background-color: lightgrey;">
+            <table class="table table-hover">
+                <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Edit</th>
+                </tr>
+                {% for project, role in projects %}
+                <tr>
+                    <td><a href="{% url 'apis_import_project:editor_main' project_pk=project.pk %}">{{project.name}}</a>
+                    </td>
+                    <td>{{role}}</td>
+                    <td><a href="#" onclick="GetUpdateForm('{{project.pk}}')"><i class="link-dark" data-feather="edit" text="edit" ></i></a></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+
+        <div class="col-md-4 text-center">
+        </div>
+    </div>
+</div>
+<script>
+   function GetForm() {
+        let url = "{% url 'apis_import_project:project_create' %}"
+        $.ajax({
+            type: "GET",
+            url: url,
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data, status, xhttp) {
+                renderCreateProjectForm(data);
+            }
+        })
+    }
+
+
+    function GetUpdateForm(pk) {
+        let url = `/apis_import_project/project/update/${pk}/`;
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            beforeSend: function (request) {
+                let csrftoken = getCookie("csrftoken");
+                request.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data, status, xhttp) {
+                renderCreateProjectForm(data);
+            }
+        })
+    }
+
+    function renderCreateProjectForm(data) {
+        $("#form_div").empty().append(data.content);
+
+    }
+</script>
+{% endblock %}
