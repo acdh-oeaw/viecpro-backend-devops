@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 #     text = models.TextField(max_length=2000, null=True, blank=True)
 
 
-table_base_name = "dubletten_tool"
 
 class PersonProxy(models.Model):
     """
@@ -17,7 +16,6 @@ class PersonProxy(models.Model):
 
     class Meta:
         ordering = ['person__name']
-        db_table = table_base_name + "_personproxy"
 
     status_choices = [
         ("candidate", "Candidate"),
@@ -100,7 +98,6 @@ class Group(models.Model):
 
     class Meta:
         ordering = ["name"]
-        db_table = table_base_name + "_group"
 
     status_choices_group = [
         ("unchecked", "unchecked"),
@@ -182,8 +179,7 @@ class Group(models.Model):
 
 class Suggestions(models.Model):
     # todo __g.pirgie__ add name field and query Suggestions by name rather than by index!
-    class Meta: 
-        db_table = table_base_name + "_suggestions"
+
 
     data = models.JSONField(null=True, blank=True)
 
@@ -191,8 +187,7 @@ class Suggestions(models.Model):
 
 class StatusButtonGroupType(models.Model):
 
-    class Meta: 
-        db_table = table_base_name + "_statusbuttongrouptype"
+
 
     name = models.CharField(max_length=600, null=False, blank=False)
     short = models.CharField(max_length=4, null=False,
@@ -207,8 +202,7 @@ class StatusButtonGroupType(models.Model):
 
 
 class StatusButtonGroup(models.Model):
-    class Meta: 
-        db_table = table_base_name + "_statusbuttongroup"
+
 
     kind = models.ForeignKey(StatusButtonGroupType, on_delete=models.CASCADE)
     related_instance = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -220,10 +214,7 @@ class StatusButtonGroup(models.Model):
 
 
 class StatusButtonProxyType(models.Model):
-    # not used at the moment
     
-    class Meta: 
-        db_table = table_base_name + "_statusbuttonproxytype"
 
     name = models.CharField(max_length=600, null=False, blank=False)
 
@@ -237,18 +228,12 @@ class StatusButtonProxyType(models.Model):
 
 class StatusButtonProxy(models.Model):
     
-    class Meta: 
-        db_table = table_base_name + "_statusbuttonproxy"
-    # not used at the moment
     kind = models.ForeignKey(StatusButtonProxyType, on_delete=models.CASCADE)
     related_instance = models.ForeignKey(PersonProxy, on_delete=models.CASCADE)
     value = models.BooleanField(default=False)
 
 
 class DublettenLOG(models.Model):
-
-    class Meta: 
-        db_table = table_base_name + "_dublettenlog"
 
     msg = models.TextField(max_length=600, null=False, blank=False)
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)

@@ -19,7 +19,6 @@ from apis_core.apis_vocabularies.models import PersonInstitutionRelation
 
 log = logging.getLogger("mylogger")
 
-table_base_name = "apis_import_project"
 
 class DataSource(models.Model):
     """
@@ -34,8 +33,6 @@ class DataSource(models.Model):
     Accessor functions allow traversing related DataSourcePage-objects and to get or set their metadata.
     """
 
-    class Meta: 
-        db_table = table_base_name + "_datasource"
 
     name = models.CharField(max_length=255, blank=False, null=False)
     server_directory = models.CharField(max_length=255, blank=False, null=False)
@@ -170,8 +167,7 @@ class DataSourcePage(models.Model):
     """
 
 
-    class Meta: 
-        db_table = table_base_name + "_datasourcepage"
+
 
     DataSource = models.ForeignKey(DataSource, null=False, blank=False, on_delete=models.CASCADE)
     page_index = models.IntegerField(blank=False, null=False)
@@ -209,8 +205,7 @@ class ImportProject(models.Model):
 
     # todo: consider adding last edited page here
 
-    class Meta: 
-        db_table = table_base_name + "_importproject"
+
 
     def save(self, *args, **kwargs):
         if not self.collection:
@@ -258,8 +253,7 @@ class GenericCollectionEntry(models.Model):
     todo: connect this with the revision-library. Save the state before the editing process and allow to reset the
     changed fields.
     """
-    class Meta: 
-        db_table = table_base_name + "_genericcollectionentry"
+
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     content_object = GenericForeignKey("content_type", "id")
@@ -308,8 +302,7 @@ class GenericCollectionEntry(models.Model):
 
 class ProjectCollectionEntry(models.Model):
 
-    class Meta: 
-        db_table = table_base_name + "_projectcollectionentry"
+
 
     json = models.TextField(blank=True)
     project = models.ForeignKey(ImportProject, null=True, on_delete=models.CASCADE)
@@ -321,8 +314,6 @@ class PageCollection(models.Model):
     See GenericCollectionEntry docstring for more information.
     """
 
-    class Meta: 
-        db_table = table_base_name + "_pagecollection"
 
     created_in = models.ManyToManyField(GenericCollectionEntry, related_name="created")
     edited_in = models.ManyToManyField(GenericCollectionEntry, related_name="edited")
@@ -345,8 +336,7 @@ class PageData(models.Model):
     todo: could be refactored to make this specific behaviour managed via some sort of settings-file. And to make
         some sort of generic solution for implementing other specific, but similiar functionality.
     """
-    class Meta: 
-        db_table = table_base_name + "_pagedata"
+
 
     project = models.ForeignKey(ImportProject, blank=False, null=False, on_delete=models.CASCADE)
     page = models.ForeignKey(DataSourcePage, blank=False, null=False, on_delete=models.CASCADE)
@@ -575,8 +565,7 @@ class DataSourceProjectState(models.Model):
     last_page that was edited, to reload it when continuing an edit.
     """
 
-    class Meta: 
-        db_table = table_base_name + "_datasourceprojectstate"
+
 
     datasource = models.ForeignKey(DataSource, blank=False, null=True, on_delete=models.CASCADE)
     project = models.ForeignKey(ImportProject, blank=False, null=True, on_delete=models.CASCADE)
@@ -589,8 +578,7 @@ class ProjectState(models.Model):
     Stores the state a Project is in during the editing process, on per-user basis. For now it only keeps the last
     DataSource to reload it when continuing an edit.
     """
-    class Meta: 
-        db_table = table_base_name + "_projectstate"
+
 
     project = models.ForeignKey(ImportProject, blank=False, null=False, on_delete=models.CASCADE)
     user = models.ForeignKey(User, blank=False, null=False, on_delete=models.CASCADE)
