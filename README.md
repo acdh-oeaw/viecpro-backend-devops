@@ -12,15 +12,8 @@ VieCPro specific django-apps are added in the root directory, separate from apis
 
 ### Table names vs. app names:
 
-For compatibility with prior versions of this repository, where some apps had different names, all table-names of VieCPro specific apps are hardcoded
-in all confliciting models via the 'meta.db_table' attribute; i.e. django app names and the prefix of the table names in your database do not exactly match. The mapping is as follows:
-
-- `viecpro_import` == `apis_import_project`
-- `viecpro_deduplication` == `dubletten_tool`
-
-So the db-table for f.e. `viecpro_deduplication.models.group` is named `dubletten_tool_group` not `viecpro_deduplication_group`.
-
-See the [Table Names](https://docs.djangoproject.com/en/4.2/ref/models/options/#table-names) - section of the django docs on how django handles model names and table names.
+In prior version of this repo, app-names had been changed. This change had no benefits atm and was potential cause for issues. 
+So it was reverted. 
 
 ## Development Container
 
