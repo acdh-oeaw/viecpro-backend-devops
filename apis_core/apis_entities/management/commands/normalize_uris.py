@@ -12,7 +12,7 @@ uri_settings_file = os.path.join(
     settings.BASE_DIR, 'apis_core', 'default_settings', "URI_replace_settings.yml"
 )
 
-sett = yaml.load(open(uri_settings_file, 'r'))
+sett = yaml.load(open(uri_settings_file, 'r'), Loader=yaml.Loader)
 
 
 class Command(BaseCommand):
