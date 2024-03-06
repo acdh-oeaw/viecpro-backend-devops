@@ -22,13 +22,17 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
         # fetch and store all relations from old vorfin
         if old_vorfin:
             all_rels = old_vorfin.get_related_relation_instances()
-            for rel in all_rels:
-                all_rels = filter(lambda x: x.relation_type !=
+            # TODO: bughunt side note: this is an obvious logic error
+            #for rel in all_rels:
+            print("ALL_RELS Bughunt branch was called, old_vorfin existed")
+            all_rels = filter(lambda x: x.relation_type !=
                                   rt_vorfin, all_rels)
                 # if rel.relation_type != rt_vorfin:
                 #     TempRel(rel)
 
     else:
+        print("ALL_RELS Bughunt branch was called, old_vorfin did not exist!")
+
         all_rels = []
         for vorfin in vorfins:
             v_rels = vorfin.get_related_relation_instances()
@@ -56,6 +60,7 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
 
     before = time()
 
+    # TODO: bughunt issue 2: use_person_list ist true
     if use_person_list:
         print("Using Personlist to Calculate Persontypes")
         if vorfins:
@@ -65,6 +70,8 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
             pass
             # personlist.add(old_vorfin)
 
+        # TODO: bughunt issue 2: this line fails
+        # bughunt issue 2: all_rels is undefined here
         for rel in all_rels:
             add_all_related_persons_to_personlist(rel)
 
@@ -72,7 +79,10 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
 
     else:
         print("Using all Person objects to calculate Persontypes")
-        # PersonHelper.update_collections()
+        print("ALL_RELS Bughunt branch was called, use_person_list was FALSE, creating temprels")
+
+        PersonHelper.update_collections()
+        # TODO: bughut issue 2: commented out line below
         [TempRel(rel) for rel in all_rels]
     after = time()
 
