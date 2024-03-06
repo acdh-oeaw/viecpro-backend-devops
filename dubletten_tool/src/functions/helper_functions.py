@@ -31,6 +31,8 @@ def is_dublette(p):
         pp = PersonProxy.objects.get(person=p)
         if pp.status == "candidate":
             return True
+        
+        return False
     except:
         return False
 

@@ -1,6 +1,6 @@
 from . import log, defaultdict, Collection, LabelType, PersonPersonRelation, logger, PersonProxy, Person, AbstractRelation, PersonPerson, Label
-
-
+from apis_bibsonomy.models import Reference
+from django.contrib.contenttypes.models import ContentType
 class MergeGroup:
     """
     Functions defined here handle the merging of groups into a vorfinalen eintrag (MergeGroup-Class) 
@@ -187,6 +187,7 @@ class MergeGroup:
         return notes
 
     def process_references(self):
+        print("called fetching references")
         refs = ""
         for m in self.members:
             if m.references:
@@ -205,6 +206,17 @@ class MergeGroup:
         # nicht nötig
         pass
 
+    def process_bibsonomy_references(self):
+        res = []
+        person_content_type = ContentType.objects.get(app_label="apis_entities", model="person")
+        for m in self.members:
+            references = Reference.objects.filter(content_type=person_content_type, object_id=m.person.id)
+            res += list(references)
+
+        return res
+
+
+
     def run_process(self):
 
         self.labels = self.process_labels()
@@ -222,8 +234,12 @@ class MergeGroup:
         self.uris = self.process_uris()
         for uri in self.uris:
             per.uri_set.add(uri)
-
+        bibs_refs = self.process_bibsonomy_references()
+        
         per.save()
+
+        for ref in bibs_refs:
+            Reference.objects.get_or_create(bibs_url = ref.bibs_url, pages_start=ref.pages_start, pages_end=ref.pages_end, bibtex=ref.bibtex, content_type=ref.content_type, object_id=per.id, attribute=ref.attribute, folio=ref.folio, notes=ref.notes)
         # MergeGroup.group_map.update({self.group.id:per.id})
         self.group.vorfin = per
         self.group.save()

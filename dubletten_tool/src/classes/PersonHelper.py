@@ -40,7 +40,7 @@ class PersonHelper(ErrorLoggerMixin):
         the lookup collection will be calculated for this set, not for all persons. 
         Makes the calculation around 10 seconds faster. 
         """
-
+        print("in person helper, called update collections")
         def is_vorfin(per):
             return "vorfin" in per.name or "Vorfin" in per.name
         
@@ -83,5 +83,6 @@ class PersonHelper(ErrorLoggerMixin):
             if not Person.objects.count() == test:
                 msg = f"Missmatch in collections in PersonHelper. Expected Persons to be split evenly, but got missmatch.\nPersons: {Person.objects.count()}, set union collections: {test}."
                 cls.errors["Expectation Missmatch"].append(msg)
+                print(msg)
                 raise Exception(msg)
         
