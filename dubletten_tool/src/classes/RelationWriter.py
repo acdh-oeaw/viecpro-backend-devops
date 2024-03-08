@@ -1,4 +1,7 @@
 from . import ErrorLoggerMixin, rt_vorfin, ProcessingTracker, PersonPerson, PersonPersonRelation, PersonProxy, defaultdict, log, PPKind, PPHelper
+from dubletten_tool.models import Group
+from apis_core.apis_entities.models import Person 
+from typing import Any
 
 
 class RelationWriter(ErrorLoggerMixin):
@@ -15,7 +18,7 @@ class RelationWriter(ErrorLoggerMixin):
         cls.setup()
         
     @classmethod
-    def write_person_person_rels(cls, g):
+    def write_person_person_rels(cls, g:Group):
         """
         Updated Version of the write person person rels logic. 
 
@@ -37,7 +40,7 @@ class RelationWriter(ErrorLoggerMixin):
         vorfin = g.vorfin  # Person.objects.get(id=MergeGroup.group_map[g.id])
        
 
-        def get_dublette_or_vorfin(per):
+        def get_dublette_or_vorfin(per:Person):
             # called in:
             # relation writer
             res = None
@@ -48,7 +51,7 @@ class RelationWriter(ErrorLoggerMixin):
                     ##### CountPerPer.single_count += 1
                     res = per
                 else:
-                    gs = proxy.group_set.all()
+                    gs: Any = proxy.group_set.all()
                     if len(gs) >= 1:
 
                         res = gs[
