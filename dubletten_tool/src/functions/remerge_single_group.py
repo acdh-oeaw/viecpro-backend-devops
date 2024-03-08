@@ -27,9 +27,6 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
             print("ALL_RELS Bughunt branch was called, old_vorfin existed")
             all_rels = filter(lambda x: x.relation_type !=
                                   rt_vorfin, all_rels)
-                # if rel.relation_type != rt_vorfin:
-                #     TempRel(rel)
-
     else:
         print("ALL_RELS Bughunt branch was called, old_vorfin did not exist!")
 
@@ -47,7 +44,7 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
 
     # TODO: check this. moved calculation of TempRel instances to after Personhelper colelctions where updated.
 
-    personlist = set(())
+    personlist = set()
 
     def add_all_related_persons_to_personlist(rel):
         # if hasattr(rel, "related_person"):
@@ -83,7 +80,7 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
 
         PersonHelper.update_collections()
         # TODO: bughut issue 2: commented out line below
-        [TempRel(rel) for rel in all_rels]
+        #[TempRel(rel) for rel in all_rels]
     after = time()
 
     # create new vorfin
