@@ -130,9 +130,6 @@ class MergeGroup:
 
         return labels
 
-    def process_personinstitution(self):
-        pass
-
     def process_all_other_relations(self):
         # todo: alle relations deduplizieren
         for m in self.members:
