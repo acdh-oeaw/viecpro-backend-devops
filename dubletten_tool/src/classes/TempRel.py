@@ -131,7 +131,7 @@ class TempRel(ErrorLoggerMixin):
     @classmethod
     def vorfin_not_red_check(cls, vorfin):
         """
-        expects a vorfin and returns true of the ampel of the vorfin is green or yellow.
+        expects a vorfin and returns true if the ampel of the vorfin is green or yellow.
         """
         status = get_ampel(vorfin)
         if status in ["yellow", "green"]:
@@ -161,9 +161,9 @@ class TempRel(ErrorLoggerMixin):
     def save_group_or_entity(cls, ent):
         """
         Helper function that expects an entity and returns said entity, or, if it 
-        is an instance of Person, checks if it is a VORFIN. if, so, returnes the group,
+        is an instance of Person, checks if it is a VORFIN. if, so, returns the group
         instead of the entity.
-        Also checks if it is a Dublette, if so, tries to get teh group and returns the group.
+        Also checks if it is a Dublette, if so, tries to get the group and returns the group.
         """
 
         #log(f"in save_group_or_person, ent is {ent}")
