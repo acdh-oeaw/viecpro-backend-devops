@@ -54,12 +54,14 @@ class PersonHelper(ErrorLoggerMixin):
         else: 
             vorfins = filter(is_vorfin, personlist)
             vorfins = list(vorfins)
+            for vorf in vorfins: 
+                print(vorf, vorf.pk)
             dubletten = filter(has_personproxy, personlist)
 
         dubletten = filter(is_dublette, list(dubletten))
         dubletten = list(dubletten)
         #singles = [el for el in Person.objects.all() if el not in dubletten and el not in vorfins]
-
+        print(f"{vorfins=}")
         v_set = set(vorfins)
         d_set = set(dubletten)
         if personlist: 

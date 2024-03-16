@@ -25,8 +25,29 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
             # TODO: bughunt side note: this is an obvious logic error
             #for rel in all_rels:
             print("ALL_RELS Bughunt branch was called, old_vorfin existed")
-            all_rels = filter(lambda x: x.relation_type !=
-                                  rt_vorfin, all_rels)
+            all_rels = list(filter(lambda x: x.relation_type !=
+                                  rt_vorfin, all_rels))
+            
+
+            
+        else: 
+            # this case reflects merging of a newly created group (i.e. merging of only singles)
+            # they don't have a vorfin, so there is no old_vorfin
+            # the necessary relations in this case would be all relations of all paticipating persons
+            # but this case can be handled by the MergeGroup class, as there are no temporary relations that need to be preserved
+            # i.e. if there are no vorfins participating, the expected output state for all relations after merging all members of a group 
+            # is completely reflected by the state of all participating members.
+            # so just merging the group will work
+            # so: just make all_rels empty in this case.
+            all_rels = []
+            print("ASSUMPTION BRANCH REACHED")
+            for m in group.members.all(): 
+                m_per = m.person
+                all_rels += m.person.get_related_relation_instances()
+                # TODO: added filter on the assumption that this branch causes vorfins to be in the list, which are then not serializable, as they are already deleted.
+                all_rels = list(filter(lambda x: x.relation_type !=
+                                  rt_vorfin, all_rels))
+
     else:
         print("ALL_RELS Bughunt branch was called, old_vorfin did not exist!")
 
@@ -46,33 +67,35 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
 
     personlist = set()
 
-    def add_all_related_persons_to_personlist(rel):
-        # if hasattr(rel, "related_person"):
-        #     personlist.add(rel.related_person)
-        # if hasattr(rel, "related_personA"):
-        #     personlist.add(rel.related_personA)
-        # if hasattr(rel, "related_personB"):
-        #     personlist.add(rel.related_personB)
-        pass
-
+    def add_all_related_persons_to_personlist(rel, personlist: set):
+        if hasattr(rel, "related_person"):
+            personlist.add(rel.related_person)
+        if hasattr(rel, "related_personA"):
+            personlist.add(rel.related_personA)
+        if hasattr(rel, "related_personB"):
+            personlist.add(rel.related_personB)
+        
+        return personlist 
+    
     before = time()
 
     # TODO: bughunt issue 2: use_person_list ist true
     if use_person_list:
         print("Using Personlist to Calculate Persontypes")
         if vorfins:
-            pass
-            # [personlist.add(vorf) for vorf in vorfins]
+            # TODO: check that this is correct for personlist
+            [personlist.add(vorf) for vorf in vorfins]
         if old_vorfin:
-            pass
-            # personlist.add(old_vorfin)
-
+            # TODO: cehck that this is correct for personlist
+            personlist.add(old_vorfin)
+            #pass
         # TODO: bughunt issue 2: this line fails
         # bughunt issue 2: all_rels is undefined here
         for rel in all_rels:
-            add_all_related_persons_to_personlist(rel)
+            personlist = add_all_related_persons_to_personlist(rel, personlist)
 
-        # PersonHelper.update_collections(personlist=personlist)
+        print("XY: updating collections with use of personlist")
+        PersonHelper.update_collections(personlist=personlist)
 
     else:
         print("Using all Person objects to calculate Persontypes")
@@ -80,7 +103,7 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
 
         PersonHelper.update_collections()
         # TODO: bughut issue 2: commented out line below
-        #[TempRel(rel) for rel in all_rels]
+        [TempRel(rel) for rel in all_rels]
     after = time()
 
     # create new vorfin
@@ -89,18 +112,19 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
     mg.run_process()
 
     if not vorfins and old_vorfin:
-        # TODO: I think this is in the wrong place. The old vorfins must be deleted before the collections are updated.
+        # TODO: I think this is in the wrong place. The old vorfins must be deleted before the collections are updated. - WHY?
         # delete old vorfin
-        # if personlist:
-        #    personlist.discard(old_vorfin)
+        if personlist:
+            personlist.discard(old_vorfin)
         old_vorfin.delete()
+
     elif not vorfins and not old_vorfin:
         print("vorfins was false and no old_vorfin")
     else:
         print("vorfins true, old vorfin false")
         print("deleting old vorfins:", vorfins)
-        # if personlist:
-        #    [personlist.discard(v) for v in vorfins]
+        if personlist:
+            [personlist.discard(v) for v in vorfins]
 
         [v.delete() for v in vorfins]
 
@@ -112,14 +136,14 @@ def remerge_single_group(group, vorfins=None, use_person_list=False, groups_to_d
             print("deleting group", el)
             el.delete()
 
-    # if personlist:
-    #     #personlist.add(mg.person)
+    if personlist:
+        personlist.add(mg.person)
     #     # Update the PersonHelper collections to include new vorfin
     #     # TODO: old vorfin or vorfins must be deleted, before updating collections
     #     # TODO: changed this, forgot it before
-    #     PersonHelper.update_collections(personlist=personlist)
-    # else:
-    #     PersonHelper.update_collections()
+        PersonHelper.update_collections(personlist=personlist)
+    else:
+        PersonHelper.update_collections()
 
     # create perper relations
     try:

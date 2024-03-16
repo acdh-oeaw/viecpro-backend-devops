@@ -18,12 +18,12 @@ def remerge_group_task(g_id, vorfin_list=[], groups_to_delete=None):
 
     logger.info(f"{g_id=}, {vorfin_list=}, {groups_to_delete=}")
     sleep(2)
-    vorfin_list = []
+    #vorfin_list = []
     # TODO: consider adding check here or in calling view, if group really had a vorfin before.
     if vorfin_list:
         try:
             vorfin_list = [Person.objects.get(id=v.id) for v in vorfin_list]
-            logger.info(f"fixed type error, so vorfin list should not be prented below this line.")
+            logger.info(f"fixed type error, so vorfin list should not be printed below this line.")
         except TypeError as te:
             logger.info(f"caught TypeError and handled it: \n{te}")
             logger.info(f"Vorfin list was true, objects are {vorfin_list}")
@@ -62,7 +62,7 @@ def remerge_group_task(g_id, vorfin_list=[], groups_to_delete=None):
         # TEST 1: set use_person_list to False
         print("yes reached this point from here")
         res_dict = remerge_single_group(
-            group, vorfins=vorfin_list, use_person_list=False, groups_to_delete=groups_to_delete)
+            group, vorfins=vorfin_list, use_person_list=True, groups_to_delete=groups_to_delete)
         new_vorfin = res_dict.get("new_vorfin")
         msg = f"Merged {group} ({group.name}) into new vorfin: {new_vorfin} ({new_vorfin.id}).\nDeleted old vorfin: {old_vorfin_name} ({old_vorfin_id})."
     except Exception as e:

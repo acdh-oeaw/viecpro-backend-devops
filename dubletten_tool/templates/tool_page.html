@@ -513,7 +513,7 @@ stats_extras %} {% load webpage_extras %} {% block content %}
        * Also, when called from merge_groups, pass on list of groups_to_delete (because those groups got combined to
        * a new group in merge_groups and are obsolete.)
        */
-
+      console.log("functio remergeGroup called")
       if (ask_for_confirmation) {
         proceed = confirm(`Do you want to re-merge group ${g_id}?`);
       } else {
@@ -1299,6 +1299,8 @@ stats_extras %} {% load webpage_extras %} {% block content %}
             (merge_groups_data = merge_groups_data)
           );
         } else {
+          console.log("function MergeGroupsAndRemergeDispatcher, celery returned")
+          console.log("calling RenderMergeGroupsOutcome")
           RenderMergeGroupsOutcome(merge_groups_data);
         }
       }
