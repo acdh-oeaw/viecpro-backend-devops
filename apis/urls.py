@@ -53,6 +53,9 @@ if "debug_toolbar" in settings.INSTALLED_APPS:
         url(r"^__debug__/", include('debug_toolbar.urls'))
     ) 
 
+if "deduplication_tool" in settings.INSTALLED_APPS:
+     urlpatterns.append(path("deduplication_tool", include("deduplication_tool.urls")))
+
 # robots.txt route
 # handling of robots.txt files on instance-basis can be configured in settings
 if os.path.exists(os.path.join(settings.ROBOTS_TXT_FOLDER,  "robots.txt")):

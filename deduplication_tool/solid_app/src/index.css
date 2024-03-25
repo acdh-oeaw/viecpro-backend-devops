@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.list-group-item:hover {
+  background-color: lightblue !important;
+}
+
+.list-group-item {
+  font-size: 0.8rem !important;
+  padding: 2 0 !important;
+}
+
+.btn-icon {
+  /* Since your button is a block button, otherwise use inline-flex */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  stroke-width: 1px;
+}
+
+.display-header {
+  font-size: 1rem;
+  color: black;
+  margin-top: 2rem;
+}
+
+.person-proxy-display {
+  font-size: 0.8rem;
+  border: 1px lightgray solid;
+  border-radius: 6px;
+  padding: 4px 20px;
+  background-color: white;
+}
+
+.relation-display-container {
+  font-size: 0.8rem;
+
+  margin-left: 2rem;
+}
+/* .relation-display-container.collapse {
+  padding-bottom: 2rem;
+}
+
+.relation-display-container.collapsing {
+  padding-bottom: 4px;
+} */
+
+.relation-display-item {
+  padding: 4px 0px;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 200,
+    "GRAD" 75,
+    "opsz" 30;
+}

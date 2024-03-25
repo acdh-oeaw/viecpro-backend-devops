@@ -7,4 +7,16 @@
             "source.organizeImports": "never"
         },
     },
+    "[typescriptreact]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        },
+    },
+    "eslint.format.enable": true,
+    "eslint.lintTask.enable": true,
+    "files.associations": {
+        "*.tsx": "typescriptreact"
+    }
 }

@@ -1,0 +1,15 @@
+{% extends "webpage/base.html" %} {% load static %}
+{% load stats_extras %} {% load webpage_extras %}
+
+{% block content %}
+<link
+  rel="stylesheet"
+  href="/static/dubletten_tool/css/deduplication.css"
+  type="text/css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+/>
+{% include 'deduplication_tool/solid_app.html' %}
+{% endblock %}

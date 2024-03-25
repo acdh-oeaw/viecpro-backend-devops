@@ -3,9 +3,12 @@ from django.conf.urls import url
 from .views import MergeGroupsView, get_all_notes, getToolPage, getNoteJSON, HandleNoteForm, get_group_suggestions, get_group_ajax, rename_group, update_group_checkboxes, create_new_group, remove_member, get_singles, get_groups, get_single_ajax, get_person_suggestions
 from .detail_view import OverwrittenGenericEntitiesDetailView
 from .merge_views import GenericCeleryTaskStatusView, DeleteRelation,  GenericEntitiesEditView, GenericEntitiesDetailView, GenericListViewNew, GetRelationEditor, UpdateFieldView, CreateRelationView, RemergeGroupView, UpdateCollectionsView
+from django.views.generic import TemplateView
+
 app_name = "dubletten_tool"
 
 urlpatterns = [
+    path("test", TemplateView.as_view(template_name="deduplication_tool/tool_page.html"), name="deduplication-test"),
     url(r"entity/update_collections",
         UpdateCollectionsView.as_view(), name="update_collections"),
 

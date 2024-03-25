@@ -40,7 +40,6 @@ ALLOWED_CIDR_NETS = ["10.0.0.0/8", "127.0.0.0/8"]
 CSP_DEFAULT_SRC = CSP_DEFAULT_SRC + \
     ("sharonchoong.github.io", "github.com/devongovett")
 
-DEBUG = True
 DEV_VERSION = False
 
 SPECTACULAR_SETTINGS["COMPONENT_SPLIT_REQUEST"] = True
@@ -48,7 +47,7 @@ SPECTACULAR_SETTINGS["COMPONENT_NO_READ_ONLY_REQUIRED"] = True
 
 
 INSTALLED_APPS += ["django_extensions", "apis_import_project", "debug_toolbar", "apis_bibsonomy", "apis_ampel",
-                   "dubletten_tool", "viecpro_hierarchy", "viecpro_typesense", "viecpro_typesense_detail", "django_celery_results"]
+                   "dubletten_tool", "deduplication_tool", "viecpro_hierarchy", "viecpro_typesense", "viecpro_typesense_detail", "django_celery_results"]
 
 
 DATABASES = {"default":
