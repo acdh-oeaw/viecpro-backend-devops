@@ -1,5 +1,5 @@
 import { JSXElement } from "solid-js";
-import type {Context} from "solid-js";
+import type {Context, Setter} from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
 
 interface PersonResponse {
@@ -38,20 +38,20 @@ interface PersonProxyResponse {
   }
 
 
-  interface DisplayedGroupItem {
-    id: number;
-    element: JSXElement;
-    listItem: GroupListItem ; 
-  }
+interface DisplayedGroupItem {
+  id: number;
+  element: JSXElement;
+  listItem: GroupListItem ; 
+}
 
-  interface DisplayedSingleItem {
-    id: number;
-    element: JSXElement;
-    listItem: SingleListItem ; 
-  }
+interface DisplayedSingleItem {
+  id: number;
+  element: JSXElement;
+  listItem: SingleListItem ; 
+}
   
 
-type SelectionStore = {
+interface SelectionStore{
     display: {
       groups: DisplayedGroupItem[];
       singles: DisplayedSingleItem[];
@@ -64,10 +64,7 @@ type SelectionStore = {
     };
   };
 
-interface PersonProxyResponse {
-  status: string;
-  person: PersonResponse;
-}
+
 
 interface GroupListItem {
   id: number;
@@ -85,16 +82,25 @@ interface SingleListItem {
   end_date: string;
 }
 
-type Group = {
+interface Group {
   id: number;
   name: string;
   vorfin: PersonResponse;
   members: PersonProxyResponse[];
 };
 
-type AppStateContextType = {
+interface AppStateContextType {
   selectionStore: SelectionStore;
   setSelectionStore: SetStoreFunction<SelectionStore>;
+  toggleSingleDisplay: (id:number, item:SingleListItem)=>void,
+  toggleGroupDisplay: (id:number, item:GroupListItem)=>void,
+  toggleMemberSelect:(groupId: number, memberId: number) => void,
+  toggleDisplayedSingleSelect:(id:number)=>void,
+  mutateSingleList: Setter<any>,
+  mutateGroupList: Setter<any>,
+  fetchGroup: (id:number, indexToInsert:number) => Promise<void>,
+  fetchSingle: (id:number, indexToInster:number)=>Promise<void>,
+  
 }
 export type {SelectionStore, Group, SingleListItem, GroupListItem, DisplayedGroupItem, DisplayedSingleItem, PersonProxyResponse, PersonInstitutionRelation, AppStateContextType}
 

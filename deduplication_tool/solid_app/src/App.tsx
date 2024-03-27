@@ -22,6 +22,8 @@ import type {
 import { DisplayedSingle } from "./components/DisplayedSingle";
 import { DisplayedGroup } from "./components/DisplayedGroup";
 
+const API_BASE = "/deduplication_tool/api/";
+
 //  main store to handle displayed (selected from browser) and selected items (selected in edit section)
 const [selectionStore, setSelectionStore] =
   createStore<SelectionStore>({
@@ -35,13 +37,241 @@ const [selectionStore, setSelectionStore] =
     },
   });
 
+const [singleQuery, setSingleQuery] = createSignal<string>();
+const [groupQuery, setGroupQuery] = createSignal<string>();
+
+const toggleDisplayedSingleSelect = (id: number) => {
+  // handles selecting a displayed singles check-box (toggles it)
+  if (selectionStore.editSelection.singles.includes(id)) {
+    // remove single from editSelection
+    setSelectionStore("editSelection", "singles", (prev) =>
+      prev.filter((el) => el !== id)
+    );
+  } else {
+    // add single to editSelection
+    setSelectionStore(
+      "editSelection",
+      "singles",
+      selectionStore.editSelection.singles.length,
+      id
+    );
+  }
+};
+const toggleMemberSelect = (groupId: number, memberId: number) => {
+  // handles selecting a displayed group-member (toggles it)
+  if (
+    selectionStore.editSelection.groups[groupId].includes(memberId)
+  ) {
+    setSelectionStore("editSelection", "groups", groupId, (prev) =>
+      prev.filter((el) => el !== memberId)
+    );
+  } else {
+    setSelectionStore(
+      "editSelection",
+      "groups",
+      groupId,
+      selectionStore.editSelection.groups[groupId].length,
+      memberId
+    );
+  }
+};
+
+async function fetchSingleList(query: string) {
+  // fetches the browsing-list for singles with current query
+  // returns a promise to work with createResource
+  const url = API_BASE + "singles-list/" + query;
+  const response = await fetch(url, {
+    headers: {
+      Accept: "*/*",
+      "Content-Type": "application/json",
+    },
+  });
+  return await response
+    .json()
+    .then((d) =>
+      d.results.filter(
+        (el: SingleListItem) =>
+          !selectionStore.display.singles
+            .map((single) => single.id)
+            .includes(el.id)
+      )
+    );
+}
+
+async function fetchGroupList(query: string) {
+  // fetches the browsing-list for groups with current query
+  // returns a promise to work with createResource
+  const url = API_BASE + "groups-list" + query;
+  const response = await fetch(url, {
+    headers: {
+      Accept: "*/*",
+      "Content-Type": "application/json",
+    },
+  });
+  return await response
+    .json()
+    .then((d) =>
+      d.results.filter(
+        (el: GroupListItem) =>
+          !selectionStore.display.groups
+            .map((group) => group.id)
+            .includes(el.id)
+      )
+    );
+}
+
+const [singleList, { mutate: mutateSingleList }] = createResource(
+  singleQuery,
+  fetchSingleList
+);
+const [groupList, { mutate: mutateGroupList }] = createResource(
+  groupQuery,
+  fetchGroupList
+);
+
+const fetchSingle = async (id: number, storeIndex: number) => {
+  const url =
+    API_BASE + "singles-object/?person__id=" + id.toString();
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    });
+    await response
+      .json()
+      .then((response) => response.results[0])
+      .then((single: PersonProxyResponse) => {
+        setSelectionStore("display", "singles", storeIndex, {
+          id: id,
+          element: <DisplayedSingle single={single} />,
+        });
+      });
+  } catch (err) {
+    setSelectionStore("display", "singles", storeIndex, {
+      id: id,
+      element: <div>Failed to fetch single with id: {id}</div>,
+      // TODO: check that this is shallow merged, i.e. the listItem is persisted
+    });
+  }
+};
+
+const fetchGroup = async (id: number, indexToInsert: number) => {
+  const url = API_BASE + "groups-object/" + id.toString();
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    });
+    await response.json().then((group: Group) =>
+      setSelectionStore("display", "groups", indexToInsert, {
+        id: id,
+        element: <DisplayedGroup group={group} />,
+      })
+    );
+  } catch (err) {
+    setSelectionStore("display", "groups", indexToInsert, {
+      id: id,
+      element: <div>Failed to fetch group with id: {id}</div>,
+      // TODO: check that this is shallow merged, i.e. the listItem is persisted
+    });
+  }
+};
+const toggleSingleDisplay = (id: number, item: SingleListItem) => {
+  // handles complex intersection of ui state and data handling
+  if (
+    selectionStore.display.singles.filter((el) => el.id === id)
+      .length === 1
+  ) {
+    // first, remove single from the displayed selection
+    setSelectionStore(
+      "display",
+      "singles",
+      (prev: DisplayedSingleItem[]) =>
+        prev.filter((el) => el.id !== id)
+    );
+    // then remove single from edit selection if checked
+    if (selectionStore.editSelection.singles.includes(id)) {
+      setSelectionStore("editSelection", "singles", (prev) =>
+        prev.filter((el) => el !== id)
+      );
+    }
+    // then move the item back to the single list
+    mutateSingleList((prev) => [item, ...prev]);
+  } else {
+    // add the single to the displayed singles
+    const indexToInsert = selectionStore.display.singles.length;
+    setSelectionStore("display", "singles", indexToInsert, {
+      id: id,
+      element: <div>Loading (from setAppStore)</div>,
+      listItem: item,
+    });
+    // remove the item from the singleList
+    mutateSingleList((prev: SingleListItem[]) =>
+      prev.filter((el) => el.id !== item.id)
+    );
+    // fetch the full single data
+    fetchSingle(id, indexToInsert);
+  }
+};
+
+const toggleGroupDisplay = (id: number, item: GroupListItem) => {
+  // handles complex intersection of ui state and data handling
+
+  if (
+    selectionStore.display.groups.filter((el) => el.id === id)
+      .length === 1
+  ) {
+    // remove the group from the selection
+    setSelectionStore(
+      "display",
+      "groups",
+      (prev: DisplayedGroupItem[]) =>
+        prev.filter((el) => el.id !== id)
+    );
+    // remove the group from the edit selection
+    setSelectionStore("editSelection", "groups", id, (prev) => {
+      const { [id]: groupToRemove, ...remaining } = prev;
+      return remaining;
+    });
+    // add the group-list-item back to the groupList
+    mutateGroupList((prev) => [item, ...prev]);
+  } else {
+    // add the group to the selection
+    const indexToInsert = selectionStore.display.groups.length;
+    setSelectionStore("display", "groups", indexToInsert, {
+      id: id,
+      element: <div>Loading (from setAppStore)</div>,
+      listItem: item,
+    });
+    // set the edit selection for the group and set the selectedMembers array to empty
+    setSelectionStore("editSelection", "groups", id, []);
+    // remove the group-llist-item from groupList
+    mutateGroupList((prev: GroupListItem[]) =>
+      prev.filter((el) => el.id !== item.id)
+    );
+    // fetch the full group data
+    fetchGroup(id, indexToInsert);
+  }
+};
+
 export const AppStateContext = createContext({
   selectionStore,
   setSelectionStore,
+  toggleSingleDisplay,
+  toggleGroupDisplay,
+  toggleMemberSelect,
+  mutateSingleList,
+  mutateGroupList,
+  fetchGroup,
+  fetchSingle,
+  toggleDisplayedSingleSelect,
 });
 
 const App: Component = () => {
-  const API_BASE = "/deduplication_tool/api/";
   // refs
   let searchInput: HTMLInputElement | undefined = undefined;
   let searchModeSelect: HTMLSelectElement | undefined = undefined;
@@ -49,82 +279,7 @@ const App: Component = () => {
   // designates if search string should search for singles, groups or both
   const [searchMode, setSearchMode] = createSignal<string>("both");
 
-  const fetchSingle = async (id: number, storeIndex: number) => {
-    const url =
-      API_BASE + "singles-object/?person__id=" + id.toString();
-    try {
-      const response = await fetch(url, {
-        headers: {
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      });
-      await response
-        .json()
-        .then((response) => response.results[0])
-        .then((single: PersonProxyResponse) => {
-          setSelectionStore("display", "singles", storeIndex, {
-            id: id,
-            element: (
-              <DisplayedSingle
-                toggleDisplayedSingleSelect={
-                  toggleDisplayedSingleSelect
-                }
-                single={single}
-              />
-            ),
-          });
-        });
-    } catch (err) {
-      setSelectionStore("display", "singles", storeIndex, {
-        id: id,
-        element: <div>Failed to fetch single with id: {id}</div>,
-        // TODO: check that this is shallow merged, i.e. the listItem is persisted
-      });
-    }
-  };
-
-  const fetchGroup = async (id: number, indexToInsert: number) => {
-    const url = API_BASE + "groups-object/" + id.toString();
-    try {
-      const response = await fetch(url, {
-        headers: {
-          Accept: "*/*",
-          "Content-Type": "application/json",
-        },
-      });
-      await response.json().then((group: Group) =>
-        setSelectionStore("display", "groups", indexToInsert, {
-          id: id,
-          element: (
-            <DisplayedGroup
-              group={group}
-              toggleMemberSelect={toggleMemberSelect}
-            />
-          ),
-        })
-      );
-    } catch (err) {
-      setSelectionStore("display", "groups", indexToInsert, {
-        id: id,
-        element: <div>Failed to fetch group with id: {id}</div>,
-        // TODO: check that this is shallow merged, i.e. the listItem is persisted
-      });
-    }
-  };
-
   // signals to be provided to createResource (for browser view singles and group lists)
-  const [singleQuery, setSingleQuery] = createSignal<string>();
-  const [groupQuery, setGroupQuery] = createSignal<string>();
-
-  const [singleList, { mutate: mutateSingleList }] = createResource(
-    singleQuery,
-    fetchSingleList
-  );
-  const [groupList, { mutate: mutateGroupList }] = createResource(
-    groupQuery,
-    fetchGroupList
-  );
 
   createEffect(() => {
     switch (searchMode()) {
@@ -149,84 +304,6 @@ const App: Component = () => {
     setSelectionStore("editSelection", "singles", []);
   };
 
-  const toggleSingleDisplay = (id: number, item: SingleListItem) => {
-    // handles complex intersection of ui state and data handling
-    if (
-      selectionStore.display.singles.filter((el) => el.id === id)
-        .length === 1
-    ) {
-      // first, remove single from the displayed selection
-      setSelectionStore(
-        "display",
-        "singles",
-        (prev: DisplayedSingleItem[]) =>
-          prev.filter((el) => el.id !== id)
-      );
-      // then remove single from edit selection if checked
-      if (selectionStore.editSelection.singles.includes(id)) {
-        setSelectionStore("editSelection", "singles", (prev) =>
-          prev.filter((el) => el !== id)
-        );
-      }
-      // then move the item back to the single list
-      mutateSingleList((prev) => [item, ...prev]);
-    } else {
-      // add the single to the displayed singles
-      const indexToInsert = selectionStore.display.singles.length;
-      setSelectionStore("display", "singles", indexToInsert, {
-        id: id,
-        element: <div>Loading (from setAppStore)</div>,
-        listItem: item,
-      });
-      // remove the item from the singleList
-      mutateSingleList((prev: SingleListItem[]) =>
-        prev.filter((el) => el.id !== item.id)
-      );
-      // fetch the full single data
-      fetchSingle(id, indexToInsert);
-    }
-  };
-
-  const toggleGroupDisplay = (id: number, item: GroupListItem) => {
-    // handles complex intersection of ui state and data handling
-
-    if (
-      selectionStore.display.groups.filter((el) => el.id === id)
-        .length === 1
-    ) {
-      // remove the group from the selection
-      setSelectionStore(
-        "display",
-        "groups",
-        (prev: DisplayedGroupItem[]) =>
-          prev.filter((el) => el.id !== id)
-      );
-      // remove the group from the edit selection
-      setSelectionStore("editSelection", "groups", id, (prev) => {
-        const { [id]: groupToRemove, ...remaining } = prev;
-        return remaining;
-      });
-      // add the group-list-item back to the groupList
-      mutateGroupList((prev) => [item, ...prev]);
-    } else {
-      // add the group to the selection
-      const indexToInsert = selectionStore.display.groups.length;
-      setSelectionStore("display", "groups", indexToInsert, {
-        id: id,
-        element: <div>Loading (from setAppStore)</div>,
-        listItem: item,
-      });
-      // set the edit selection for the group and set the selectedMembers array to empty
-      setSelectionStore("editSelection", "groups", id, []);
-      // remove the group-llist-item from groupList
-      mutateGroupList((prev: GroupListItem[]) =>
-        prev.filter((el) => el.id !== item.id)
-      );
-      // fetch the full group data
-      fetchGroup(id, indexToInsert);
-    }
-  };
-
   const singlesCount = createMemo(() => singleList()?.length);
   const groupsCount = createMemo(() => groupList()?.length);
   const displayedSinglesCount = createMemo(
@@ -237,41 +314,6 @@ const App: Component = () => {
     () => selectionStore.display.groups.length
   );
 
-  const toggleDisplayedSingleSelect = (id: number) => {
-    // handles selecting a displayed singles check-box (toggles it)
-    if (selectionStore.editSelection.singles.includes(id)) {
-      // remove single from editSelection
-      setSelectionStore("editSelection", "singles", (prev) =>
-        prev.filter((el) => el !== id)
-      );
-    } else {
-      // add single to editSelection
-      setSelectionStore(
-        "editSelection",
-        "singles",
-        selectionStore.editSelection.singles.length,
-        id
-      );
-    }
-  };
-  const toggleMemberSelect = (groupId: number, memberId: number) => {
-    // handles selecting a displayed group-member (toggles it)
-    if (
-      selectionStore.editSelection.groups[groupId].includes(memberId)
-    ) {
-      setSelectionStore("editSelection", "groups", groupId, (prev) =>
-        prev.filter((el) => el !== memberId)
-      );
-    } else {
-      setSelectionStore(
-        "editSelection",
-        "groups",
-        groupId,
-        selectionStore.editSelection.groups[groupId].length,
-        memberId
-      );
-    }
-  };
   function getCookie(cname: string) {
     // for passing djangos csrfToken to ajax-calls
     const name = cname + "=";
@@ -287,50 +329,6 @@ const App: Component = () => {
       }
     }
     return "";
-  }
-
-  async function fetchSingleList(query: string) {
-    // fetches the browsing-list for singles with current query
-    // returns a promise to work with createResource
-    const url = API_BASE + "singles-list/" + query;
-    const response = await fetch(url, {
-      headers: {
-        Accept: "*/*",
-        "Content-Type": "application/json",
-      },
-    });
-    return await response
-      .json()
-      .then((d) =>
-        d.results.filter(
-          (el: SingleListItem) =>
-            !selectionStore.display.singles
-              .map((single) => single.id)
-              .includes(el.id)
-        )
-      );
-  }
-
-  async function fetchGroupList(query: string) {
-    // fetches the browsing-list for groups with current query
-    // returns a promise to work with createResource
-    const url = API_BASE + "groups-list" + query;
-    const response = await fetch(url, {
-      headers: {
-        Accept: "*/*",
-        "Content-Type": "application/json",
-      },
-    });
-    return await response
-      .json()
-      .then((d) =>
-        d.results.filter(
-          (el: GroupListItem) =>
-            !selectionStore.display.groups
-              .map((group) => group.id)
-              .includes(el.id)
-        )
-      );
   }
 
   async function searchItems() {
@@ -378,6 +376,14 @@ const App: Component = () => {
       value={{
         selectionStore: selectionStore,
         setSelectionStore: setSelectionStore,
+        toggleGroupDisplay: toggleGroupDisplay,
+        toggleMemberSelect: toggleMemberSelect,
+        toggleSingleDisplay: toggleDisplayedSingleSelect,
+        toggleDisplayedSingleSelect: toggleDisplayedSingleSelect,
+        fetchGroup: fetchGroup,
+        fetchSingle: fetchSingle,
+        mutateGroupList: mutateGroupList,
+        mutateSingleList: mutateSingleList,
       }}
     >
       <div class="container-fluid w-100 d-flex">

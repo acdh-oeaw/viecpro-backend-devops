@@ -1,19 +1,20 @@
 import type { Component } from "solid-js";
-import { useContext, For, Show } from "solid-js";
+import { useContext, For, Show, createSignal } from "solid-js";
 import { Group } from "../deduplication_types";
 import { AppStateContext } from "../App";
 
 const DisplayedGroup: Component<{
   group: Group;
-  toggleMemberSelect: (groupId: number, memberId: number) => void;
 }> = (props) => {
   const {
     selectionStore: selectionStore,
     setSelectionStore: setSelectionStore,
+    toggleMemberSelect: toggleMemberSelect,
+    toggleGroupDisplay: toggleGroupDisplay,
   } = useContext(AppStateContext);
   const group = props.group;
-  const toggleMemberSelect = props.toggleMemberSelect;
-  
+  const handleHover = () => {};
+  const [eyeIcon, setEyeIcon] = createSignal<string>("visibility");
   return (
     <>
       <div
@@ -21,7 +22,27 @@ const DisplayedGroup: Component<{
         data-toggle="collapse"
         data-target={`#data_members_${group.id}`}
       >
-        {group.name} ({group.id})
+        <div class="d-flex flex-inline align-items-center">
+          <span
+            class="material-symbols-outlined mr-2"
+            style={{ cursor: "pointer" }}
+            onmouseover={() => setEyeIcon("visibility_off")}
+            onmouseleave={() => setEyeIcon("visibility")}
+            onclick={() =>
+              toggleGroupDisplay(
+                group.id,
+                selectionStore.display.groups.find(
+                  (el) => el.id === group.id
+                )!.listItem
+              )
+            }
+          >
+            {eyeIcon()}
+          </span>
+          <span>
+            {group.name} ({group.id})
+          </span>
+        </div>
       </div>
       <div class="collapse" id={`data_members_${group.id}`}>
         <For each={group.members}>

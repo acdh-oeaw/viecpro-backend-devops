@@ -1,20 +1,21 @@
 import type { Component } from "solid-js";
-import { useContext, Show, For } from "solid-js";
+import { useContext, Show, For, createSignal } from "solid-js";
 import { AppStateContext } from "../App";
 import { PersonProxyResponse } from "../deduplication_types";
 
 const DisplayedSingle: Component<{
   single: PersonProxyResponse;
-  toggleDisplayedSingleSelect: (id: number) => void;
 }> = (props) => {
   const {
     selectionStore: selectionStore,
     setSelectionStore: setSelectionStore,
+    toggleSingleDisplay: toggleSingleDisplay,
+    toggleDisplayedSingleSelect: toggleDisplayedSingleSelect,
   } = useContext(AppStateContext);
 
   const single = props.single;
-  const toggleDisplayedSingleSelect =
-    props.toggleDisplayedSingleSelect;
+  const [eyeIcon, setEyeIcon] = createSignal<string>("visibility");
+
   return (
     <>
       <div class="text-sm pt-3">
@@ -54,8 +55,28 @@ const DisplayedSingle: Component<{
             data-toggle="collapse"
             data-target={`#data_proxy_relations_${single.person.id}`}
           >
-            {single.person.name}, {single.person.first_name} (
-            {single.person.id} [{single.status}])
+            <div class="d-flex flex-inline align-items-center">
+              <span
+                class="material-symbols-outlined mr-2"
+                style={{ cursor: "pointer" }}
+                onmouseover={() => setEyeIcon("visibility_off")}
+                onmouseleave={() => setEyeIcon("visibility")}
+                onclick={() =>
+                  toggleSingleDisplay(
+                    single.person.id,
+                    selectionStore.display.singles.find(
+                      (el) => el.id === single.person.id
+                    )!.listItem
+                  )
+                }
+              >
+                {eyeIcon()}
+              </span>
+              <span>
+                {single.person.name}, {single.person.first_name} (
+                {single.person.id} [{single.status}]){" "}
+              </span>
+            </div>
           </div>
         </div>
       </div>
