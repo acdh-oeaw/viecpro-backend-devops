@@ -86,6 +86,7 @@ async function fetchSingleList(query: string) {
       "Content-Type": "application/json",
     },
   });
+  // why await? entweder then oder await
   return await response
     .json()
     .then((d) =>

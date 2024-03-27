@@ -17,31 +17,56 @@ const DisplayedGroup: Component<{
   const [eyeIcon, setEyeIcon] = createSignal<string>("visibility");
   return (
     <>
-      <div
-        class="display-header"
-        data-toggle="collapse"
-        data-target={`#data_members_${group.id}`}
-      >
-        <div class="d-flex flex-inline align-items-center">
-          <span
-            class="material-symbols-outlined mr-2"
+      <div class="d-flex flex-row align-items-center display-header">
+        <div
+          class=""
+          data-toggle="collapse"
+          data-target={`#data_members_${group.id}`}
+        >
+          <div class="d-flex align-items-center">
+            <span
+              class="material-symbols-outlined mr-2"
+              style={{ cursor: "pointer" }}
+              onmouseover={() => setEyeIcon("visibility_off")}
+              onmouseleave={() => setEyeIcon("visibility")}
+              onclick={() =>
+                toggleGroupDisplay(
+                  group.id,
+                  selectionStore.display.groups.find(
+                    (el) => el.id === group.id
+                  )!.listItem
+                )
+              }
+            >
+              {eyeIcon()}
+            </span>
+            <span>
+              {group.name} ({group.id})
+            </span>
+          </div>
+        </div>
+        <div class="dropdown">
+          <div
+            class="btn-icon dropdown-toggle ml-4"
+            id="selection-action-dropdown"
+            data-toggle="dropdown"
+            aria-expanded="false"
             style={{ cursor: "pointer" }}
-            onmouseover={() => setEyeIcon("visibility_off")}
-            onmouseleave={() => setEyeIcon("visibility")}
-            onclick={() =>
-              toggleGroupDisplay(
-                group.id,
-                selectionStore.display.groups.find(
-                  (el) => el.id === group.id
-                )!.listItem
-              )
-            }
           >
-            {eyeIcon()}
-          </span>
-          <span>
-            {group.name} ({group.id})
-          </span>
+            <span class="material-symbols-outlined">settings</span>
+          </div>
+          <div class="dropdown-menu">
+            <li class="dropdown-item">
+              {/* this should only show if more than one group or single are displayed */}
+              <button class="btn btn-outline-none" type="button">
+                merge selected members
+              </button>
+            </li>
+            <li class="dropdown-item">
+              {/* this should only show if more than one single or member are selected */}
+              <span>remove selected members </span>
+            </li>
+          </div>{" "}
         </div>
       </div>
       <div class="collapse" id={`data_members_${group.id}`}>
