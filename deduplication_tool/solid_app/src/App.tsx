@@ -7,6 +7,7 @@ import {
   createResource,
   createEffect,
   Show,
+  createContext,
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import type {
@@ -18,6 +19,26 @@ import type {
   SelectionStore,
   GroupListItem,
 } from "./deduplication_types";
+import { DisplayedSingle } from "./components/DisplayedSingle";
+import { DisplayedGroup } from "./components/DisplayedGroup";
+
+//  main store to handle displayed (selected from browser) and selected items (selected in edit section)
+const [selectionStore, setSelectionStore] =
+  createStore<SelectionStore>({
+    display: {
+      groups: [],
+      singles: [],
+    },
+    editSelection: {
+      groups: {},
+      singles: [],
+    },
+  });
+
+export const AppStateContext = createContext({
+  selectionStore,
+  setSelectionStore,
+});
 
 const App: Component = () => {
   const API_BASE = "/deduplication_tool/api/";
@@ -45,70 +66,12 @@ const App: Component = () => {
           setSelectionStore("display", "singles", storeIndex, {
             id: id,
             element: (
-              <>
-                <div class="text-sm pt-3">
-                  <div class="d-flex align-items-center">
-                    <Show
-                      when={selectionStore.editSelection.singles.includes(
-                        single.person.id
-                      )}
-                    >
-                      <span
-                        onclick={() =>
-                          toggleDisplayedSingleSelect(
-                            single.person.id
-                          )
-                        }
-                        class="material-symbols-outlined  m-0 mr-2 my-1"
-                      >
-                        check_box
-                      </span>
-                    </Show>
-                    <Show
-                      when={
-                        !selectionStore.editSelection.singles.includes(
-                          single.person.id
-                        )
-                      }
-                    >
-                      <span
-                        onclick={() =>
-                          toggleDisplayedSingleSelect(
-                            single.person.id
-                          )
-                        }
-                        class="material-symbols-outlined m-0 mr-2 my-1"
-                      >
-                        check_box_outline_blank
-                      </span>
-                    </Show>
-                    <div
-                      class="person-proxy-display"
-                      data-toggle="collapse"
-                      data-target={`#data_proxy_relations_${single.person.id}`}
-                    >
-                      {single.person.name}, {single.person.first_name}{" "}
-                      ({single.person.id} [{single.status}])
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="collapse relation-display-container"
-                  id={`data_proxy_relations_${single.person.id}`}
-                >
-                  <For each={single.relations}>
-                    {(rel) => (
-                      <>
-                        <div class="relation-display-item">
-                          {rel.relation_type.name}{" "}
-                          {rel.related_institution.name}
-                          {rel.start_date} {rel.end_date}
-                        </div>
-                      </>
-                    )}
-                  </For>
-                </div>
-              </>
+              <DisplayedSingle
+                toggleDisplayedSingleSelect={
+                  toggleDisplayedSingleSelect
+                }
+                single={single}
+              />
             ),
           });
         });
@@ -134,88 +97,10 @@ const App: Component = () => {
         setSelectionStore("display", "groups", indexToInsert, {
           id: id,
           element: (
-            <>
-              <div
-                class="display-header"
-                data-toggle="collapse"
-                data-target={`#data_members_${group.id}`}
-              >
-                {group.name} ({group.id})
-              </div>
-              <div class="collapse" id={`data_members_${group.id}`}>
-                <For each={group.members}>
-                  {(member) => (
-                    <>
-                      <div class="text-sm pt-3">
-                        <div class="d-flex align-items-center">
-                          <Show
-                            when={selectionStore.editSelection.groups[
-                              group.id
-                            ].includes(member.person.id)}
-                          >
-                            <span
-                              onclick={() =>
-                                toggleMemberSelect(
-                                  group.id,
-                                  member.person.id
-                                )
-                              }
-                              class="material-symbols-outlined  m-0 mr-2 my-1"
-                            >
-                              check_box
-                            </span>
-                          </Show>
-                          <Show
-                            when={
-                              !selectionStore.editSelection.groups[
-                                group.id
-                              ].includes(member.person.id)
-                            }
-                          >
-                            <span
-                              onclick={() =>
-                                toggleMemberSelect(
-                                  group.id,
-                                  member.person.id
-                                )
-                              }
-                              class="material-symbols-outlined m-0 mr-2 my-1"
-                            >
-                              check_box_outline_blank
-                            </span>
-                          </Show>
-                          <div
-                            class="person-proxy-display"
-                            data-toggle="collapse"
-                            data-target={`#data_proxy_relations_${member.person.id}`}
-                          >
-                            {member.person.name},{" "}
-                            {member.person.first_name} (
-                            {member.person.id} [{member.status}])
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="collapse relation-display-container"
-                        id={`data_proxy_relations_${member.person.id}`}
-                      >
-                        <For each={member.relations}>
-                          {(rel) => (
-                            <>
-                              <div class="relation-display-item">
-                                {rel.relation_type.name}{" "}
-                                {rel.related_institution.name}
-                                {rel.start_date} {rel.end_date}
-                              </div>
-                            </>
-                          )}
-                        </For>
-                      </div>
-                    </>
-                  )}
-                </For>
-              </div>
-            </>
+            <DisplayedGroup
+              group={group}
+              toggleMemberSelect={toggleMemberSelect}
+            />
           ),
         })
       );
@@ -255,20 +140,6 @@ const App: Component = () => {
         break;
     }
   });
-
-  //  main store to handle displayed (selected from browser) and selected items (selected in edit section)
-  const [selectionStore, setSelectionStore] =
-    createStore<SelectionStore>({
-      display: {
-        groups: [],
-        singles: [],
-      },
-      editSelection: {
-        groups: {},
-        singles: [],
-      },
-    });
-
   const resetStore = () => {
     // clears all selections
     // TODO: consider iterating through the displayed singles and groups and moving listItems back to browser-lists
@@ -503,404 +374,403 @@ const App: Component = () => {
   }
 
   return (
-    <div class="container-fluid w-100 d-flex">
-      {/* --- Start Browser Section */}
-      <div class="col pt-5 pb-3">
-        <button
-          class="btn btn-danger mb-4"
-          onclick={() => resetStore()}
-        >
-          Reset Store
-        </button>
-        <div class="container-fluid border border-secondary rounded py-4 px-2 mb-4">
-          <div class="input-group mb-3">
-            <select
-              class="form-select btn-secondary text-sm rounded-left "
-              aria-label="Example select with button addon"
-              ref={searchModeSelect}
-              onchange={() => setSearchMode(searchModeSelect!.value)}
-            >
-              <option value="both" selected>
-                Both
-              </option>
-              <option value="singles">Singles</option>
-              <option value="groups">Groups</option>
-            </select>
-            <input
-              class="form-control form-control-sm"
-              type="search"
-              placeholder="search for groups and singles"
-              id="search-input"
-              ref={searchInput}
-              onkeydown={(event) => {
-                if (event.key === "Enter") {
-                  event.stopPropagation();
-                  event.preventDefault();
-                  searchItems();
+    <AppStateContext.Provider
+      value={{
+        selectionStore: selectionStore,
+        setSelectionStore: setSelectionStore,
+      }}
+    >
+      <div class="container-fluid w-100 d-flex">
+        {/* --- Start Browser Section */}
+        <div class="col pt-5 pb-3">
+          <button
+            class="btn btn-danger mb-4"
+            onclick={() => resetStore()}
+          >
+            Reset Store
+          </button>
+          <div class="container-fluid border border-secondary rounded py-4 px-2 mb-4">
+            <div class="input-group mb-3">
+              <select
+                class="form-select btn-secondary text-sm rounded-left "
+                aria-label="Example select with button addon"
+                ref={searchModeSelect}
+                onchange={() =>
+                  setSearchMode(searchModeSelect!.value)
                 }
-              }}
-            />
+              >
+                <option value="both" selected>
+                  Both
+                </option>
+                <option value="singles">Singles</option>
+                <option value="groups">Groups</option>
+              </select>
+              <input
+                class="form-control form-control-sm"
+                type="search"
+                placeholder="search for groups and singles"
+                id="search-input"
+                ref={searchInput}
+                onkeydown={(event) => {
+                  if (event.key === "Enter") {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    searchItems();
+                  }
+                }}
+              />
 
-            <button
-              type="button"
-              class="btn btn-primary m-0 btn-sm rounded-right"
-              onclick={searchItems}
-            >
-              Search
-            </button>
-          </div>
+              <button
+                type="button"
+                class="btn btn-primary m-0 btn-sm rounded-right"
+                onclick={searchItems}
+              >
+                Search
+              </button>
+            </div>
 
-          <div class="d-flex" style={"font-size: .8rem;"}>
-            <span class="mr-4">Gender:</span>
-            <div class="form-check form-check-inline mx-1">
-              <input
-                checked
-                class="form-check-input"
-                type="radio"
-                name="gender-radio-group"
-                id="gender-choice-male"
-                value="male"
-              />
-              <label
-                class="form-check-label mr-2"
-                for="gender-choice-male"
-              >
-                Male
-              </label>
-            </div>
-            <div class="form-check form-check-inline mx-1">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="gender-radio-group"
-                id="gender-choice-female"
-                value="female"
-              />
-              <label
-                class="form-check-label mr-2"
-                for="gender-choice-female"
-              >
-                Female
-              </label>
-            </div>
-            <div class="form-check form-check-inline mx-1">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="gender-radio-group"
-                id="gender-choice-other"
-                value="third gender"
-              />
-              <label
-                class="form-check-label mr-2"
-                for="gender-choice-other"
-              >
-                Other/None
-              </label>
-            </div>
-          </div>
-        </div>
-        <div id="menu_navigation">
-          <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-              <a
-                class="nav-link active"
-                id="groups-tab"
-                data-toggle="tab"
-                href="#groups_section"
-                role="tab"
-              >
-                Groups
-                <span
-                  class="badge badge-pill ml-2"
-                  style={{
-                    "background-color":
-                      displayedGroupsCount() > 0
-                        ? "lightblue"
-                        : "lightgray",
-                  }}
+            <div class="d-flex" style={"font-size: .8rem;"}>
+              <span class="mr-4">Gender:</span>
+              <div class="form-check form-check-inline mx-1">
+                <input
+                  checked
+                  class="form-check-input"
+                  type="radio"
+                  name="gender-radio-group"
+                  id="gender-choice-male"
+                  value="male"
+                />
+                <label
+                  class="form-check-label mr-2"
+                  for="gender-choice-male"
                 >
-                  {displayedGroupsCount()}
-                </span>
-                <span
-                  class="badge badge-pill ml-1"
-                  style={{
-                    "background-color":
-                      groupsCount() > 0 ? "#0d6efd" : "lightgray",
-                    color: groupsCount() > 0 ? "white" : "black",
-                  }}
+                  Male
+                </label>
+              </div>
+              <div class="form-check form-check-inline mx-1">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="gender-radio-group"
+                  id="gender-choice-female"
+                  value="female"
+                />
+                <label
+                  class="form-check-label mr-2"
+                  for="gender-choice-female"
                 >
-                  {groupsCount()}
-                </span>
-              </a>
-            </li>
-            <li class="nav-item" role="presentation">
-              <a
-                class="nav-link"
-                id="singles-tab"
-                data-toggle="tab"
-                href="#singles_section"
-                role="tab"
-              >
-                Singles
-                <span
-                  class="badge badge-pill ml-2"
-                  style={{
-                    "background-color":
-                      displayedSinglesCount() > 0
-                        ? "lightblue"
-                        : "lightgray",
-                  }}
+                  Female
+                </label>
+              </div>
+              <div class="form-check form-check-inline mx-1">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="gender-radio-group"
+                  id="gender-choice-other"
+                  value="third gender"
+                />
+                <label
+                  class="form-check-label mr-2"
+                  for="gender-choice-other"
                 >
-                  {displayedSinglesCount()}
-                </span>
-                <span
-                  class="badge badge-pill ml-1"
-                  id="group_count_badge_{{g.id}}"
-                  style={{
-                    "background-color":
-                      singlesCount() > 0 ? "#0d6efd" : "lightgray",
-                    color: singlesCount() > 0 ? "white" : "black",
-                  }}
-                >
-                  {singlesCount()}
-                </span>
-              </a>
-            </li>
-            {/* <li class="nav-item" role="presentation">
-                  <a
-                    class="nav-link"
-                    id="marked-tab"
-                    data-toggle="tab"
-                    href="#marked_section"
-                    //onclick="getAllNotesJson()"
-                    role="tab"
-                  >
-                    Marked
-                  </a>
-                </li> */}
-          </ul>
-        </div>
-        <div class="" id="browser_content">
-          <div class="tab-content" id="myTabContent">
-            <div
-              class="tab-pane show active"
-              id="groups_section"
-              role="tabpanel"
-            >
-              <div
-                class="container-fluid mt-4"
-                style="overflow-y: scroll; height: 80vh"
-              >
-                <ul class="m-0 pl-0 list-group mb-4">
-                  <For
-                    each={selectionStore.display.groups.map(
-                      (group) => group.listItem
-                    )}
-                  >
-                    {(item) => (
-                      <>
-                        <li
-                          class="list-group-item m-o d-flex justify-content-between align-items-center "
-                          onclick={() =>
-                            toggleGroupDisplay(item.id, item)
-                          }
-                          style={{
-                            "background-color": "lightblue",
-                          }}
-                        >
-                          {item.name} ({item.id}){" "}
-                          <span class="badge badge-primary badge-pill">
-                            {item.count}
-                          </span>
-                        </li>
-                      </>
-                    )}
-                  </For>
-                </ul>
-                <ul class="m-0 pl-0 list-group">
-                  <For
-                    each={groupList()}
-                    fallback={<div>No Results</div>}
-                  >
-                    {(item) => (
-                      <>
-                        <li
-                          class="list-group-item m-o d-flex justify-content-between align-items-center "
-                          onclick={() =>
-                            toggleGroupDisplay(item.id, item)
-                          }
-                          style={{
-                            "background-color": "white",
-                          }}
-                        >
-                          {item.name} ({item.id}){" "}
-                          <span class="badge badge-primary badge-pill">
-                            {item.count}
-                          </span>
-                        </li>
-                      </>
-                    )}
-                  </For>
-                </ul>
+                  Other/None
+                </label>
               </div>
             </div>
-            <div
-              class="tab-pane"
-              id="singles_section"
-              role="tabpanel"
-            >
+          </div>
+          <div id="menu_navigation">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <a
+                  class="nav-link active"
+                  id="groups-tab"
+                  data-toggle="tab"
+                  href="#groups_section"
+                  role="tab"
+                >
+                  Groups
+                  <span
+                    class="badge badge-pill ml-2"
+                    style={{
+                      "background-color":
+                        displayedGroupsCount() > 0
+                          ? "lightblue"
+                          : "lightgray",
+                    }}
+                  >
+                    {displayedGroupsCount()}
+                  </span>
+                  <span
+                    class="badge badge-pill ml-1"
+                    style={{
+                      "background-color":
+                        groupsCount() > 0 ? "#0d6efd" : "lightgray",
+                      color: groupsCount() > 0 ? "white" : "black",
+                    }}
+                  >
+                    {groupsCount()}
+                  </span>
+                </a>
+              </li>
+              <li class="nav-item" role="presentation">
+                <a
+                  class="nav-link"
+                  id="singles-tab"
+                  data-toggle="tab"
+                  href="#singles_section"
+                  role="tab"
+                >
+                  Singles
+                  <span
+                    class="badge badge-pill ml-2"
+                    style={{
+                      "background-color":
+                        displayedSinglesCount() > 0
+                          ? "lightblue"
+                          : "lightgray",
+                    }}
+                  >
+                    {displayedSinglesCount()}
+                  </span>
+                  <span
+                    class="badge badge-pill ml-1"
+                    id="group_count_badge_{{g.id}}"
+                    style={{
+                      "background-color":
+                        singlesCount() > 0 ? "#0d6efd" : "lightgray",
+                      color: singlesCount() > 0 ? "white" : "black",
+                    }}
+                  >
+                    {singlesCount()}
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="" id="browser_content">
+            <div class="tab-content" id="myTabContent">
               <div
-                class="container-fluid mt-4"
-                style="overflow-y: scroll; height: 80vh"
+                class="tab-pane show active"
+                id="groups_section"
+                role="tabpanel"
               >
-                <ul class="m-0 pl-0 list-group mb-4">
-                  <For
-                    each={selectionStore.display.singles.map(
-                      (single) => single.listItem
-                    )}
-                  >
-                    {(item) => (
-                      <>
-                        <li
-                          class="list-group-item w-100 m-0"
-                          onclick={() =>
-                            toggleSingleDisplay(item.id, item)
-                          }
-                          style={{
-                            "background-color": "lightblue",
-                          }}
-                        >
-                          {item.name}, {item.first_name} ({item.id})
-                        </li>
-                      </>
-                    )}
-                  </For>
-                </ul>
-                <ul class="m-0 pl-0 list-group">
-                  <For
-                    each={singleList()}
-                    fallback={<div>No Results</div>}
-                  >
-                    {(item) => (
-                      <>
-                        <li
-                          class="list-group-item w-100 m-0"
-                          onclick={() =>
-                            toggleSingleDisplay(item.id, item)
-                          }
-                          style={{
-                            "background-color": "white",
-                          }}
-                        >
-                          {item.name}, {item.first_name} ({item.id})
-                        </li>
-                      </>
-                    )}
-                  </For>
-                </ul>
+                <div
+                  class="container-fluid mt-4"
+                  style="overflow-y: scroll; height: 80vh"
+                >
+                  <ul class="m-0 pl-0 list-group mb-4">
+                    <For
+                      each={selectionStore.display.groups.map(
+                        (group) => group.listItem
+                      )}
+                    >
+                      {(item) => (
+                        <>
+                          <li
+                            class="list-group-item m-o d-flex justify-content-between align-items-center "
+                            onclick={() =>
+                              toggleGroupDisplay(item.id, item)
+                            }
+                            style={{
+                              "background-color": "lightblue",
+                            }}
+                          >
+                            {item.name} ({item.id}){" "}
+                            <span class="badge badge-primary badge-pill">
+                              {item.count}
+                            </span>
+                          </li>
+                        </>
+                      )}
+                    </For>
+                  </ul>
+                  <ul class="m-0 pl-0 list-group">
+                    <For
+                      each={groupList()}
+                      fallback={<div>No Results</div>}
+                    >
+                      {(item) => (
+                        <>
+                          <li
+                            class="list-group-item m-o d-flex justify-content-between align-items-center "
+                            onclick={() =>
+                              toggleGroupDisplay(item.id, item)
+                            }
+                            style={{
+                              "background-color": "white",
+                            }}
+                          >
+                            {item.name} ({item.id}){" "}
+                            <span class="badge badge-primary badge-pill">
+                              {item.count}
+                            </span>
+                          </li>
+                        </>
+                      )}
+                    </For>
+                  </ul>
+                </div>
+              </div>
+              <div
+                class="tab-pane"
+                id="singles_section"
+                role="tabpanel"
+              >
+                <div
+                  class="container-fluid mt-4"
+                  style="overflow-y: scroll; height: 80vh"
+                >
+                  <ul class="m-0 pl-0 list-group mb-4">
+                    <For
+                      each={selectionStore.display.singles.map(
+                        (single) => single.listItem
+                      )}
+                    >
+                      {(item) => (
+                        <>
+                          <li
+                            class="list-group-item w-100 m-0"
+                            onclick={() =>
+                              toggleSingleDisplay(item.id, item)
+                            }
+                            style={{
+                              "background-color": "lightblue",
+                            }}
+                          >
+                            {item.name}, {item.first_name} ({item.id})
+                          </li>
+                        </>
+                      )}
+                    </For>
+                  </ul>
+                  <ul class="m-0 pl-0 list-group">
+                    <For
+                      each={singleList()}
+                      fallback={<div>No Results</div>}
+                    >
+                      {(item) => (
+                        <>
+                          <li
+                            class="list-group-item w-100 m-0"
+                            onclick={() =>
+                              toggleSingleDisplay(item.id, item)
+                            }
+                            style={{
+                              "background-color": "white",
+                            }}
+                          >
+                            {item.name}, {item.first_name} ({item.id})
+                          </li>
+                        </>
+                      )}
+                    </For>
+                  </ul>
+                </div>
+              </div>
+              <div
+                class="tab-pane fade"
+                id="marked_section"
+                role="tabpanel"
+              >
+                Not implemented yet
               </div>
             </div>
-            <div
-              class="tab-pane fade"
-              id="marked_section"
-              role="tabpanel"
-            >
-              Not implemented yet
-            </div>
           </div>
         </div>
-      </div>
-      {/* --- End Browser Section */}
-      {/* --- Start Display Section */}
+        {/* --- End Browser Section */}
+        {/* --- Start Display Section */}
 
-      <div class="container-fluid pt-5 pb-3">
-        <div class="d-flex flex-inline justify-content-center align-items-center">
-          <h4 class="pl-0 mr-4">Selected</h4>
+        <div class="container-fluid pt-5 pb-3">
+          <div class="d-flex flex-inline justify-content-center align-items-center">
+            <h4 class="pl-0 mr-4">Selected</h4>
 
-          <div class="dropdown">
-            <button
-              class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle"
-              type="button"
-              id="selection-action-dropdown"
-              data-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <span class="material-symbols-outlined">settings</span>
-            </button>
-            <div class="dropdown-menu">
-              <li class="dropdown-item">
-                {/* this should only show if more than one group or single are displayed */}
-                <span> merge all</span>
-              </li>
-              <li class="dropdown-item">
-                {/* this should only show if more than one single or member are selected */}
-                <span> group selected </span>
-              </li>
-              <li class="dropdown-item">
-                <span onclick={resetStore}>clear display</span>
-              </li>
+            <div class="dropdown">
+              <button
+                class="btn btn-sm btn-outline-secondary btn-icon dropdown-toggle"
+                type="button"
+                id="selection-action-dropdown"
+                data-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <span class="material-symbols-outlined">
+                  settings
+                </span>
+              </button>
+              <div class="dropdown-menu">
+                <li class="dropdown-item">
+                  {/* this should only show if more than one group or single are displayed */}
+                  <span> merge all</span>
+                </li>
+                <li class="dropdown-item">
+                  {/* this should only show if more than one single or member are selected */}
+                  <span> group selected </span>
+                </li>
+                <li class="dropdown-item">
+                  <span onclick={resetStore}>clear display</span>
+                </li>
+              </div>
             </div>
           </div>
+          <div
+            class="pl-2 pb-5"
+            id="relations-section"
+            style="overflow-y: scroll; height: 120vh;"
+          >
+            <Show when={selectionStore.display.groups.length > 0}>
+              <div class="m-0 p-0">
+                <For
+                  each={selectionStore.display.groups.map(
+                    (el) => el.element
+                  )}
+                  fallback={<div>No groups selected</div>}
+                >
+                  {(item) => item}
+                </For>
+              </div>
+            </Show>
+
+            <Show when={selectionStore.display.singles.length > 0}>
+              <div class="m-0 p-0">
+                <p class="display-header">Singles</p>
+                <For
+                  each={selectionStore.display.singles.map(
+                    (el) => el.element
+                  )}
+                  fallback={<div>No singles selected</div>}
+                >
+                  {(item) => item}
+                </For>
+              </div>
+            </Show>
+          </div>
         </div>
-        <div
-          class="pl-2 pb-5"
-          id="relations-section"
-          style="overflow-y: scroll; height: 120vh;"
-        >
-          <Show when={selectionStore.display.groups.length > 0}>
-            <div class="m-0 p-0">
-              <For
-                each={selectionStore.display.groups.map(
-                  (el) => el.element
-                )}
-                fallback={<div>No groups selected</div>}
+        {/* --- End Display Section */}
+        {/* --- Start Detail Section */}
+
+        <div class="col">
+          <div class="pl-0">
+            <span class="d-flex">
+              <h2 class="pl-4">Detail / Suggestions</h2>
+              <button
+                class="btn btn-sm btn-outline-secondary ml-4"
+                //onclick="clearSuggestions()"
+                id="clearSuggestions"
               >
-                {(item) => item}
-              </For>
-            </div>
-          </Show>
+                Clear
+              </button>
+            </span>
+          </div>
 
-          <Show when={selectionStore.display.singles.length > 0}>
-            <div class="m-0 p-0">
-              <p class="display-header">Singles</p>
-              <For
-                each={selectionStore.display.singles.map(
-                  (el) => el.element
-                )}
-                fallback={<div>No singles selected</div>}
-              >
-                {(item) => item}
-              </For>
-            </div>
-          </Show>
+          <div
+            class="pl-4 pb-5"
+            id="detail-content"
+            style="width: 100%; overflow-y: scroll; height: 80vh"
+          ></div>
         </div>
+        {/* --- End Detail Section */}
       </div>
-      {/* --- End Display Section */}
-      {/* --- Start Detail Section */}
-
-      <div class="col">
-        <div class="pl-0">
-          <span class="d-flex">
-            <h2 class="pl-4">Detail / Suggestions</h2>
-            <button
-              class="btn btn-sm btn-outline-secondary ml-4"
-              //onclick="clearSuggestions()"
-              id="clearSuggestions"
-            >
-              Clear
-            </button>
-          </span>
-        </div>
-
-        <div
-          class="pl-4 pb-5"
-          id="detail-content"
-          style="width: 100%; overflow-y: scroll; height: 80vh"
-        ></div>
-      </div>
-      {/* --- End Detail Section */}
-    </div>
+    </AppStateContext.Provider>
   );
 };
 

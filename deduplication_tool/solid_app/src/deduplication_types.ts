@@ -1,5 +1,6 @@
 import { JSXElement } from "solid-js";
-
+import type {Context} from "solid-js";
+import { SetStoreFunction } from "solid-js/store";
 
 interface PersonResponse {
     id: number;
@@ -91,7 +92,10 @@ type Group = {
   members: PersonProxyResponse[];
 };
 
-
-export type {SelectionStore, Group, SingleListItem, GroupListItem, DisplayedGroupItem, DisplayedSingleItem, PersonProxyResponse, PersonInstitutionRelation}
+type AppStateContextType = {
+  selectionStore: SelectionStore;
+  setSelectionStore: SetStoreFunction<SelectionStore>;
+}
+export type {SelectionStore, Group, SingleListItem, GroupListItem, DisplayedGroupItem, DisplayedSingleItem, PersonProxyResponse, PersonInstitutionRelation, AppStateContextType}
 
 
