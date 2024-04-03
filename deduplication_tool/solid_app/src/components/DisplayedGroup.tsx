@@ -11,6 +11,7 @@ const DisplayedGroup: Component<{
     setSelectionStore: setSelectionStore,
     toggleMemberSelect: toggleMemberSelect,
     toggleGroupDisplay: toggleGroupDisplay,
+    getDetail: getDetail,
   } = useContext(AppStateContext);
   const group = props.group;
   const handleHover = () => {};
@@ -113,6 +114,16 @@ const DisplayedGroup: Component<{
                     {member.person.name}, {member.person.first_name} (
                     {member.person.id} [{member.status}])
                   </div>
+                  <button
+                    class="btn btn-sm btn-outline-none btn-icon mb-0"
+                    onclick={() => {
+                      getDetail(member.person.id);
+                    }}
+                  >
+                    <span class="material-symbols-outlined">
+                      patient_list
+                    </span>
+                  </button>
                 </div>
               </div>
               <div

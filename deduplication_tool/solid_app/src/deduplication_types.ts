@@ -100,6 +100,8 @@ interface AppStateContextType {
   mutateGroupList: Setter<any>,
   fetchGroup: (id:number, indexToInsert:number) => Promise<void>,
   fetchSingle: (id:number, indexToInster:number)=>Promise<void>,
+  getDetail: (perId:number)=>Promise<void>,
+  getCookie: (cname:string)=>string
   
 }
 export type {SelectionStore, Group, SingleListItem, GroupListItem, DisplayedGroupItem, DisplayedSingleItem, PersonProxyResponse, PersonInstitutionRelation, AppStateContextType}

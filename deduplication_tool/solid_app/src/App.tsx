@@ -1,5 +1,6 @@
 import type { Component, JSXElement } from "solid-js";
 import styles from "./App.module.css";
+import $ from "jquery";
 import {
   createSignal,
   For,
@@ -23,7 +24,24 @@ import { DisplayedSingle } from "./components/DisplayedSingle";
 import { DisplayedGroup } from "./components/DisplayedGroup";
 
 const API_BASE = "/deduplication_tool/api/";
+let detailContent: HTMLDivElement | undefined = undefined;
 
+function getCookie(cname: string) {
+  // for passing djangos csrfToken to ajax-calls
+  const name = cname + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(";");
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == " ") {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 //  main store to handle displayed (selected from browser) and selected items (selected in edit section)
 const [selectionStore, setSelectionStore] =
   createStore<SelectionStore>({
@@ -259,6 +277,17 @@ const toggleGroupDisplay = (id: number, item: GroupListItem) => {
   }
 };
 
+async function getDetail(perId: number) {
+  const result_html = fetch(
+    `/dubletten/get_person_detail/${perId.toString()}/`
+  )
+    .then((response) => response.json())
+    .then((json) => {
+      // yeah, that is strange, but I need to use jquery for the ampel to work correctly.
+      $("#detail_section").html(json.html);
+    });
+}
+
 export const AppStateContext = createContext({
   selectionStore,
   setSelectionStore,
@@ -270,6 +299,8 @@ export const AppStateContext = createContext({
   fetchGroup,
   fetchSingle,
   toggleDisplayedSingleSelect,
+  getDetail,
+  getCookie,
 });
 
 const App: Component = () => {
@@ -314,23 +345,6 @@ const App: Component = () => {
   const displayedGroupsCount = createMemo(
     () => selectionStore.display.groups.length
   );
-
-  function getCookie(cname: string) {
-    // for passing djangos csrfToken to ajax-calls
-    const name = cname + "=";
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(";");
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == " ") {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
-    }
-    return "";
-  }
 
   async function searchItems() {
     // over complex search function that creates the query string for search
@@ -418,6 +432,8 @@ const App: Component = () => {
         fetchSingle: fetchSingle,
         mutateGroupList: mutateGroupList,
         mutateSingleList: mutateSingleList,
+        getDetail: getDetail,
+        getCookie: getCookie,
       }}
     >
       <div class="container-fluid w-100 d-flex">
@@ -820,8 +836,9 @@ const App: Component = () => {
 
           <div
             class="pl-4 pb-5"
-            id="detail-content"
+            ref={detailContent}
             style="width: 100%; overflow-y: scroll; height: 80vh"
+            id="detail_section"
           ></div>
         </div>
         {/* --- End Detail Section */}

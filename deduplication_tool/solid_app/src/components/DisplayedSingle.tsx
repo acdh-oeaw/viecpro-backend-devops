@@ -11,6 +11,7 @@ const DisplayedSingle: Component<{
     setSelectionStore: setSelectionStore,
     toggleSingleDisplay: toggleSingleDisplay,
     toggleDisplayedSingleSelect: toggleDisplayedSingleSelect,
+    getDetail: getDetail,
   } = useContext(AppStateContext);
 
   const single = props.single;
@@ -78,6 +79,16 @@ const DisplayedSingle: Component<{
               </span>
             </div>
           </div>
+          <button
+            class="btn btn-sm btn-outline-none btn-icon mb-0"
+            onclick={() => {
+              getDetail(single.person.id);
+            }}
+          >
+            <span class="material-symbols-outlined">
+              patient_list
+            </span>
+          </button>
         </div>
       </div>
       <div
