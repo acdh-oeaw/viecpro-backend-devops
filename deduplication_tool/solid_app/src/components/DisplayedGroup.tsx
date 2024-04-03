@@ -19,7 +19,7 @@ const DisplayedGroup: Component<{
     <>
       <div class="d-flex flex-row align-items-center display-header">
         <div
-          class=""
+          class="auto-collapsable-group-container collapsed"
           data-toggle="collapse"
           data-target={`#data_members_${group.id}`}
         >
@@ -106,7 +106,7 @@ const DisplayedGroup: Component<{
                     </span>
                   </Show>
                   <div
-                    class="person-proxy-display"
+                    class="person-proxy-display auto-collapsable-member-relations-container collapsed"
                     data-toggle="collapse"
                     data-target={`#data_proxy_relations_${member.person.id}`}
                   >

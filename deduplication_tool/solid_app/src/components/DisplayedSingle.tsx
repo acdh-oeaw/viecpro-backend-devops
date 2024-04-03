@@ -51,7 +51,7 @@ const DisplayedSingle: Component<{
             </span>
           </Show>
           <div
-            class="person-proxy-display"
+            class="person-proxy-display auto-collapsable-single-relations-container collapsed"
             data-toggle="collapse"
             data-target={`#data_proxy_relations_${single.person.id}`}
           >

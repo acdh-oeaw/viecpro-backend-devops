@@ -372,6 +372,39 @@ const App: Component = () => {
     }
   }
 
+  function expandAll() {
+    // should expand all collapes member containers of groups and all relation containers of each member and single
+    // targets:
+    // auto-collapsable-group-container
+    // auto-collapsable-member-relations-container
+    // auto-collapsable-single-relations-container
+    // debug: to work, the element must have the collapsed class attached if it is collapsed at start of the app.
+
+    document
+      .querySelectorAll(
+        ".auto-collapsable-group-container, .auto-collapsable-member-relations-container, .auto-collapsable-single-relations-container"
+      )
+      .forEach((el) => {
+        if (el.classList.contains("collapsed")) {
+          // @ts-ignore
+          el.click();
+        }
+      });
+  }
+
+  function collapseAll() {
+    // exact reverse of expandAll()
+    document
+      .querySelectorAll(
+        ".auto-collapsable-group-container, .auto-collapsable-member-relations-container, .auto-collapsable-single-relations-container"
+      )
+      .forEach((el) => {
+        if (!el.classList.contains("collapsed")) {
+          // @ts-ignore
+          el.click();
+        }
+      });
+  }
   return (
     <AppStateContext.Provider
       value={{
@@ -690,6 +723,22 @@ const App: Component = () => {
 
         <div class="container-fluid pt-5 pb-3">
           <div class="d-flex flex-inline justify-content-center align-items-center">
+            <button
+              class="btn btn-outline-none btn-icon"
+              onclick={() => expandAll()}
+            >
+              <span class="material-symbols-outlined">
+                expand_all
+              </span>
+            </button>
+            <button
+              class="btn btn-outline-none btn-icon"
+              onclick={() => collapseAll()}
+            >
+              <span class="material-symbols-outlined">
+                collapse_all
+              </span>
+            </button>
             <h4 class="pl-0 mr-4">Selected</h4>
 
             <div class="dropdown">
