@@ -11,6 +11,7 @@ const DisplayedGroup: Component<{
     setSelectionStore: setSelectionStore,
     toggleMemberSelect: toggleMemberSelect,
     toggleGroupDisplay: toggleGroupDisplay,
+    startAction: startAction,
     getDetail: getDetail,
   } = useContext(AppStateContext);
   const group = props.group;
@@ -57,13 +58,23 @@ const DisplayedGroup: Component<{
             <span class="material-symbols-outlined">settings</span>
           </div>
           <div class="dropdown-menu">
-            <li class="dropdown-item">
-              {/* this should only show if more than one group or single are displayed */}
-              <button class="btn btn-outline-none" type="button">
-                merge selected members
-              </button>
+            {/* this should only show if more than one group or single are displayed */}
+            <li
+              class="dropdown-item"
+              onclick={() => startAction("remerge group")}
+            >
+              remerge group
             </li>
-            <li class="dropdown-item">
+            <li
+              class="dropdown-item"
+              onclick={() => startAction("merge_selected_members")}
+            >
+              merge selected members
+            </li>
+            <li
+              class="dropdown-item"
+              onclick={() => startAction("remove_selected_members")}
+            >
               {/* this should only show if more than one single or member are selected */}
               <span>remove selected members </span>
             </li>

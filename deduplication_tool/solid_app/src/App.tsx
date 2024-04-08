@@ -1,4 +1,4 @@
-import type { Component, JSXElement } from "solid-js";
+import type { Component, JSXElemen } from "solid-js";
 import styles from "./App.module.css";
 import $ from "jquery";
 import {
@@ -10,7 +10,7 @@ import {
   Show,
   createContext,
 } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, unwrap, produce } from "solid-js/store";
 import type {
   Group,
   PersonProxyResponse,
@@ -78,21 +78,47 @@ const toggleDisplayedSingleSelect = (id: number) => {
 const toggleMemberSelect = (groupId: number, memberId: number) => {
   // handles selecting a displayed group-member (toggles it)
   if (
-    selectionStore.editSelection.groups[groupId].includes(memberId)
+    selectionStore.editSelection.groups.filter(
+      (el) => el.id === groupId
+    ).length === 1 &&
+    selectionStore.editSelection.groups
+      .filter((el) => el.id === groupId)[0]
+      .members.includes(memberId)
   ) {
-    setSelectionStore("editSelection", "groups", groupId, (prev) =>
-      prev.filter((el) => el !== memberId)
+    setSelectionStore(
+      "editSelection",
+      "groups",
+      (el) => el.id === groupId,
+      "members",
+      (prev) => prev.filter((el) => el !== memberId)
     );
   } else {
     setSelectionStore(
       "editSelection",
       "groups",
-      groupId,
-      selectionStore.editSelection.groups[groupId].length,
+      (el) => el.id === groupId,
+      (el) => el.members.length,
       memberId
     );
   }
 };
+
+async function startAction(action: string) {
+  const data = unwrap(selectionStore.editSelection);
+  const serializedData = JSON.stringify(data);
+  console.log(serializedData);
+  const response = (
+    await fetch(`/deduplication_tool/actions/${action}/`, {
+      method: "POST",
+      body: serializedData,
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+    })
+  )
+    .json()
+    .then((json) => console.log(json));
+}
 
 async function fetchSingleList(query: string) {
   // fetches the browsing-list for singles with current query
@@ -252,10 +278,20 @@ const toggleGroupDisplay = (id: number, item: GroupListItem) => {
         prev.filter((el) => el.id !== id)
     );
     // remove the group from the edit selection
-    setSelectionStore("editSelection", "groups", id, (prev) => {
-      const { [id]: groupToRemove, ...remaining } = prev;
-      return remaining;
-    });
+    setSelectionStore(
+      "editSelection",
+      "groups",
+      produce((prev) => prev.filter((el) => el.id !== id))
+    );
+    // (prev) => {
+    //prev.filter((el) => el.id !== id)
+
+    //   console.log("previous", prev);
+    //   const { [id]: groupToRemove, ...remaining } = prev;
+    //   console.log("remaining groups", remaining);
+    //   console.log("group to remove:", groupToRemove);
+    //   return remaining;
+    // });
     // add the group-list-item back to the groupList
     mutateGroupList((prev) => [item, ...prev]);
   } else {
@@ -301,6 +337,7 @@ export const AppStateContext = createContext({
   toggleDisplayedSingleSelect,
   getDetail,
   getCookie,
+  startAction,
 });
 
 const App: Component = () => {
@@ -434,6 +471,7 @@ const App: Component = () => {
         mutateSingleList: mutateSingleList,
         getDetail: getDetail,
         getCookie: getCookie,
+        startAction: startAction,
       }}
     >
       <div class="container-fluid w-100 d-flex">
@@ -770,11 +808,17 @@ const App: Component = () => {
                 </span>
               </button>
               <div class="dropdown-menu">
-                <li class="dropdown-item">
+                <li
+                  class="dropdown-item"
+                  onclick={() => startAction("merge_all")}
+                >
                   {/* this should only show if more than one group or single are displayed */}
                   <span> merge all</span>
                 </li>
-                <li class="dropdown-item">
+                <li
+                  class="dropdown-item"
+                  onclick={() => startAction("group_selection")}
+                >
                   {/* this should only show if more than one single or member are selected */}
                   <span> group selected </span>
                 </li>

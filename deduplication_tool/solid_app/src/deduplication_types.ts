@@ -50,7 +50,10 @@ interface DisplayedSingleItem {
   listItem: SingleListItem ; 
 }
   
-
+interface GroupWithMembers {
+  id: number;
+  members: number[];
+}
 interface SelectionStore{
     display: {
       groups: DisplayedGroupItem[];
@@ -59,7 +62,7 @@ interface SelectionStore{
 
     editSelection: {
       // groups: key is group id, values are selected member-ids for this group
-      groups: {[key: number]: number[]};
+      groups: GroupWithMembers[];//{[key: number]: number[]};
       singles: number[];
     };
   };
@@ -101,7 +104,8 @@ interface AppStateContextType {
   fetchGroup: (id:number, indexToInsert:number) => Promise<void>,
   fetchSingle: (id:number, indexToInster:number)=>Promise<void>,
   getDetail: (perId:number)=>Promise<void>,
-  getCookie: (cname:string)=>string
+  getCookie: (cname:string)=>string,
+  startAction: (action:string)=> Promise<void>
   
 }
 export type {SelectionStore, Group, SingleListItem, GroupListItem, DisplayedGroupItem, DisplayedSingleItem, PersonProxyResponse, PersonInstitutionRelation, AppStateContextType}
