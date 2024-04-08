@@ -8,7 +8,7 @@ test:
 	python manage.py test
 
 notebook:
-	python manage.py shell_plus --notebook
+	python manage.py shell_plus --lab
 
 makemigrations: 
 	python manage.py makemigrations

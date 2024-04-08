@@ -18,6 +18,14 @@ python-versions = ">=3.6"
 vine = ">=5.0.0,<6.0.0"
 
 [[package]]
+name = "annotated-types"
+version = "0.6.0"
+description = "Reusable constraint types to use with typing.Annotated"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
 name = "anyio"
 version = "4.3.0"
 description = "High level compatibility layer for multiple asynchronous event loop implementations"
@@ -1717,6 +1725,33 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
+name = "pydantic"
+version = "2.6.4"
+description = "Data validation using Python type hints"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+annotated-types = ">=0.4.0"
+pydantic-core = "2.16.3"
+typing-extensions = ">=4.6.1"
+
+[package.extras]
+email = ["email-validator (>=2.0.0)"]
+
+[[package]]
+name = "pydantic-core"
+version = "2.16.3"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
+
+[[package]]
 name = "pyflakes"
 version = "3.1.0"
 description = "passive checker of Python programs"
@@ -2334,11 +2369,12 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "d4254cbefffd22b2e2f52aa5a0d1deac45c7be8e39b2739647cf9cb88852a7ea"
+content-hash = "5719a186ed9fca25ad9c3323c094ce5f0513b61da0f135db1e8769e42ea0d677"
 
 [metadata.files]
 acdh-django-charts = []
 amqp = []
+annotated-types = []
 anyio = []
 anytree = []
 apis-ampel = []
@@ -2465,6 +2501,8 @@ ptyprocess = []
 pure-eval = []
 pycodestyle = []
 pycparser = []
+pydantic = []
+pydantic-core = []
 pyflakes = []
 pygments = []
 pylint = []
