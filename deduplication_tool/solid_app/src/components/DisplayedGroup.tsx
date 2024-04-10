@@ -1,5 +1,12 @@
 import type { Component } from "solid-js";
-import { useContext, For, Show, createSignal } from "solid-js";
+import {
+  useContext,
+  For,
+  Show,
+  createSignal,
+  createEffect,
+  on,
+} from "solid-js";
 import { Group } from "../deduplication_types";
 import { AppStateContext } from "../App";
 
@@ -19,6 +26,7 @@ const DisplayedGroup: Component<{
   const group = props.group;
   const handleHover = () => {};
   const [eyeIcon, setEyeIcon] = createSignal<string>("visibility");
+
   return (
     <>
       <div class="d-flex flex-row align-items-center display-header">
@@ -89,44 +97,18 @@ const DisplayedGroup: Component<{
             <>
               <div class="text-sm pt-3">
                 <div class="d-flex align-items-center">
-                  <Show
-                    when={
-                      Object.keys(groupEditSelection()).includes(
-                        group.id.toString()
-                      ) &&
-                      groupEditSelection()[group.id].includes(
+                  <span
+                    onclick={(event) =>
+                      toggleMemberSelect(
+                        event,
+                        group.id,
                         member.person.id
                       )
                     }
+                    class="material-symbols-outlined  m-0 mr-2 my-1"
                   >
-                    <span
-                      onclick={() =>
-                        toggleMemberSelect(group.id, member.person.id)
-                      }
-                      class="material-symbols-outlined  m-0 mr-2 my-1"
-                    >
-                      check_box
-                    </span>
-                  </Show>
-                  <Show
-                    when={
-                      Object.keys(groupEditSelection()).includes(
-                        group.id.toString()
-                      ) &&
-                      !groupEditSelection()[group.id].includes(
-                        member.person.id
-                      )
-                    }
-                  >
-                    <span
-                      onclick={() =>
-                        toggleMemberSelect(group.id, member.person.id)
-                      }
-                      class="material-symbols-outlined m-0 mr-2 my-1"
-                    >
-                      check_box_outline_blank
-                    </span>
-                  </Show>
+                    check_box_outline_blank
+                  </span>
                   <div
                     class="person-proxy-display auto-collapsable-member-relations-container collapsed"
                     data-toggle="collapse"

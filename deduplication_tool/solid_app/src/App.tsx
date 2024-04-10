@@ -23,7 +23,6 @@ import type {
 } from "./deduplication_types";
 import { DisplayedSingle } from "./components/DisplayedSingle";
 import { DisplayedGroup } from "./components/DisplayedGroup";
-import { preview } from "vite";
 
 const API_BASE = "/deduplication_tool/api/";
 let detailContent: HTMLDivElement | undefined = undefined;
@@ -82,7 +81,11 @@ const toggleDisplayedSingleSelect = (id: number) => {
   }
 };
 
-const toggleMemberSelect = (groupId: number, memberId: number) => {
+const toggleMemberSelect = (
+  event: MouseEvent,
+  groupId: number,
+  memberId: number
+) => {
   // handles selecting a displayed group-member (toggles it)
   console.log("toggle memberSelect clicked");
   if (
@@ -93,12 +96,17 @@ const toggleMemberSelect = (groupId: number, memberId: number) => {
       prev[groupId] = prev[groupId].filter((el) => el !== memberId);
       return prev;
     });
+    //@ts-ignore
+
+    event.target.innerHTML = "check_box_outline_blank";
   } else {
     setGroupEditSelection((prev) => {
       prev[groupId].push(memberId);
       console.log("pushed ", memberId, "to ", prev);
       return prev;
     });
+    //@ts-ignore
+    event.target.innerHTML = "check_box";
   }
   console.log(
     "groupEditSelection after toggle",

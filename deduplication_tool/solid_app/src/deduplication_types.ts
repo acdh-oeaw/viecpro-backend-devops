@@ -95,7 +95,7 @@ interface AppStateContextType {
   setSelectionStore: SetStoreFunction<SelectionStore>;
   toggleSingleDisplay: (id:number, item:SingleListItem)=>void,
   toggleGroupDisplay: (id:number, item:GroupListItem)=>void,
-  toggleMemberSelect:(groupId: number, memberId: number) => void,
+  toggleMemberSelect:(event:MouseEvent, groupId: number, memberId: number) => void,
   toggleDisplayedSingleSelect:(id:number)=>void,
   mutateSingleList: Setter<any>,
   mutateGroupList: Setter<any>,
