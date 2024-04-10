@@ -9,6 +9,8 @@ const DisplayedGroup: Component<{
   const {
     selectionStore: selectionStore,
     setSelectionStore: setSelectionStore,
+    groupEditSelection: groupEditSelection,
+    setGroupEditSelection: setGroupEditSelection,
     toggleMemberSelect: toggleMemberSelect,
     toggleGroupDisplay: toggleGroupDisplay,
     startAction: startAction,
@@ -88,9 +90,14 @@ const DisplayedGroup: Component<{
               <div class="text-sm pt-3">
                 <div class="d-flex align-items-center">
                   <Show
-                    when={selectionStore.editSelection.groups[
-                      group.id
-                    ].includes(member.person.id)}
+                    when={
+                      Object.keys(groupEditSelection()).includes(
+                        group.id.toString()
+                      ) &&
+                      groupEditSelection()[group.id].includes(
+                        member.person.id
+                      )
+                    }
                   >
                     <span
                       onclick={() =>
@@ -103,9 +110,12 @@ const DisplayedGroup: Component<{
                   </Show>
                   <Show
                     when={
-                      !selectionStore.editSelection.groups[
-                        group.id
-                      ].includes(member.person.id)
+                      Object.keys(groupEditSelection()).includes(
+                        group.id.toString()
+                      ) &&
+                      !groupEditSelection()[group.id].includes(
+                        member.person.id
+                      )
                     }
                   >
                     <span

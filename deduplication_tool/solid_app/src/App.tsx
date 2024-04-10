@@ -1,4 +1,4 @@
-import type { Component, JSXElemen } from "solid-js";
+import type { Component, JSXElement } from "solid-js";
 import styles from "./App.module.css";
 import $ from "jquery";
 import {
@@ -19,9 +19,11 @@ import type {
   DisplayedGroupItem,
   SelectionStore,
   GroupListItem,
+  GroupWithMembers,
 } from "./deduplication_types";
 import { DisplayedSingle } from "./components/DisplayedSingle";
 import { DisplayedGroup } from "./components/DisplayedGroup";
+import { preview } from "vite";
 
 const API_BASE = "/deduplication_tool/api/";
 let detailContent: HTMLDivElement | undefined = undefined;
@@ -50,10 +52,14 @@ const [selectionStore, setSelectionStore] =
       singles: [],
     },
     editSelection: {
-      groups: {},
+      //groups: {},
       singles: [],
     },
   });
+
+const [groupEditSelection, setGroupEditSelection] = createSignal<{
+  [key: number]: number[];
+}>({});
 
 const [singleQuery, setSingleQuery] = createSignal<string>();
 const [groupQuery, setGroupQuery] = createSignal<string>();
@@ -75,36 +81,64 @@ const toggleDisplayedSingleSelect = (id: number) => {
     );
   }
 };
+
 const toggleMemberSelect = (groupId: number, memberId: number) => {
   // handles selecting a displayed group-member (toggles it)
+  console.log("toggle memberSelect clicked");
   if (
-    selectionStore.editSelection.groups.filter(
-      (el) => el.id === groupId
-    ).length === 1 &&
-    selectionStore.editSelection.groups
-      .filter((el) => el.id === groupId)[0]
-      .members.includes(memberId)
+    Object.keys(groupEditSelection()).includes(groupId.toString()) &&
+    groupEditSelection()[groupId].includes(memberId)
   ) {
-    setSelectionStore(
-      "editSelection",
-      "groups",
-      (el) => el.id === groupId,
-      "members",
-      (prev) => prev.filter((el) => el !== memberId)
-    );
+    setGroupEditSelection((prev) => {
+      prev[groupId] = prev[groupId].filter((el) => el !== memberId);
+      return prev;
+    });
   } else {
-    setSelectionStore(
-      "editSelection",
-      "groups",
-      (el) => el.id === groupId,
-      (el) => el.members.length,
-      memberId
-    );
+    setGroupEditSelection((prev) => {
+      prev[groupId].push(memberId);
+      console.log("pushed ", memberId, "to ", prev);
+      return prev;
+    });
   }
+  console.log(
+    "groupEditSelection after toggle",
+    groupEditSelection()
+  );
+
+  // if (
+  //   selectionStore.editSelection.groups.filter(
+  //     (el) => el.id === groupId
+  //   ).length === 1 &&
+  //   selectionStore.editSelection.groups
+  //     .filter((el) => el.id === groupId)[0]
+  //     .members.includes(memberId)
+  // ) {
+  //   setSelectionStore(
+  //     "editSelection",
+  //     "groups",
+  //     (el) => el.id === groupId,
+  //     "members",
+  //     (prev) => prev.filter((el) => el !== memberId)
+  //   );
+  // } else {
+  //   setSelectionStore(
+  //     "editSelection",
+  //     "groups",
+  //     (el) => el.id === groupId,
+  //     (el) => el.members.length,
+  //     memberId
+  //   );
+  // }
 };
 
 async function startAction(action: string) {
-  const data = unwrap(selectionStore.editSelection);
+  let data: {
+    singles: number[];
+    groups: { [key: number]: number[] };
+  } = { singles: [], groups: {} };
+  data.singles = unwrap(selectionStore.editSelection.singles);
+  data.groups = groupEditSelection();
+
   const serializedData = JSON.stringify(data);
   console.log(serializedData);
   const response = (
@@ -278,11 +312,10 @@ const toggleGroupDisplay = (id: number, item: GroupListItem) => {
         prev.filter((el) => el.id !== id)
     );
     // remove the group from the edit selection
-    setSelectionStore(
-      "editSelection",
-      "groups",
-      produce((prev) => prev.filter((el) => el.id !== id))
-    );
+    setGroupEditSelection((prev) => {
+      const { [id]: groupToRemove, ...remaining } = prev;
+      return remaining;
+    });
     // (prev) => {
     //prev.filter((el) => el.id !== id)
 
@@ -303,7 +336,9 @@ const toggleGroupDisplay = (id: number, item: GroupListItem) => {
       listItem: item,
     });
     // set the edit selection for the group and set the selectedMembers array to empty
-    setSelectionStore("editSelection", "groups", id, []);
+    setGroupEditSelection((prev) => {
+      return { ...prev, [id]: [] };
+    });
     // remove the group-llist-item from groupList
     mutateGroupList((prev: GroupListItem[]) =>
       prev.filter((el) => el.id !== item.id)
@@ -311,6 +346,7 @@ const toggleGroupDisplay = (id: number, item: GroupListItem) => {
     // fetch the full group data
     fetchGroup(id, indexToInsert);
   }
+  console.log("editGroup after group toggle", groupEditSelection());
 };
 
 async function getDetail(perId: number) {
@@ -338,6 +374,8 @@ export const AppStateContext = createContext({
   getDetail,
   getCookie,
   startAction,
+  groupEditSelection,
+  setGroupEditSelection,
 });
 
 const App: Component = () => {
@@ -364,13 +402,15 @@ const App: Component = () => {
         break;
     }
   });
+
   const resetStore = () => {
     // clears all selections
     // TODO: consider iterating through the displayed singles and groups and moving listItems back to browser-lists
     setSelectionStore("display", "groups", []);
     setSelectionStore("display", "singles", []);
-    setSelectionStore("editSelection", "groups", {});
+    //setSelectionStore("editSelection", "groups", {});
     setSelectionStore("editSelection", "singles", []);
+    setGroupEditSelection([]);
   };
 
   const singlesCount = createMemo(() => singleList()?.length);
@@ -472,6 +512,8 @@ const App: Component = () => {
         getDetail: getDetail,
         getCookie: getCookie,
         startAction: startAction,
+        groupEditSelection: groupEditSelection,
+        setGroupEditSelection: setGroupEditSelection,
       }}
     >
       <div class="container-fluid w-100 d-flex">

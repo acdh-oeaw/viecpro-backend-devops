@@ -1,5 +1,5 @@
 import { JSXElement } from "solid-js";
-import type {Context, Setter} from "solid-js";
+import type {Context, Setter, Accessor} from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
 
 interface PersonResponse {
@@ -62,11 +62,9 @@ interface SelectionStore{
 
     editSelection: {
       // groups: key is group id, values are selected member-ids for this group
-      groups: GroupWithMembers[];//{[key: number]: number[]};
       singles: number[];
     };
   };
-
 
 
 interface GroupListItem {
@@ -105,9 +103,11 @@ interface AppStateContextType {
   fetchSingle: (id:number, indexToInster:number)=>Promise<void>,
   getDetail: (perId:number)=>Promise<void>,
   getCookie: (cname:string)=>string,
-  startAction: (action:string)=> Promise<void>
+  startAction: (action:string)=> Promise<void>,
+  setGroupEditSelection: Setter<any>,
+  groupEditSelection: Accessor<any>,
   
 }
-export type {SelectionStore, Group, SingleListItem, GroupListItem, DisplayedGroupItem, DisplayedSingleItem, PersonProxyResponse, PersonInstitutionRelation, AppStateContextType}
+export type {SelectionStore, Group, SingleListItem, GroupListItem, DisplayedGroupItem, DisplayedSingleItem, PersonProxyResponse, PersonInstitutionRelation, AppStateContextType, GroupWithMembers}
 
 
