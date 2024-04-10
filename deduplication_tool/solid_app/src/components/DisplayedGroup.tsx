@@ -27,6 +27,9 @@ const DisplayedGroup: Component<{
   const handleHover = () => {};
   const [eyeIcon, setEyeIcon] = createSignal<string>("visibility");
 
+  createEffect(() => {
+    console.log("test", groupEditSelection());
+  });
   return (
     <>
       <div class="d-flex flex-row align-items-center display-header">

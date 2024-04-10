@@ -61,7 +61,6 @@ interface SelectionStore{
     };
 
     editSelection: {
-      // groups: key is group id, values are selected member-ids for this group
       singles: number[];
     };
   };

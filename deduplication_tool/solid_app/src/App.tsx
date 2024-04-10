@@ -58,7 +58,7 @@ const [selectionStore, setSelectionStore] =
 
 const [groupEditSelection, setGroupEditSelection] = createSignal<{
   [key: number]: number[];
-}>({});
+}>({}); //, { equals: false });
 
 const [singleQuery, setSingleQuery] = createSignal<string>();
 const [groupQuery, setGroupQuery] = createSignal<string>();
