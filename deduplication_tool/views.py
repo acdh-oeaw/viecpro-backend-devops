@@ -1,13 +1,21 @@
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from django.views import View
+from django.views.generic import TemplateView
+from django.contrib.auth.decorators import login_required
 from dubletten_tool.models import Group, StatusButtonGroup, PersonProxy
 import json
 from deduplication_tool.validation import SelectionState, get_selection_state_from_dict
 from pydantic import ValidationError
 
-class ActionHandler(View):
+@method_decorator(login_required, name="dispatch")
+class EditorView(TemplateView):
+    template_name="deduplication_tool/tool_page.html"
 
+@method_decorator(login_required, name="dispatch")
+class ActionHandler(View):
+    
     def post(self, request, action, **kwargs):
         data = json.loads(request.body)
         try: 

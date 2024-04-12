@@ -34,10 +34,18 @@ class SelectionGroup(BaseModel):
         return self
 
 class SelectionState(BaseModel): 
+    """
+    Models the selectionState datastructure as Objects.
+    Use this in processing.
+    """
     groups: list[SelectionGroup]
     singles: list[SelectionSingle]
 
 class RawSelectionState(TypedDict):
+    """
+    Models the incoming json selectionState datastructure containing primitives (mostly ids).
+    Use this only in the inital request parsing.
+    """
     groups: dict[str,list[int]]
     singles: list[int]
 
