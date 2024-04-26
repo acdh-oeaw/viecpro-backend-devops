@@ -93,7 +93,7 @@ def parse_person_labels(p, res:Dict[str, Any]):
                 res["married_names"].append(to_rel(l))
             case 'Nachname verheiratet (1. Ehe)':
                 res["first_marriage"] = l.label  # type: ignore
-            case "Sonstiger Hofbezug":
+            case "Sonstiger Hofbezug" | "Sonstiger Hofbezug (AV)" | "Sonstiger Hofbezug (Rat)":
                 res["other_relations_court"].append(to_rel(l))
             case "Akadem. Titel":
                 res["academic_titles"].append(to_rel(l))
