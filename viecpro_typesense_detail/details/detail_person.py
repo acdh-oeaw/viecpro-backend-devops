@@ -104,7 +104,7 @@ def parse_person_labels(p, res: Dict[str, Any]):
                 res["other_relations_court"].append(to_rel(l))
             case "Akadem. Titel":
                 res["academic_titles"].append(to_rel(l))
-            case "Funktion, Amtsinhabe und Beruf":
+            case "Funktion, Amtsinhabe und Beruf" | "Sonstige/r Funktion, Amtsinhabe und Beruf":
                 res["non_court_functions"].append(to_rel(l))
             case "Kirche" | "Orden":
                 res["relations_to_church_and_orders"].append(to_rel(l))
