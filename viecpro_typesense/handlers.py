@@ -25,6 +25,7 @@ def fixstring(string):
         string = re.sub(REG_SKL, "", string)
         string = re.sub(REG_EKL, "", string)
         string = re.sub(REG_GKL, "", string)
+        string = string.replace("  ", " ").replace(" ,", ",")
     return string
 
 
