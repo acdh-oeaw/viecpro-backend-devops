@@ -95,7 +95,7 @@ def parse_person_labels(p, res: Dict[str, Any]):
             case "Konfession":
                 res["confession"].append(l.label)  # type: ignore
             case "Adelstitel / -prädikat" | "Auszeichnung" | "Stand":
-                res["honorary_titles"].append(to_rel(l))
+                res["honorary_titles"].append(l)
             case "Schreibvariante Nachname verheiratet" | "Schreibvariante Nachname verheiratet (2. Ehe)" | "Nachname verheiratet (1. Ehe)" | "Schreibvariante Nachname verheiratet (1. Ehe)" | "Nachname verheiratet (2. Ehe)" | "Nachname verheiratet (3. Ehe)" | "Nachname verheiratet":
                 res["married_names"].append(to_rel(l))
             # case 'Nachname verheiratet (1. Ehe)':
@@ -108,6 +108,8 @@ def parse_person_labels(p, res: Dict[str, Any]):
                 res["non_court_functions"].append(to_rel(l))
             case "Kirche" | "Orden":
                 res["relations_to_church_and_orders"].append(to_rel(l))
+    res["honorary_titles"].sort(key=lambda obj: obj.label_type.name != 'Adelstitel / -prädikat')
+    res["honorary_titles"] = [to_rel(h) for h in res["honorary_titles"]]
     return res
 
 
