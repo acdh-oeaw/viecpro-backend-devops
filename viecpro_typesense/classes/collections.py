@@ -42,12 +42,13 @@ class Collection(metaclass=CollectionMeta):
         vorfinale_eintraege = Collection.objects.get(name="Vorfinale Einträge")
         dubletten = Collection.objects.get(name="Dubletten")
         for inst in qs:
-            if vorfinale_eintraege in inst.collection.all():
-                if hasattr(inst, "ampel"):
-                    if inst.ampel.status == "red":
-                        continue
-            if dubletten in inst.collection.all():
-                continue
+            if hasattr(inst, "collection"):
+                if vorfinale_eintraege in inst.collection.all():
+                    if hasattr(inst, "ampel"):
+                        if inst.ampel.status == "red":
+                            continue
+                if dubletten in inst.collection.all():
+                    continue
             result.append({f.name: f.get_doc(inst) for f in cls.fields})
         
         return result
