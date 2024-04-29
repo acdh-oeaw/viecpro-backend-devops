@@ -17,8 +17,8 @@
 				"njpwerner.autodocstring",
 				"esbenp.prettier-vscode",
 				"Gruntfuggly.todo-tree",
-				"junstyle.vscode-django-support",
-				"ms-python.autopep8"
+				//"junstyle.vscode-django-support",
+				"charliermarsh.ruff"
 			]
 		}
 	},

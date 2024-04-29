@@ -1,10 +1,11 @@
 {
-    "python.languageServer": "Pylance",
+    //"python.languageServer": "Pylance",
     "[python]": {
-        "editor.defaultFormatter": "ms-python.python",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports": "never"
+            "source.organizeImports": "never",
+            "source.fixAll": "always"
         },
     },
     "[typescriptreact]": {
@@ -17,6 +18,6 @@
     "eslint.format.enable": true,
     "eslint.lintTask.enable": true,
     "files.associations": {
-        "*.tsx": "typescriptreact"
+        "*.tsx": "typescriptreact",
     }
 }

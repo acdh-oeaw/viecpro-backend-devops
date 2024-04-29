@@ -89,6 +89,38 @@ interface Group {
   members: PersonProxyResponse[];
 };
 
+
+interface ActionDataRemoveMember {
+  group_id: number;
+  old_vorfin: number
+  members_to_remove: number[];
+}
+
+interface ActionDataDissolveGroup {
+  group_id: number;
+  old_vorfin: number;
+  old_members: number[]
+}
+
+
+interface ActionDataRemergeGroup { 
+  group_id: number;
+  old_vorfin: number;
+}
+
+interface ActionDataMergeAll {
+  singles: number[];
+  groups: {[key:number]:number[]};
+  new_group_name: string;
+
+}
+
+interface ActionDataGroupSelected {
+  singles: number[];
+  groups: {[key:number]:number};
+  new_group_name: string;
+}
+
 interface AppStateContextType {
   selectionStore: SelectionStore;
   setSelectionStore: SetStoreFunction<SelectionStore>;
@@ -102,7 +134,7 @@ interface AppStateContextType {
   fetchSingle: (id:number, indexToInster:number)=>Promise<void>,
   getDetail: (perId:number)=>Promise<void>,
   getCookie: (cname:string)=>string,
-  startAction: (action:string)=> Promise<void>,
+  startAction: (action:string, targetGroup: number | undefined)=> Promise<void>,
   setGroupEditSelection: Setter<any>,
   groupEditSelection: Accessor<any>,
   

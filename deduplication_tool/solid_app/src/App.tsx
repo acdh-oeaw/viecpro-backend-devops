@@ -1,5 +1,4 @@
 import type { Component, JSXElement } from "solid-js";
-import styles from "./App.module.css";
 import $ from "jquery";
 import {
   createSignal,
@@ -27,6 +26,15 @@ import { DisplayedGroup } from "./components/DisplayedGroup";
 const API_BASE = "/deduplication_tool/api/";
 let detailContent: HTMLDivElement | undefined = undefined;
 
+const ACTIONS = [
+  "remove_selcted_members",
+  "merge_selected_members",
+  "remerge_group",
+  "merge_all_displayed",
+  "group_selected",
+  "dissolve_group",
+  "create_group_from_single",
+];
 function getCookie(cname: string) {
   // for passing djangos csrfToken to ajax-calls
   const name = cname + "=";
@@ -139,11 +147,25 @@ const toggleMemberSelect = (
   // }
 };
 
-async function startAction(action: string) {
-  let data: {
-    singles: number[];
-    groups: { [key: number]: number[] };
-  } = { singles: [], groups: {} };
+async function pollRedis(task_id: number, callback: () => any) {}
+
+interface ActionData {
+  singles: number[];
+  groups: { [key: number]: number[] };
+  target_group: number | null;
+}
+
+async function startAction(
+  action: string,
+  targetGroup: number | null
+) {
+  console.log("called startGroupAction with: ", action, targetGroup);
+
+  let data: ActionData = {
+    singles: [],
+    groups: {},
+    target_group: targetGroup,
+  };
   data.singles = unwrap(selectionStore.editSelection.singles);
   data.groups = groupEditSelection();
 
@@ -860,14 +882,16 @@ const App: Component = () => {
               <div class="dropdown-menu">
                 <li
                   class="dropdown-item"
-                  onclick={() => startAction("merge_all")}
+                  onclick={() =>
+                    startAction("merge_all_displayed", null)
+                  }
                 >
                   {/* this should only show if more than one group or single are displayed */}
                   <span> merge all</span>
                 </li>
                 <li
                   class="dropdown-item"
-                  onclick={() => startAction("group_selection")}
+                  onclick={() => startAction("group_selected", null)}
                 >
                   {/* this should only show if more than one single or member are selected */}
                   <span> group selected </span>

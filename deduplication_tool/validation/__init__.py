@@ -1,4 +1,17 @@
-from .datastructures import SelectionPerson, SelectionGroup, SelectionMember, SelectionState
+from .datastructures import (
+    SelectionPerson,
+    SelectionGroup,
+    SelectionMember,
+    SelectionState, 
+    RawSelectionState, 
+    ActionDataDissolveGroup, 
+    ActionDataGroupSelected,
+    ActionDataMergeAll,
+    ActionDataRemergeGroup, 
+    ActionDataRemoveMember
+    )
+
+
 from .utils import get_selection_state_from_dict
 
 __all__ = [
@@ -6,5 +19,11 @@ __all__ = [
     "SelectionPerson", 
     "SelectionMember",
     "SelectionGroup",
-    "SelectionState"
-]
+    "SelectionState",
+    "RawSelectionState",
+    "ActionDataRemoveMember",
+    "ActionDataRemergeGroup",
+    "ActionDataGroupSelected",
+    "ActionDataMergeAll",
+    "ActionDataDissolveGroup"
+    ]

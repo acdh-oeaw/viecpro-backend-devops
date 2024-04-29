@@ -74,19 +74,23 @@ const DisplayedGroup: Component<{
             {/* this should only show if more than one group or single are displayed */}
             <li
               class="dropdown-item"
-              onclick={() => startAction("remerge group")}
+              onclick={() => startAction("remerge_group", group.id)}
             >
               remerge group
             </li>
             <li
               class="dropdown-item"
-              onclick={() => startAction("merge_selected_members")}
+              onclick={() =>
+                startAction("merge_selected_members", group.id)
+              }
             >
               merge selected members
             </li>
             <li
               class="dropdown-item"
-              onclick={() => startAction("remove_selected_members")}
+              onclick={() =>
+                startAction("remove_selected_members", group.id)
+              }
             >
               {/* this should only show if more than one single or member are selected */}
               <span>remove selected members </span>
