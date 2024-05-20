@@ -1,3 +1,5 @@
+import os
+import requests
 from .utils import F, C
 from typing import Dict, Any, List, Union, Iterable
 from apis_bibsonomy.models import Reference
@@ -15,6 +17,7 @@ reference_fields = [
     F("title", type="string"),
     F("type", type="string"),
     F("bibtex", type="string"),
+    F("tag", type="string"),  # the tag group to which the source belongs
     F("references"),
 ]
 
@@ -55,6 +58,26 @@ def parse_source_references(
     return res
 
 
+def get_tag_group(reference: Reference) -> str:
+    """Get the tags from the Zotero API and return the tags with prefix "1_" as the tag group
+
+    Args:
+        reference (Reference): The reference object
+
+    Returns:
+        list: list of tags with prefix "1_"
+    """
+    json = requests.get(
+        reference.bibs_url, params={"key": os.environ.get("ZOTERO_API_KEY")}
+    ).json()
+    tags = json["data"].get("tags")
+    tag_group = [tag["tag"][2:] for tag in tags if tag["tag"].startswith("1_")]
+    if len(tag_group) == 1:
+        return tag_group[0]
+    else:
+        return "Allgemein"
+
+
 def parse_source_meta(reference: Reference, res: Dict[str, Any]) -> Dict[str, Any]:
     """ """
     bibtex = json.loads(reference.bibtex)
@@ -62,6 +85,7 @@ def parse_source_meta(reference: Reference, res: Dict[str, Any]) -> Dict[str, An
     res["short_title"] = bibtex.get("shortTitle")
     res["title"] = bibtex.get("title", "")
     res["type"] = bibtex.get("type", "")
+    res["tag"] = get_tag_group(reference)
     res["bibtex"] = bibtex
 
     return res
