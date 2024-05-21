@@ -1,3 +1,5 @@
+import os
+import requests
 from apis_core.apis_vocabularies.models import VocabsBaseClass
 from viecpro_typesense.classes import Handler
 import json
@@ -151,6 +153,18 @@ class BibtexTypeHandler(Handler):
     def func(bibtex):
         bib = json.loads(bibtex)
         return bib.get("type", "")
+
+class ZoteroTagHandler(Handler):
+    def func(zotero_url):       
+        json = requests.get(
+            zotero_url, params={"key": os.environ.get("ZOTERO_API_KEY")}
+        ).json()
+        tags = json["data"].get("tags")
+        tag_group = [tag["tag"][2:] for tag in tags if tag["tag"].startswith("1_")]
+        if len(tag_group) == 1:
+            return tag_group[0]
+        else:
+            return "Allgemein"
 
 
 class HofstaatsinhaberHandler(Handler):

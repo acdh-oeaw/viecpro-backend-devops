@@ -1,4 +1,4 @@
-from .handlers import GenericDocIDHandler
+from .handlers import GenericDocIDHandler, ZoteroTagHandler
 from viecpro_typesense import Collection, StaticField, CollectionConfig, O, Field
 from copy import deepcopy
 from .fields import StringField, FullNameField, TitlesNestedObjectField, RelationTypeHierarchyHandler, WrittenDateField, BibtexShortTitleHandler, BibtexTitleHandler, BibtexTypeHandler, RelatedReferenceDocField, ObjectIDField, DateObjectDateField, LabelsNestedObjectField, KindField, SourceField, TargetField, HofstaatsinhaberField, MainOwnerField, FunctionsArrayField, PersonInstitutionArrayField
@@ -26,6 +26,8 @@ class ReferenceCollection(Collection):
         "bibtex", handler=BibtexShortTitleHandler, options=O(facet=True, optional=True))
     kind = StringField("bibtex", handler=BibtexTypeHandler,
                        options=O(facet=True, optional=True))
+    tag = StringField("url", handler=ZoteroTagHandler,
+                       options=O(facet=True, optional=False))
     related_doc = RelatedReferenceDocField(
         ("content_type", "object_id"), options=O(facet=True, optional=True))
 
