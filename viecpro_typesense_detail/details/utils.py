@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict, field
+import datetime
 from typing import List, Dict, Any
 from apis_core.apis_labels.models import Label
 from django.contrib.contenttypes.models import ContentType
@@ -115,7 +116,9 @@ def format_and_orient_relation(
         "relation_type": fixstring(relation_type),
         "target": target,
         "start_date": fixstring(rel.start_date_written) or "",
+        "start_date_iso": datetime.datetime.combine(rel.start_date, datetime.time()).timestamp() if rel.start_date else None,
         "end_date": fixstring(rel.end_date_written) or "",
+        "end_date_iso": datetime.datetime.combine(rel.end_date, datetime.time()).timestamp() if rel.end_date else None,
     }
 
 
