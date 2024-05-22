@@ -53,6 +53,7 @@ person_fields = [
     # label_data and RelData Kirchliche Amtsbeziehung
     F("relations_to_church_and_orders"),
     F("non_court_functions"),  # labelData other jobs
+    F("notes", type="string") #editorial notes
 ]
 
 # unused atm, we only build the person collection (for now)
@@ -244,6 +245,7 @@ def main(offset: int = 0):
             for uri in instance.uri_set.all()
             if not uri.uri.startswith("https://viecpro.acdh.oeaw.ac.at")
         ]
+        res["notes"] = instance.notes if instance.notes else ""
         results.append(res)
 
     return {"schema": schema, "results": results}
