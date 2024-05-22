@@ -26,7 +26,7 @@ class ReferenceCollection(Collection):
         "bibtex", handler=BibtexShortTitleHandler, options=O(facet=True, optional=True))
     kind = StringField("bibtex", handler=BibtexTypeHandler,
                        options=O(facet=True, optional=True))
-    tag = StringField("url", handler=ZoteroTagHandler,
+    tag = StringField("bibs_url", handler=ZoteroTagHandler,
                        options=O(facet=True, optional=False))
     related_doc = RelatedReferenceDocField(
         ("content_type", "object_id"), options=O(facet=True, optional=True))

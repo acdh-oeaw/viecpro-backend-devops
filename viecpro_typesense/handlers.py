@@ -21,6 +21,8 @@ OwnerLookup = defaultdict(list)
     "start_date": el.start_date_written.split("<")[0] if el.start_date_written else "",
             "end_date": el.end_date_written.split("<")[0] if el.end_date_written else "", }) for el in PersonInstitution.objects.filter(relation_type__name="hatte den Hofstaat")]
 
+zotero_cache = {}
+
 
 def fixstring(string):
     if isinstance(string, str):
@@ -155,15 +157,19 @@ class BibtexTypeHandler(Handler):
         return bib.get("type", "")
 
 class ZoteroTagHandler(Handler):
-    def func(zotero_url):       
+    def func(zotero_url):
+        if zotero_url in zotero_cache:
+            return zotero_cache[zotero_url]
         json = requests.get(
             zotero_url, params={"key": os.environ.get("ZOTERO_API_KEY")}
         ).json()
-        tags = json["data"].get("tags")
+        tags = json["data"].get("tags", [])
         tag_group = [tag["tag"][2:] for tag in tags if tag["tag"].startswith("1_")]
         if len(tag_group) == 1:
+            zotero_cache[zotero_url] = tag_group[0]
             return tag_group[0]
         else:
+            zotero_cache[zotero_url] = "Allgemein"
             return "Allgemein"
 
 
