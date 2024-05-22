@@ -18,7 +18,8 @@ place_fields = [
     F("alternative_names", type="string[]"),
     F("person_relations"),
     F("place_relations"),
-    F("institution_relations")
+    F("institution_relations"),
+    F("notes", type="string")
     # TODO: add all fields
 
 
@@ -94,6 +95,7 @@ def main(offset:int=0) -> Dict[str, Any]:
         res["model"] = model.__name__
         res["ampel"] = ampel(instance)
         res["sameAs"] = [uri.uri for uri in instance.uri_set.all() if not uri.uri.startswith("https://viecpro.acdh.oeaw.ac.at")]
+        res["notes"] = instance.notes if instance.notes else ""
         results.append(res)
 
     return {"schema":schema, "results":results}
