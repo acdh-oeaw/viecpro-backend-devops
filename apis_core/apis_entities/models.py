@@ -524,6 +524,7 @@ class Person(AbstractEntity):
     gender = models.CharField(
         max_length=15, choices=GENDER_CHOICES, blank=True, null=True
     )
+    grouped_into = models.ForeignKey("self", null=True, on_delete=models.SET_NULL)
 
     def save(self, *args, **kwargs):
         if self.first_name:

@@ -18,6 +18,7 @@ urlpatterns = [
     ),
     url(r"^admin/", admin.site.urls),
     url(r"^info/", include("infos.urls", namespace="info")),
+    path("", include("django_grouper.urls")),
     url(r"^", include("webpage.urls", namespace="webpage")),
 ]
 
@@ -62,3 +63,4 @@ if os.path.exists(os.path.join(settings.ROBOTS_TXT_FOLDER,  "robots.txt")):
     )
 
 handler404 = "webpage.views.handler404"
+
