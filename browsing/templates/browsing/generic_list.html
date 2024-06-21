@@ -92,6 +92,9 @@
                                     </div>
                                 {% endif %}
                             {% endif %}
+                        {% if entity == "person" %}
+                        <a class ="btn btn-outline-info"  href="/grouper/?{{ request.GET.urlencode }}&group_fields=name&group_fields=first_name&group_content_type=apis_entities.person">Duplicates</a>
+                        {% endif %}
                         {% endblock %}
                 </div>
             </div>

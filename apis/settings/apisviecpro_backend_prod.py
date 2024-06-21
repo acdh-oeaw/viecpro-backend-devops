@@ -50,6 +50,7 @@ SPECTACULAR_SETTINGS["COMPONENT_NO_READ_ONLY_REQUIRED"] = True
 
 INSTALLED_APPS += ["django_extensions", "apis_import_project", "apis_bibsonomy", "apis_ampel",
                    "dubletten_tool", "viecpro_hierarchy", "viecpro_typesense", "viecpro_typesense_detail", "django_celery_results"]
+INSTALLED_APPS += ["django_grouper"]
 
 
 DATABASES = {"default":
@@ -138,3 +139,9 @@ DJANGO_TYPESENSE = {
 
 MIDDLEWARE += [
 ]
+
+def custom_group_filter(queryset, request):
+    from apis_core.apis_entities.filters import get_list_filter_of_entity
+    return get_list_filter_of_entity(queryset.model.__name__)(request.GET, queryset=queryset).qs
+
+GROUP_FILTER = custom_group_filter
