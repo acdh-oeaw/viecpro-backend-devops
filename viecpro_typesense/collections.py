@@ -88,20 +88,20 @@ def shared_fields(m):
         "object_id": ObjectIDField("id"),
         "start_date": WrittenDateField("start_date_written"),
         "end_date": WrittenDateField("end_date_written"),
-        "start": DateObjectDateField("start_date"),
-        "end": DateObjectDateField("end_date"),
+        "start": DateObjectDateField("start_date", options=O(sort=True)),
+        "end": DateObjectDateField("end_date", options=O(sort=True)),
         "model": StaticField(value=m.__name__, options=O(facet=False)),
         "start_date_int": StringField(
             "start_date_int",
             handler=get_start_year_or_0,
             pass_instance=True,
-            options=O(type="int32", optional=True),
+            options=O(type="int32", optional=True, sort=True),
         ),
         "end_date_int": StringField(
             "end_date_int",
             handler=get_end_year_or_5000,
             pass_instance=True,
-            options=O(type="int32", optional=True),
+            options=O(type="int32", optional=True, sort=True),
         ),
     }
 
@@ -182,13 +182,15 @@ def create_entity_collections():
             base_fields = deepcopy(shared_fields(m))
             base_fields.update(
                 {
-                    "name": StringField("name", options=O(facet=False)),
+                    "name": StringField("name", options=O(facet=False, sort=True)),
                     "labels": LabelsNestedObjectField("id", pass_instance=True),
                 }
             )
 
             if m is not Person:
-                base_fields.update({"kind": KindField("kind", options=O(facet=True))})
+                base_fields.update(
+                    {"kind": KindField("kind", options=O(facet=True, sort=True))}
+                )
 
                 if m is Place:
                     base_fields.update(
@@ -211,22 +213,25 @@ def create_entity_collections():
                     ),
                     "titles": TitlesNestedObjectField("id", pass_instance=True),
                     "functions": FunctionsArrayField(
-                        "id", pass_instance=True, options=O(facet=True)
+                        "id", pass_instance=True, options=O(facet=True, sort=True)
                     ),  # TODO: need to remove need to pass field param to field with pass_instance. id won't be accessed here, its a dummy
                     "institutions": PersonInstitutionArrayField(
-                        "id", pass_instance=True, options=O(facet=True)
+                        "id", pass_instance=True, options=O(facet=True, sort=True)
                     ),
                 }
                 base_fields.update(per_fields)
             detail_fields = get_entity_specific_detail_fields(m.__name__.lower())
             base_fields["ampel"] = StringField(
-                "ampel", pass_instance=True, options=O(facet=True), handler=ampelhandler
+                "ampel",
+                pass_instance=True,
+                options=O(facet=True, sort=True),
+                handler=ampelhandler,
             )
             base_fields["alternativenames"] = Field(
                 "alternativenames",
                 pass_instance=True,
                 handler=labelhandler,
-                options=O(type="string[]", optional=True),
+                options=O(type="string[]", optional=True, sort=True),
             )
             base_fields.update(detail_fields)
 
