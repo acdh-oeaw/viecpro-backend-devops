@@ -45,7 +45,6 @@ def parse_event_relations(i: Event, res: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def parse_event_labels(i: Event, res: Dict[str, Any]) -> Dict[str, Any]:
-
     # for label in i.label_set.all():
     #     match label.label_type.name:
     #         case "name":
@@ -79,7 +78,7 @@ def main(offset: int = 0) -> Dict[str, Any]:
 
         res = ts_collection.to_empty_result_dict()
 
-        res["id"] = f"detail_{model._meta.model_name}_{instance.id}"
+        res["id"] = f"{instance.id}"
         res["model"] = model.__name__
         res["object_id"] = str(instance.id)
         res = parse_event_labels(instance, res)
@@ -87,7 +86,11 @@ def main(offset: int = 0) -> Dict[str, Any]:
         # NOTE: sources contain the bibtex json directly, they could be parsed to a) conform to the naming scheme and b) get rid of uneccessary data
         res["sources"] = get_references_for_instance(instance)
         res["ampel"] = ampel(instance)
-        res["sameAs"] = [uri.uri for uri in instance.uri_set.all() if not uri.uri.startswith("https://viecpro.acdh.oeaw.ac.at")]
+        res["sameAs"] = [
+            uri.uri
+            for uri in instance.uri_set.all()
+            if not uri.uri.startswith("https://viecpro.acdh.oeaw.ac.at")
+        ]
 
         results.append(res)
 

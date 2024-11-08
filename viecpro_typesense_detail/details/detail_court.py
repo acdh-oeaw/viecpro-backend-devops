@@ -124,7 +124,7 @@ def main(offset:int=0) -> Dict[str, Any]:
 
         res = ts_collection.to_empty_result_dict()
      
-        res["id"] = f"detail_{model._meta.model_name}_{instance.id}"
+        res["id"] = f""{instance.id}"
         res["model"] = model.__name__
         res["object_id"] = str(instance.id)
         res = parse_court_labels(instance, res)

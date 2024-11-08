@@ -53,7 +53,7 @@ person_fields = [
     # label_data and RelData Kirchliche Amtsbeziehung
     F("relations_to_church_and_orders"),
     F("non_court_functions"),  # labelData other jobs
-    F("notes", type="string") #editorial notes
+    F("notes", type="string"),  # editorial notes
 ]
 
 # unused atm, we only build the person collection (for now)
@@ -97,19 +97,36 @@ def parse_person_labels(p, res: Dict[str, Any]):
                 res["confession"].append(l.label)  # type: ignore
             case "Adelstitel / -prädikat" | "Auszeichnung" | "Stand":
                 res["honorary_titles"].append(l)
-            case "Schreibvariante Nachname verheiratet" | "Schreibvariante Nachname verheiratet (2. Ehe)" | "Nachname verheiratet (1. Ehe)" | "Schreibvariante Nachname verheiratet (1. Ehe)" | "Nachname verheiratet (2. Ehe)" | "Nachname verheiratet (3. Ehe)" | "Nachname verheiratet":
+            case (
+                "Schreibvariante Nachname verheiratet"
+                | "Schreibvariante Nachname verheiratet (2. Ehe)"
+                | "Nachname verheiratet (1. Ehe)"
+                | "Schreibvariante Nachname verheiratet (1. Ehe)"
+                | "Nachname verheiratet (2. Ehe)"
+                | "Nachname verheiratet (3. Ehe)"
+                | "Nachname verheiratet"
+            ):
                 res["married_names"].append(to_rel(l))
             # case 'Nachname verheiratet (1. Ehe)':
             #     res["first_marriage"] = l.label  # type: ignore
-            case "Sonstiger Hofbezug" | "Sonstiger Hofbezug (AV)" | "Sonstiger Hofbezug (Rat)":
+            case (
+                "Sonstiger Hofbezug"
+                | "Sonstiger Hofbezug (AV)"
+                | "Sonstiger Hofbezug (Rat)"
+            ):
                 res["other_relations_court"].append(to_rel(l))
             case "Akadem. Titel":
                 res["academic_titles"].append(to_rel(l))
-            case "Funktion, Amtsinhabe und Beruf" | "Sonstige/r Funktion, Amtsinhabe und Beruf":
+            case (
+                "Funktion, Amtsinhabe und Beruf"
+                | "Sonstige/r Funktion, Amtsinhabe und Beruf"
+            ):
                 res["non_court_functions"].append(to_rel(l))
             case "Kirche" | "Orden":
                 res["relations_to_church_and_orders"].append(to_rel(l))
-    res["honorary_titles"].sort(key=lambda obj: obj.label_type.name != 'Adelstitel / -prädikat')
+    res["honorary_titles"].sort(
+        key=lambda obj: obj.label_type.name != "Adelstitel / -prädikat"
+    )
     res["honorary_titles"] = [to_rel(h) for h in res["honorary_titles"]]
     return res
 
@@ -233,7 +250,7 @@ def main(offset: int = 0):
         res = c.to_empty_result_dict()
         res = parse_person_labels(instance, res)
         res = parse_person_relations(instance, res)
-        res["id"] = f"detail_{model._meta.model_name}_{instance.id}"  # type: ignore
+        res["id"] = f"{instance.id}"  # type: ignore
         res["object_id"] = str(instance.id)  # type: ignore
         res["model"] = model.__name__
         res["ampel"] = ampel(instance)
