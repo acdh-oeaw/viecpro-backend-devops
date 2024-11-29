@@ -213,10 +213,10 @@ def create_entity_collections():
                     ),
                     "titles": TitlesNestedObjectField("id", pass_instance=True),
                     "functions": FunctionsArrayField(
-                        "id", pass_instance=True, options=O(facet=True, sort=True)
+                        "id", pass_instance=True, options=O(facet=True)
                     ),  # TODO: need to remove need to pass field param to field with pass_instance. id won't be accessed here, its a dummy
                     "institutions": PersonInstitutionArrayField(
-                        "id", pass_instance=True, options=O(facet=True, sort=True)
+                        "id", pass_instance=True, options=O(facet=True)
                     ),
                 }
                 base_fields.update(per_fields)
@@ -231,7 +231,7 @@ def create_entity_collections():
                 "alternativenames",
                 pass_instance=True,
                 handler=labelhandler,
-                options=O(type="string[]", optional=True, sort=True),
+                options=O(type="string[]", optional=True),
             )
             base_fields.update(detail_fields)
 
