@@ -3,6 +3,12 @@ from viecpro_typesense import Field, O
 from .handlers import *
 
 
+class LatLongField(Field):
+    class Config:
+        options = O(type="float", optional=True, facet=False)
+        handler = FloatHandler
+
+
 class MainOwnerField(Field):
     class Config:
         options = O(type="object", optional=True, facet=False)
@@ -11,8 +17,14 @@ class MainOwnerField(Field):
 
 class HofstaatsinhaberField(Field):
     class Config:
-        options = O(type="object[]", optional=True, facet=False)
+        options = O(type="string", optional=True, facet=False, sort=True)
         handler = HofstaatsinhaberHandler
+
+
+class HofstaatsinhaberFieldID(Field):
+    class Config:
+        options = O(type="int64", optional=True, facet=False, sort=True)
+        handler = HofstaatsinhaberHandlerID
 
 
 class RelatedReferenceDocField(Field):

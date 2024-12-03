@@ -68,6 +68,11 @@ class IntHandler(Handler):
         return int(x) if x else None
 
 
+class FloatHandler(Handler):
+    def func(x):
+        return float(x) if x else None
+
+
 class KindHandler(Handler):
     def func(x):
         return str(x.name) if x and x.name else ""
@@ -209,7 +214,20 @@ class ZoteroTagHandler(Handler):
 
 class HofstaatsinhaberHandler(Handler):
     def func(x):
-        return OwnerLookup.get(x.id, [])
+        owner = OwnerLookup.get(x.id, False)
+        if owner:
+            return owner[0]["name"]
+        else:
+            return ""
+
+
+class HofstaatsinhaberHandlerID(Handler):
+    def func(x):
+        owner = OwnerLookup.get(x.id, False)
+        if owner:
+            return owner[0]["object_id"]
+        else:
+            return ""
 
 
 class MainOwnerFieldHandler(Handler):

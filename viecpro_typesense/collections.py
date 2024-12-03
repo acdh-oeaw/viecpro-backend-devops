@@ -18,9 +18,11 @@ from .fields import (
     SourceField,
     TargetField,
     HofstaatsinhaberField,
+    HofstaatsinhaberFieldID,
     MainOwnerField,
     FunctionsArrayField,
     PersonInstitutionArrayField,
+    LatLongField,
 )
 from apis_bibsonomy.models import Reference
 from apis_core.apis_relations.models import AbstractRelation
@@ -162,12 +164,16 @@ def labelhandler(x):
 
 def kategorienhandler(x):
     labels = x.label_set.all()
-    return [label.label for label in labels if label.label_type.name == "Kategorie"]
+    return " / ".join(
+        [label.label for label in labels if label.label_type.name == "Kategorie"]
+    )
 
 
 def create_entity_collections():
     res = []
     for m in AbstractEntity.get_all_entity_classes():
+        if m is Person:
+            continue
         if m is not Work:
             config = CollectionConfig()
             config.model = m
@@ -182,7 +188,10 @@ def create_entity_collections():
             base_fields = deepcopy(shared_fields(m))
             base_fields.update(
                 {
-                    "name": StringField("name", options=O(facet=False, sort=True)),
+                    "name": StringField(
+                        "name",
+                        options=O(facet=False, sort=True, token_separators=["-"]),
+                    ),
                     "labels": LabelsNestedObjectField("id", pass_instance=True),
                 }
             )
@@ -195,8 +204,8 @@ def create_entity_collections():
                 if m is Place:
                     base_fields.update(
                         {
-                            "lat": StringField("lat"),
-                            "long": StringField("lng"),
+                            "lat": LatLongField("lat"),
+                            "long": LatLongField("lng"),
                         }
                     )
             else:
@@ -304,6 +313,7 @@ class HofstaatCollection(Collection):
     id = StringField("id", handler=lambda x: f"{x.id}", pass_instance=True)
     name = StringField("name", options=O(facet=True, sort=True))
     owner = HofstaatsinhaberField("id", pass_instance=True)
+    owner_id = HofstaatsinhaberFieldID("id", pass_instance=True)
     main_owner = MainOwnerField("id", pass_instance=True)
     object_id = ObjectIDField("id")
     start_date = WrittenDateField("start_date_written")
@@ -311,12 +321,12 @@ class HofstaatCollection(Collection):
     start = DateObjectDateField("start_date")
     end = DateObjectDateField("end_date")
     # Maybe need to change model to hofstaat here
-    model = StaticField(value="Hofstaat", options=O(facet=True))
-    kind = KindField("kind", options=O(facet=True))
+    model = StaticField(value="Hofstaat")
+    kind = KindField("kind")
     labels = LabelsNestedObjectField("id", pass_instance=True, options=O(facet=False))
     kategorie = Field(
         "kategorie",
-        options=O(type="string[]", facet=True, optional=True),
+        options=O(type="string", facet=True, optional=True, sort=True),
         handler=kategorienhandler,
         pass_instance=True,
     )
@@ -325,7 +335,7 @@ class HofstaatCollection(Collection):
             "start_date_int",
             handler=get_start_year_or_0,
             pass_instance=True,
-            options=O(type="int32", optional=True),
+            options=O(type="int32", optional=True, sort=True),
         ),
     )
     end_date_int = (
@@ -333,7 +343,7 @@ class HofstaatCollection(Collection):
             "end_date_int",
             handler=get_end_year_or_5000,
             pass_instance=True,
-            options=O(type="int32", optional=True),
+            options=O(type="int32", optional=True, sort=True),
         ),
     )
 
