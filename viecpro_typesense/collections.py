@@ -76,7 +76,7 @@ def collection_factory(name, fields, config):
 def get_start_year_or_0(instance):
     if instance.start_date is not None:
         return int(instance.start_date.strftime("%s"))
-    return int(-62167174098)
+    return int(-62167219200)
 
 
 def get_end_year_or_5000(instance):
