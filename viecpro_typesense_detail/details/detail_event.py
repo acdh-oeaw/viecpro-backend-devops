@@ -60,7 +60,7 @@ def parse_event_labels(i: Event, res: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def main(offset: int = 0) -> Dict[str, Any]:
-    ts_collection = C(name="viecpro_detail_event", fields=event_fields)
+    ts_collection = C(name="viecpro_v2_detail_event", fields=event_fields)
     schema = ts_collection.to_schema()
 
     results = []

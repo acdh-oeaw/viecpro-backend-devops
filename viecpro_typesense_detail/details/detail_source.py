@@ -39,9 +39,9 @@ def parse_source_references(
             "model": str(target.__class__.__name__),
             # TODO: make this logic uniform across all collections
             "detail_collection_name": (
-                "viecpro_detail_court"
+                "viecpro_v2_detail_court"
                 if hasattr(target, "kind") and target.kind.name == "Hofstaat"
-                else f"viecpro_detail_{target.__class__.__name__}"
+                else f"viecpro_v2_detail_{target.__class__.__name__}"
             ),
         }
 
@@ -92,7 +92,7 @@ def parse_source_meta(reference: Reference, res: Dict[str, Any]) -> Dict[str, An
 
 
 def main(offset: int = 0) -> Dict[str, Any]:
-    ts_collection = C(name="viecpro_detail_source", fields=reference_fields)
+    ts_collection = C(name="viecpro_v2_detail_source", fields=reference_fields)
     schema = ts_collection.to_schema()
 
     results: List[Any] = []

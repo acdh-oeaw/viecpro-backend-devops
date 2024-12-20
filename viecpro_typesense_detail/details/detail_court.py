@@ -52,6 +52,8 @@ court_fields = [
     F("id", type="string", index=True, optional=False),
     F("model", type="string", index=True, optional=False),
     F("object_id", type="string", index=True, optional=False),
+    F("start_date", type="string"),
+    F("end_date", type="string"),
     F("resolution", type="string"),
     F("category", type="string"),
     F("alternative_names"),
@@ -108,7 +110,7 @@ def parse_court_labels(i: Institution, res: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def main(offset: int = 0) -> Dict[str, Any]:
-    ts_collection = C(name="viecpro_detail_court", fields=court_fields)
+    ts_collection = C(name="viecpro_v2_detail_court", fields=court_fields)
     schema = ts_collection.to_schema()
 
     results = []
@@ -129,11 +131,14 @@ def main(offset: int = 0) -> Dict[str, Any]:
         res["id"] = f"{instance.id}"
         res["model"] = model.__name__
         res["object_id"] = str(instance.id)
+        res["name"] = instance.name
+        res["start_date"] = instance.start_date_written
+        res["end_date"] = instance.end_date_written
         res = parse_court_labels(instance, res)
         res = parse_court_relations(instance, res)
         # NOTE: sources contain the bibtex json directly, they could be parsed to a) conform to the naming scheme and b) get rid of uneccessary data
         res["sources"] = get_references_for_instance(instance)
-        res["ampel"] = ampel(instance)
+        res["status"] = ampel(instance)
         res["sameAs"] = [
             uri.uri
             for uri in instance.uri_set.all()

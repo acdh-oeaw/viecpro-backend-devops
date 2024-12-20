@@ -84,8 +84,10 @@ class Schema:
         for c in self.collections:
             schema = c.schema()
 
-            if not schema["name"].startswith("viecpro_"):
-                schema["name"] = "viecpro_" + schema["name"]
+            if schema["name"].startswith("viecpro_"):
+                schema["name"] = schema["name"].replace("viecpro_", "viecpro_v2_")
+            else:
+                schema["name"] = "viecpro_v2_" + schema["name"]
             try:
                 client.collections[schema["name"]].delete()
                 print(f"sending: deleted-schema: {schema['name']}")
@@ -96,7 +98,7 @@ class Schema:
             client.collections.create(schema)
             print(f"sending: created-schema: {schema['name']}")
 
-            try: 
+            try:
                 if "CollectionAdapter" not in [c.__class__.__name__]:
                     # TODO: refactor this temporarily workaround once collection Adapter is a stable class
                     # TODO: remove this wrapper that breaks the normal manager!
@@ -110,7 +112,7 @@ class Schema:
                 client.collections[schema["name"]].documents.import_(
                     docs, {"action": "create"}
                 )
-            except Exception as e: 
+            except Exception as e:
                 print("error in: ", schema["name"], e)
                 continue
 

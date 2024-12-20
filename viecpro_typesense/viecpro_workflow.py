@@ -1,13 +1,20 @@
 from viecpro_typesense import Schema, CollectionAdapter
 from .clients import local_client, remote_client
-from .collections import create_entity_collections, create_relation_collections, ReferenceCollection, HofstaatCollection
+from .collections import (
+    create_entity_collections,
+    create_relation_collections,
+    ReferenceCollection,
+    HofstaatCollection,
+)
 from .handlers import ErrorCount
 from .utils import process_detail_collection
 from datetime import date
 import os
 from pathlib import Path
 from viecpro_typesense_detail.details.detail_person import main as person_detail_main
-from viecpro_typesense_detail.details.detail_institution import main as institution_detail_main
+from viecpro_typesense_detail.details.detail_institution import (
+    main as institution_detail_main,
+)
 from viecpro_typesense_detail.details.detail_place import main as place_detail_main
 from viecpro_typesense_detail.details.detail_court import main as court_detail_main
 from viecpro_typesense_detail.details.detail_source import main as source_detail_main
@@ -26,21 +33,21 @@ def main(send=False, local=True, *args, **kwargs):
 
     rels = create_relation_collections()
     ents = create_entity_collections()
-    col_relations = CollectionAdapter(name="viecpro_relations", nested=True)
+    # col_relations = CollectionAdapter(name="viecpro_relations", nested=True)
 
-    for col in rels:
-        print(f"adding collection {col=} to col_relations.")
-        col_relations.add_collection(col)
+    # for col in rels:
+    #     print(f"adding collection {col=} to col_relations.")
+    #     col_relations.add_collection(col)
 
-    for field in col_relations.collections[0].fields:
-        print(f"adding field {field=} to col_relations collection")
-        col_relations.add_field(field)
+    # for field in col_relations.collections[0].fields:
+    #     print(f"adding field {field=} to col_relations collection")
+    #     col_relations.add_field(field)
 
     for col in ents:
         vc.add_collection(col)
 
     vc.add_collection(ReferenceCollection)
-    vc.add_collection(col_relations)
+    # vc.add_collection(col_relations)
     vc.add_collection(HofstaatCollection)
 
     # todo: make this a utility function to reuse
@@ -50,12 +57,12 @@ def main(send=False, local=True, *args, **kwargs):
             os.mkdir(schemata_folder)
 
         curr_date = date.today()
-        template = schemata_folder / \
-            f"viecpro_typesense_schema_{curr_date}.json"
+        template = schemata_folder / f"viecpro_typesense_schema_{curr_date}.json"
         idx = 0
         while os.path.exists(schemata_folder / template):
-            template = schemata_folder / \
-                f"viecpro_typesense_schema_{curr_date}_{idx}.json"
+            template = (
+                schemata_folder / f"viecpro_typesense_schema_{curr_date}_{idx}.json"
+            )
             idx += 1
         print(template)
         return str(template)
@@ -84,7 +91,6 @@ def main(send=False, local=True, *args, **kwargs):
     # court_detail_schema = court_detail_data["schema"]
     # court_detail_docs = court_detail_data["results"]
 
-
     # for collection_name in [person_detail_schema["name"], institution_detail_schema["name"], place_detail_schema["name"], court_detail_schema["name"]]:
     #     try:
     #         client.collections[collection_name].delete()
@@ -110,10 +116,15 @@ def main(send=False, local=True, *args, **kwargs):
     #     client.collections[court_detail_schema["name"]].documents.import_(
     #         court_detail_docs, {"action": "create"}
     #     )
-        
-    if not search_only:
-        for process in [person_detail_main, court_detail_main, source_detail_main, institution_detail_main, place_detail_main]:
-            process_detail_collection(process, client, send=send)
 
+    if not search_only:
+        for process in [
+            person_detail_main,
+            court_detail_main,
+            source_detail_main,
+            institution_detail_main,
+            place_detail_main,
+        ]:
+            process_detail_collection(process, client, send=send)
 
     return vc

@@ -16,6 +16,7 @@ institution_fields = [
     # if no type is given, default is "object[]" which is the typesense signature for an array of objects
     F("id", type="string", index=True, optional=False),
     F("model", type="string", index=True, optional=False),
+    F("name", type="string", optional=False),
     F("object_id", type="string", index=True, optional=False),
     F("resolution", type="string"),
     F("category", type="string"),
@@ -64,7 +65,7 @@ def parse_institution_labels(i: Institution, res: Dict[str, Any]) -> Dict[str, A
 
 
 def main(offset: int = 0) -> Dict[str, Any]:
-    ts_collection = C(name="viecpro_detail_institution", fields=institution_fields)
+    ts_collection = C(name="viecpro_v2_detail_institution", fields=institution_fields)
     schema = ts_collection.to_schema()
 
     results = []
@@ -85,12 +86,13 @@ def main(offset: int = 0) -> Dict[str, Any]:
 
         res["id"] = f"{instance.id}"
         res["model"] = model.__name__
+        res["name"] = instance.name
         res["object_id"] = str(instance.id)
         res = parse_institution_labels(instance, res)
         res = parse_institution_relations(instance, res)
         # NOTE: sources contain the bibtex json directly, they could be parsed to a) conform to the naming scheme and b) get rid of uneccessary data
         res["sources"] = get_references_for_instance(instance)
-        res["ampel"] = ampel(instance)
+        res["status"] = ampel(instance)
         res["sameAs"] = [
             uri.uri
             for uri in instance.uri_set.all()

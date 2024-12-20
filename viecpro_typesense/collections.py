@@ -1,6 +1,7 @@
 from .handlers import GenericDocIDHandler, ZoteroTagHandler
 from viecpro_typesense import Collection, StaticField, CollectionConfig, O, Field
 from copy import deepcopy
+import datetime
 from .fields import (
     StringField,
     FullNameField,
@@ -74,14 +75,14 @@ def collection_factory(name, fields, config):
 
 def get_start_year_or_0(instance):
     if instance.start_date is not None:
-        return instance.start_date.year
-    return 0
+        return int(instance.start_date.strftime("%s"))
+    return int(-62167174098)
 
 
 def get_end_year_or_5000(instance):
     if instance.end_date is not None:
-        return instance.end_date.year
-    return 5000
+        return int(instance.end_date.strftime("%s"))
+    return int(datetime.datetime(5000, 1, 1, 0, 0).timestamp())
 
 
 def shared_fields(m):
@@ -97,13 +98,13 @@ def shared_fields(m):
             "start_date_int",
             handler=get_start_year_or_0,
             pass_instance=True,
-            options=O(type="int32", optional=True, sort=True),
+            options=O(type="int64", optional=True, sort=True),
         ),
         "end_date_int": StringField(
             "end_date_int",
             handler=get_end_year_or_5000,
             pass_instance=True,
-            options=O(type="int32", optional=True, sort=True),
+            options=O(type="int64", optional=True, sort=True),
         ),
     }
 
@@ -172,8 +173,6 @@ def kategorienhandler(x):
 def create_entity_collections():
     res = []
     for m in AbstractEntity.get_all_entity_classes():
-        if m is Person:
-            continue
         if m is not Work:
             config = CollectionConfig()
             config.model = m
@@ -230,7 +229,7 @@ def create_entity_collections():
                 }
                 base_fields.update(per_fields)
             detail_fields = get_entity_specific_detail_fields(m.__name__.lower())
-            base_fields["ampel"] = StringField(
+            base_fields["status"] = StringField(
                 "ampel",
                 pass_instance=True,
                 options=O(facet=True, sort=True),
@@ -330,21 +329,17 @@ class HofstaatCollection(Collection):
         handler=kategorienhandler,
         pass_instance=True,
     )
-    start_date_int = (
-        StringField(
-            "start_date_int",
-            handler=get_start_year_or_0,
-            pass_instance=True,
-            options=O(type="int32", optional=True, sort=True),
-        ),
+    start_date_int = StringField(
+        "start_date_int",
+        handler=get_start_year_or_0,
+        pass_instance=True,
+        options=O(type="int64", optional=True, sort=True),
     )
-    end_date_int = (
-        StringField(
-            "end_date_int",
-            handler=get_end_year_or_5000,
-            pass_instance=True,
-            options=O(type="int32", optional=True, sort=True),
-        ),
+    end_date_int = StringField(
+        "end_date_int",
+        handler=get_end_year_or_5000,
+        pass_instance=True,
+        options=O(type="int64", optional=True, sort=True),
     )
 
 

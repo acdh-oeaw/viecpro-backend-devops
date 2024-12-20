@@ -30,6 +30,10 @@ person_fields = [
     F("id", type="string", index=True, optional=False),
     F("model", type="string", index=True, optional=False),
     F("object_id", type="string", index=True, optional=False),
+    F("first_name", type="string"),
+    F("name", type="string"),
+    F("start_date", type="string"),
+    F("end_date", type="string"),
     F("had_courts"),
     F("place_of_birth", type="object"),
     F("place_of_death", type="object"),
@@ -58,7 +62,7 @@ person_fields = [
 
 # unused atm, we only build the person collection (for now)
 collections = [
-    f"viecpro_{model}_detail"
+    f"viecpro_v2_{model}_detail"
     for model in ["person", "institution", "place", "work", "source", "court"]
 ]
 
@@ -219,7 +223,7 @@ def parse_person_relations(p: Person, res: Dict[str, Any]) -> Dict[str, Any]:
 
 def main(offset: int = 0):
     # instanciate the collection and create the schema from it
-    c = C(name="viecpro_detail_person", fields=person_fields)
+    c = C(name="viecpro_v2_detail_person", fields=person_fields)
     schema = c.to_schema()
 
     results: List[Any] = []
@@ -252,8 +256,12 @@ def main(offset: int = 0):
         res = parse_person_relations(instance, res)
         res["id"] = f"{instance.id}"  # type: ignore
         res["object_id"] = str(instance.id)  # type: ignore
+        res["name"] = instance.name
+        res["first_name"] = instance.first_name
+        res["start_date"] = instance.start_date_written
+        res["end_date"] = instance.end_date_written
         res["model"] = model.__name__
-        res["ampel"] = ampel(instance)
+        res["status"] = ampel(instance)
         res["allowance"] = [
             text.text for text in instance.text.filter(kind__name="Diverses")
         ]

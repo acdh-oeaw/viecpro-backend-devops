@@ -14,11 +14,14 @@ place_fields = [
     F("id", type="string", index=True, optional=False),
     F("model", type="string", index=True, optional=False),
     F("object_id", type="string", index=True, optional=False),
+    F("name", type="string", optional=False),
     F("alternative_names", type="string[]"),
     F("person_relations"),
     F("place_relations"),
     F("institution_relations"),
     F("notes", type="string"),
+    F("lat", type="float"),
+    F("long", type="float"),
     # TODO: add all fields
 ]
 
@@ -71,7 +74,7 @@ def parse_place_labels(p: Place, res) -> List[Any]:
 
 
 def main(offset: int = 0) -> Dict[str, Any]:
-    c = C(name="viecpro_detail_place", fields=place_fields)
+    c = C(name="viecpro_v2_detail_place", fields=place_fields)
     schema = c.to_schema()
 
     results = []
@@ -92,13 +95,15 @@ def main(offset: int = 0) -> Dict[str, Any]:
         res["id"] = f"{instance.id}"
         res["object_id"] = str(instance.id)
         res["model"] = model.__name__
-        res["ampel"] = ampel(instance)
+        res["status"] = ampel(instance)
         res["sameAs"] = [
             uri.uri
             for uri in instance.uri_set.all()
             if not uri.uri.startswith("https://viecpro.acdh.oeaw.ac.at")
         ]
         res["notes"] = instance.notes if instance.notes else ""
+        res["lat"] = instance.lat
+        res["long"] = instance.lng
         results.append(res)
 
     return {"schema": schema, "results": results}
