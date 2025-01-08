@@ -101,6 +101,38 @@ class Command(BaseCommand):
             help="Optional query filter in format 'field=value' or JSON (e.g., 'status=active')",
             default=None,
         )
+        parser.add_argument(
+            "--export-dir",
+            type=str,
+            help="Directory to export schema and documents as JSON files",
+            default=None,
+        )
+        parser.add_argument(
+            "--export-only",
+            action="store_true",
+            help="Only export files without updating Typesense index",
+            default=False,
+        )
+
+    def export_to_json(
+        self, export_dir: str, collection_name: str, schema: Dict, documents: list
+    ) -> None:
+        """
+        Export schema and documents to JSON files
+        """
+        os.makedirs(export_dir, exist_ok=True)
+
+        # Export schema
+        schema_file = os.path.join(export_dir, f"{collection_name}_schema.json")
+        with open(schema_file, "w", encoding="utf-8") as f:
+            json.dump(schema, f, indent=2, ensure_ascii=False)
+        self.stdout.write(f"Exported schema to {schema_file}")
+
+        # Export documents
+        docs_file = os.path.join(export_dir, f"{collection_name}_documents.json")
+        with open(docs_file, "w", encoding="utf-8") as f:
+            json.dump(documents, f, indent=2, ensure_ascii=False)
+        self.stdout.write(f"Exported {len(documents)} documents to {docs_file}")
 
     def handle(self, *args, **options):
         model_path = options["model"]
@@ -158,14 +190,22 @@ class Command(BaseCommand):
             documents = collection.get_documents()
             self.stdout.write(f"Generated {len(documents)} documents for indexing")
 
-            # Get Typesense client
-            client = self.get_client()
+            # Export to JSON if requested
+            if options["export_dir"]:
+                self.export_to_json(
+                    options["export_dir"], schema["name"], schema, documents
+                )
 
-            # Create or update collection
-            self.create_or_update_collection(client, schema)
+            # Update Typesense index unless export-only is specified
+            if not options["export_only"]:
+                # Get Typesense client
+                client = self.get_client()
 
-            # Import documents
-            self.import_documents(client, schema["name"], documents)
+                # Create or update collection
+                self.create_or_update_collection(client, schema)
+
+                # Import documents
+                self.import_documents(client, schema["name"], documents)
         except Exception as e:
             raise CommandError(f"Error processing collection: {str(e)}")
 
