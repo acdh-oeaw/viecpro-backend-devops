@@ -1,7 +1,5 @@
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Q
-from django.conf import settings
 import json
 import typesense
 import os
