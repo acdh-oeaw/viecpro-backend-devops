@@ -180,6 +180,9 @@ class Command(BaseCommand):
         # Initialize the collection with the queryset
         try:
             # Initialize collection and get schema/documents
+            queryset = queryset.prefetch_related(
+                "personinstitution", "personperson", "personplace", "label_set"
+            )
             collection = collection_class(queryset=queryset)
             schema = collection.get_schema()
             self.stdout.write(
