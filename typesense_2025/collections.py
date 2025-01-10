@@ -12,6 +12,8 @@ from .fields import (
     TsRelationFlatField,
     TsRelatedEntitiesField,
     TsSameAsField,
+    RelationsFieldDef,
+    TsReferencesField,
 )
 
 
@@ -204,7 +206,11 @@ class PersonDetailCollection(PersonCollection):
         type="object[]",
         optional=True,
         relations=[
-            ({}, "personinstitution_set.related_institution", "name", "court", None)
+            RelationsFieldDef(
+                accessor="personinstitution_set.related_institution",
+                accessor_label="name",
+                entity_type="court",
+            )
         ],
     )
     nonCourtFunctions: TsRelationField = TsRelationField(
@@ -215,26 +221,20 @@ class PersonDetailCollection(PersonCollection):
             "Sonstige/r Funktion, Amtsinhabe und Beruf",
         ],
         relations=[
-            (
-                {"relation_type__name": "Tätigkeiten für ausländische Höfe"},
-                "personinstitution_set.related_institution",
-                "name",
-                "court",
-                None,
+            RelationsFieldDef(
+                accessor="personinstitution_set.related_institution",
+                filter={"relation_type__name": "Tätigkeiten für ausländische Höfe"},
+                accessor_label="name",
+                entity_type="court",
             ),
-            (
-                {"relation_type__name": "Dynastische Beziehung"},
-                "related_personA.related_personA",
-                None,
-                None,
-                None,
+            RelationsFieldDef(
+                accessor="related_personA.related_personA",
+                filter={"relation_type__name": "Dynastische Beziehung"},
             ),
-            (
-                {"relation_type__name": "Dynastische Beziehung"},
-                "related_personB.related_personB",
-                None,
-                None,
-                None,
+            RelationsFieldDef(
+                accessor="related_personB.related_personB",
+                filter={"relation_type__name": "Dynastische Beziehung"},
+                relation_type_reverse=True,
             ),
         ],
     )
@@ -249,31 +249,26 @@ class PersonDetailCollection(PersonCollection):
         type="object[]",
         optional=True,
         relations=[
-            (
-                {
+            RelationsFieldDef(
+                accessor="related_personA.related_personA",
+                filter={
                     "relation_type__name__in": [
                         "Doubletten Beziehung",
                         "Doublette (Leopold/Access)",
                         "ist potentielle Doublette von",
                     ]
                 },
-                "related_personA.related_personA",
-                None,
-                None,
-                None,
             ),
-            (
-                {
+            RelationsFieldDef(
+                accessor="related_personB.related_personB",
+                filter={
                     "relation_type__name__in": [
                         "Doubletten Beziehung",
                         "Doublette (Leopold/Access)",
                         "ist potentielle Doublette von",
                     ]
                 },
-                "related_personB.related_personB",
-                None,
-                None,
-                None,
+                relation_type_reverse=True,
             ),
         ],
     )
@@ -281,12 +276,10 @@ class PersonDetailCollection(PersonCollection):
         type="object[]",
         optional=True,
         relations=[
-            (
-                {"relation_type__name": "hatte den Hofstaat"},
-                "personinstitution_set.related_institution",
-                None,
-                "court",
-                None,
+            RelationsFieldDef(
+                accessor="personinstitution_set.related_institution",
+                filter={"relation_type__name": "hatte den Hofstaat"},
+                entity_type="court",
             )
         ],
     )
@@ -299,8 +292,9 @@ class PersonDetailCollection(PersonCollection):
         type="object[]",
         optional=True,
         relations=[
-            (
-                {
+            RelationsFieldDef(
+                accessor="related_personA.related_personA",
+                filter={
                     "relation_type__name__in": [
                         "war Vetter von",
                         "unbek. Verwandtschaftliche Beziehung",
@@ -308,13 +302,10 @@ class PersonDetailCollection(PersonCollection):
                         "war verwandt mit",
                     ]
                 },
-                "related_personA.related_personA",
-                None,
-                None,
-                None,
             ),
-            (
-                {
+            RelationsFieldDef(
+                accessor="related_personB.related_personB",
+                filter={
                     "relation_type__name__in": [
                         "war Vetter von",
                         "unbek. Verwandtschaftliche Beziehung",
@@ -322,10 +313,7 @@ class PersonDetailCollection(PersonCollection):
                         "war verwandt mit",
                     ]
                 },
-                "related_personB.related_personB",
-                None,
-                None,
-                None,
+                relation_type_reverse=True,
             ),
         ],
     )
@@ -358,19 +346,14 @@ class PersonDetailCollection(PersonCollection):
         type="object[]",
         optional=True,
         relations=[
-            (
-                {},
-                "related_personA.related_personA",
-                None,
-                None,
-                ["Berufliche Beziehung"],
+            RelationsFieldDef(
+                accessor="related_personA.related_personA",
+                relation_types=["Berufliche Beziehung"],
             ),
-            (
-                {},
-                "related_personB.related_personB",
-                None,
-                None,
-                ["Berufliche Beziehung"],
+            RelationsFieldDef(
+                accessor="related_personB.related_personB",
+                relation_types=["Berufliche Beziehung"],
+                relation_type_reverse=True,
             ),
         ],
     )
@@ -378,19 +361,14 @@ class PersonDetailCollection(PersonCollection):
         type="object[]",
         optional=True,
         relations=[
-            (
-                {},
-                "related_personA.related_personA",
-                None,
-                None,
-                ["Kirchl. Amtsbeziehung"],
+            RelationsFieldDef(
+                accessor="related_personA.related_personA",
+                relation_types=["Kirchl. Amtsbeziehung"],
             ),
-            (
-                {},
-                "related_personB.related_personB",
-                None,
-                None,
-                ["Kirchl. Amtsbeziehung"],
+            RelationsFieldDef(
+                accessor="related_personB.related_personB",
+                relation_types=["Kirchl. Amtsbeziehung"],
+                relation_type_reverse=True,
             ),
         ],
     )
@@ -405,6 +383,7 @@ class PersonDetailCollection(PersonCollection):
         accessor_label="name",
         filter={"relation_type__name": "ist geboren in"},
     )
+    references: TsReferencesField = TsReferencesField(type="object[]", optional=True)
 
     def get_collection_name(self):
         return "viecpro_v3_person_detail"
@@ -439,18 +418,21 @@ class HofstaatCollection(BaseCollection):
         type="string",
         optional=True,
         use_str_method=True,
+        many=False,
         accessor="personinstitution_set.related_person",
         filter={"relation_type__name": "hatte den Hofstaat"},
     )
     ownerId: TsRelationFlatField = TsRelationFlatField(
         type="int32",
         optional=True,
+        many=False,
         accessor="personinstitution_set.related_person_id",
         filter={"relation_type__name": "hatte den Hofstaat"},
     )
     category: TsRelationFlatField = TsRelationFlatField(
         type="string",
         optional=True,
+        many=False,
         accessor="label_set.label",
         filter={"label_type__name": "Kategorie"},
     )
@@ -468,8 +450,65 @@ class HofstaatCollection(BaseCollection):
 
 @dataclass
 class HofstaatDetailCollection(HofstaatCollection):
+    alternativeNames: TsRelationFlatField = TsRelationFlatField(
+        type="string[]",
+        accessor="label_set.label",
+        optional=True,
+        filter={"label_type__name": "Bezeichnung, alternativ"},
+    )
+    expandedName: TsRelationFlatField = TsRelationFlatField(
+        type="string",
+        many=False,
+        accessor="label_set.label",
+        optional=True,
+        filter={"label_type__name": "Auflösung"},
+    )
+    hierarchy: TsRelationField = TsRelationField(
+        type="object[]",
+        optional=True,
+        relations=[
+            RelationsFieldDef(
+                accessor="related_institutionA.related_institutionA",
+                entity_type="court",
+                relation_types=["strukturelle Beziehung"],
+            ),
+            RelationsFieldDef(
+                accessor="related_institutionB.related_institutionB",
+                entity_type="court",
+                relation_types=["strukturelle Beziehung"],
+                relation_type_reverse=True,
+            ),
+        ],
+    )
+    locations: TsRelationField = TsRelationField(
+        type="object[]",
+        optional=True,
+        relations=[
+            RelationsFieldDef(
+                accessor="institutionplace_set.related_place",
+            )
+        ],
+    )
+    notes: TypesenseField = TypesenseField(
+        type="string", field_name="notes", optional=True
+    )
+    personnel: TsRelationField = TsRelationField(
+        type="object[]",
+        optional=True,
+        relations=[
+            RelationsFieldDef(
+                accessor="personinstitution_set.related_person",
+                exclude_filter={"relation_type__name": "hatte den Hofstaat"},
+            )
+        ],
+    )
+    sameAs: TsSameAsField = TsSameAsField(
+        type="string[]", domain="viecpro", optional=True
+    )
+    references: TsReferencesField = TsReferencesField(type="object[]", optional=True)
+
     def get_collection_name(self):
-        return "viecpro_v3_court"
+        return "viecpro_v3_court_detail"
 
     def __init__(
         self,

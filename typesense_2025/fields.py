@@ -1,11 +1,16 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple, field
 from os import wait
+import string
 from typing import List, Optional, Literal, Dict, Any, Tuple
 from django.db.models import Model
 import re
 import datetime
 from django.contrib.contenttypes.models import ContentType
 from functools import cache
+from apis_bibsonomy.models import Reference
+import json
+import requests
+import os
 
 
 def clean_text(text):
@@ -44,6 +49,19 @@ def create_timestamps(obj):
         clean_text(obj.end_date_written) if obj.end_date_written is not None else None
     )
     return r1
+
+
+@dataclass
+class RelationsFieldDef:
+    """Class used to store the relation definitions for the TsRelationField"""
+
+    accessor: str
+    filter: dict = field(default_factory=dict)
+    exclude_filter: dict = field(default_factory=dict)
+    accessor_label: Optional[str] = None
+    entity_type: Optional[str] = None
+    relation_types: Optional[list[str]] = None
+    relation_type_reverse: bool = False
 
 
 # Valid Typesense field types
@@ -262,7 +280,7 @@ class TsRelationField(TypesenseField):
         self,
         type: FieldType,
         labels: Optional[List[str]] = None,
-        relations: Optional[List[Tuple]] = None,
+        relations: Optional[List[RelationsFieldDef]] = None,
         facet: bool = False,
         optional: bool = False,
         index: bool = True,
@@ -282,8 +300,10 @@ class TsRelationField(TypesenseField):
     @cache
     def get_vocabs_list(cls, c, term):
         res = []
-        if "A" in c or "B" in c:
+        if ("A" in c or "B" in c) and "person" in c:
             mdl = "PersonPersonRelation".lower()
+        elif ("A" in c or "B" in c) and "institution" in c:
+            mdl = "InstitutionInstitutionRelation".lower()
         else:
             mdl = c.replace("_set", "")
         ct = ContentType.objects.get(app_label="apis_vocabularies", model=mdl)
@@ -305,7 +325,16 @@ class TsRelationField(TypesenseField):
                 r1.update(time_data)
                 res.append(r1)
         if self.relations is not None:
-            for filter, acc, acc_label, entity_type, rel_types in self.relations:
+            for rel_type_class in self.relations:
+                (
+                    acc,
+                    filter,
+                    excl_filter,
+                    acc_label,
+                    entity_type,
+                    rel_types,
+                    rel_type_reverse,
+                ) = astuple(rel_type_class)
                 lst_accessor = acc.split(".")
                 if acc_label is not None:
                     lst_accessor_label = acc_label.split(".")
@@ -320,7 +349,9 @@ class TsRelationField(TypesenseField):
                     for r in rel_types:
                         rel_types_list.extend(self.get_vocabs_list(mdl, r))
                     filter.update({"relation_type__in": rel_types_list})
-                for obj2 in getattr(obj, qs_attr).filter(**filter):
+                for obj2 in (
+                    getattr(obj, qs_attr).filter(**filter).exclude(**excl_filter)
+                ):
                     obj1 = obj2
                     for acc in lst_accessor:
                         obj1 = getattr(obj1, acc)
@@ -334,7 +365,12 @@ class TsRelationField(TypesenseField):
                         for acc in lst_accessor_label:
                             label = getattr(label, acc)
                     r1["name"] = clean_text(str(label))
-                    r2 = {"relationType": obj2.relation_type.name, "target": r1}
+                    r2 = {
+                        "relationType": obj2.relation_type.name_reverse
+                        if rel_type_reverse
+                        else obj2.relation_type.name,
+                        "target": r1,
+                    }
                     time_data = create_timestamps(obj1)
                     r2.update(time_data)
                     res.append(r2)
@@ -419,3 +455,53 @@ class TsSameAsField(TypesenseField):
         if self.domain is not None:
             filter["uri__contains"] = self.domain
         return list(obj.uri_set.all().exclude(**filter).values_list("uri", flat=True))
+
+
+class TsReferencesField(TypesenseField):
+    @classmethod
+    @cache
+    def get_zotero_entry(cls, url):
+        json = requests.get(
+            url, params={"key": os.environ.get("ZOTERO_API_KEY")}
+        ).json()
+        return json["data"]
+
+    def serialize_ref(self, ref):
+        bib = json.loads(ref.bibtex)
+        res = {
+            "id": ref.pk,
+            "folio": None,
+            "start_page": None,
+            "end_page": None,
+            "kind": None,
+            "shortTitle": None,
+            "title": None,
+        }
+        if ref.folio is not None:
+            if len(ref.folio) > 0:
+                res["folio"] = ref.folio
+        if ref.pages_start is not None:
+            res["start_page"] = ref.pages_start
+        if ref.pages_end is not None:
+            res["end_page"] = ref.pages_end
+        bib = self.get_zotero_entry(ref.bibs_url)
+        if "itemType" in bib:
+            res["kind"] = bib["itemType"]
+        for key in ["shortTitle", "title"]:
+            if key in bib:
+                res[key] = bib[key]
+        tags = bib.get("tags", [])
+        tag_group = [tag["tag"][2:] for tag in tags if tag["tag"].startswith("1_")]
+        if len(tag_group) == 1:
+            res["tag"] = tag_group[0]
+        else:
+            res["tag"] = "Allgemein"
+
+        return res
+
+    def get_data_representation(self, obj: Model) -> Any:
+        refs = Reference.objects.filter(object_id=obj.pk)
+        if refs.count() == 0 and self.optional:
+            return None
+        res = [self.serialize_ref(ref) for ref in refs]
+        return res
