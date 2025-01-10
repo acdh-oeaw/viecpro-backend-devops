@@ -99,13 +99,13 @@ class PersonCollection(BaseCollection):
         type="string", field_name="first_name", optional=True
     )
     gender: TsFieldGender = TsFieldGender(
-        type="string", facet=True, optional=True, sort=True, field_name="gender"
+        type="string", facet=True, sort=True, field_name="gender"
     )
     startDate: TsFieldTimestamp = TsFieldTimestamp(
-        type="int64", sort=True, field_name="start_date"
+        type="int64", sort=True, optional=True, field_name="start_date"
     )
     endDate: TsFieldTimestamp = TsFieldTimestamp(
-        type="int64", sort=True, field_name="end_date"
+        type="int64", sort=True, optional=True, field_name="end_date"
     )
     startDateWritten: TypesenseField = TypesenseField(
         type="string", optional=True, field_name="start_date_written"
@@ -116,12 +116,16 @@ class PersonCollection(BaseCollection):
     status: TsStatusField = TsStatusField(type="string", facet=True, sort=True)
     kind: TsFixedStringField = TsFixedStringField(type="string", string="person")
     functions: TsRelationFlatField = TsRelationFlatField(
-        type="string[]", accessor="personinstitution_set.relation_type.name", facet=True
+        type="string[]",
+        accessor="personinstitution_set.relation_type.name",
+        facet=True,
+        optional=True,
     )
     institutions: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
         accessor="personinstitution_set.related_institution.name",
         facet=True,
+        optional=True,
     )
 
     def get_collection_name(self):
@@ -155,6 +159,7 @@ class PersonDetailCollection(PersonCollection):
     alternativeBirthDates: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
         accessor="label_set.label",
+        optional=True,
         filter={
             "label_type__name__in": [
                 "alternatives Geburtsdatum",
@@ -165,6 +170,7 @@ class PersonDetailCollection(PersonCollection):
     alternativeDeathDates: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
         accessor="label_set.label",
+        optional=True,
         filter={
             "label_type__name__in": [
                 "alternatives Sterbedatum",
@@ -175,6 +181,7 @@ class PersonDetailCollection(PersonCollection):
     alternativeLastNames: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
         accessor="label_set.label",
+        optional=True,
         filter={
             "label_type__name__in": [
                 "alternativer Nachname",
@@ -185,6 +192,7 @@ class PersonDetailCollection(PersonCollection):
     alternativeFirstNames: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
         accessor="label_set.label",
+        optional=True,
         filter={
             "label_type__name__in": [
                 "alternativer Vorname",
@@ -233,6 +241,7 @@ class PersonDetailCollection(PersonCollection):
     confession: TsRelationFlatField = TsRelationFlatField(
         type="string",
         optional=True,
+        many=False,
         accessor="label_set.label",
         filter={"label_type__name": "Konfession"},
     )
@@ -399,6 +408,68 @@ class PersonDetailCollection(PersonCollection):
 
     def get_collection_name(self):
         return "viecpro_v3_person_detail"
+
+    def __init__(
+        self,
+        queryset: QuerySet,
+    ):
+        self.queryset = queryset
+        self.enable_nested_fields = True
+
+
+@dataclass
+class HofstaatCollection(BaseCollection):
+    id: TypesenseField = TypesenseField(type="int32", field_name="pk")
+    name: TypesenseField = TypesenseField(type="string", field_name="name", sort=True)
+    startDate: TsFieldTimestamp = TsFieldTimestamp(
+        type="int64", sort=True, optional=True, field_name="start_date"
+    )
+    endDate: TsFieldTimestamp = TsFieldTimestamp(
+        type="int64", sort=True, optional=True, field_name="end_date"
+    )
+    startDateWritten: TypesenseField = TypesenseField(
+        type="string", optional=True, field_name="start_date_written"
+    )
+    endDateWritten: TypesenseField = TypesenseField(
+        type="string", optional=True, field_name="end_date_written"
+    )
+    status: TsStatusField = TsStatusField(type="string", facet=True, sort=True)
+    kind: TsFixedStringField = TsFixedStringField(type="string", string="court")
+    owner: TsRelationFlatField = TsRelationFlatField(
+        type="string",
+        optional=True,
+        use_str_method=True,
+        accessor="personinstitution_set.related_person",
+        filter={"relation_type__name": "hatte den Hofstaat"},
+    )
+    ownerId: TsRelationFlatField = TsRelationFlatField(
+        type="int32",
+        optional=True,
+        accessor="personinstitution_set.related_person_id",
+        filter={"relation_type__name": "hatte den Hofstaat"},
+    )
+    category: TsRelationFlatField = TsRelationFlatField(
+        type="string",
+        optional=True,
+        accessor="label_set.label",
+        filter={"label_type__name": "Kategorie"},
+    )
+
+    def get_collection_name(self):
+        return "viecpro_v3_court"
+
+    def __init__(
+        self,
+        queryset: QuerySet,
+    ):
+        self.queryset = queryset
+        self.enable_nested_fields = True
+
+
+@dataclass
+class HofstaatDetailCollection(HofstaatCollection):
+    def get_collection_name(self):
+        return "viecpro_v3_court"
 
     def __init__(
         self,

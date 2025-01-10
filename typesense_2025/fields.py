@@ -35,8 +35,14 @@ def create_timestamps(obj):
         end_date = int(datetime.datetime(5000, 1, 1, 0, 0).timestamp())
     r1["startDate"] = start_date
     r1["endDate"] = end_date
-    r1["startDateWritten"] = clean_text(obj.start_date_written)
-    r1["endDateWritten"] = clean_text(obj.end_date_written)
+    r1["startDateWritten"] = (
+        clean_text(obj.start_date_written)
+        if obj.start_date_written is not None
+        else None
+    )
+    r1["endDateWritten"] = (
+        clean_text(obj.end_date_written) if obj.end_date_written is not None else None
+    )
     return r1
 
 
@@ -215,6 +221,7 @@ class TsRelationFlatField(TypesenseField):
         accessor: str,
         filter: Optional[dict] = {},
         many: bool = True,
+        use_str_method: bool = False,
         facet: bool = False,
         optional: bool = False,
         index: bool = True,
@@ -230,6 +237,7 @@ class TsRelationFlatField(TypesenseField):
         self.accessor = accessor
         self.filter = filter
         self.many = many
+        self.use_str_method = use_str_method
 
     def get_data_representation(self, obj: Model) -> Any:
         res = []
@@ -238,6 +246,8 @@ class TsRelationFlatField(TypesenseField):
         for obj1 in getattr(obj, qs_attr).filter(**self.filter):
             for acc in lst_accessor:
                 obj1 = getattr(obj1, acc)
+            if self.use_str_method:
+                obj1 = str(obj1)
             res.append(obj1)
         if len(res) == 0 and self.optional:
             return None

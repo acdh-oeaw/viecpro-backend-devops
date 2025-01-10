@@ -69,7 +69,7 @@ class Command(BaseCommand):
                 if errors:
                     self.stdout.write(
                         self.style.WARNING(
-                            f"Batch {i//batch_size + 1}: {len(errors)} errors in {len(batch)} documents"
+                            f"Batch {i//batch_size + 1}: {len(errors)} errors in {len(batch)} documents | {errors}"
                         )
                     )
 
