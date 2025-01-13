@@ -100,6 +100,12 @@ class Command(BaseCommand):
             default=None,
         )
         parser.add_argument(
+            "--query-exclude",
+            type=str,
+            help="Optional query filter in format 'field=value' or JSON (e.g., 'status=active') to exclude objects.",
+            default=None,
+        )
+        parser.add_argument(
             "--export-dir",
             type=str,
             help="Directory to export schema and documents as JSON files",
@@ -135,6 +141,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         model_path = options["model"]
         query = options["query"]
+        query_exlude = options["query_exclude"]
 
         try:
             app_label, model_name = model_path.split(".")
@@ -150,22 +157,26 @@ class Command(BaseCommand):
         queryset = model.objects.all()
 
         # Apply filter if provided
-        if query:
-            try:
-                # Try to parse as JSON first
+        if query or query_exlude:
+            for q_key, q_value in {"filter": query, "exclude": query_exlude}.items():
+                if q_value is None:
+                    continue
                 try:
-                    filter_dict = json.loads(query)
-                    queryset = queryset.filter(**filter_dict)
-                except json.JSONDecodeError:
-                    # Fall back to simple key=value parsing
-                    if "=" in query:
-                        key, value = query.split("=", 1)
-                        filter_kwargs = {key.strip(): value.strip()}
-                        queryset = queryset.filter(**filter_kwargs)
-                    else:
-                        raise CommandError(f"Invalid query format: {query}")
-            except Exception as e:
-                raise CommandError(f"Error applying query filter: {str(e)}")
+                    # Try to parse as JSON first
+                    filter_method = getattr(queryset, q_key)
+                    try:
+                        filter_dict = json.loads(q_value)
+                        queryset = filter_method(**filter_dict)
+                    except json.JSONDecodeError:
+                        # Fall back to simple key=value parsing
+                        if "=" in q_value:
+                            key, value = q_value.split("=", 1)
+                            filter_kwargs = {key.strip(): value.strip()}
+                            queryset = filter_method(**filter_kwargs)
+                        else:
+                            raise CommandError(f"Invalid query format: {query}")
+                except Exception as e:
+                    raise CommandError(f"Error applying query filter: {str(e)}")
 
         self.stdout.write(f"Found {queryset.count()} objects to index")
 

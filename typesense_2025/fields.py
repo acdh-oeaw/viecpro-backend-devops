@@ -19,6 +19,7 @@ def clean_text(text):
     text = re.sub(r"<[^>]+>", "", text)  # Remove <...>
     text = re.sub(r"\[[^\]]+\]", "", text)  # Remove [...]
     text = re.sub(r"\{[^\}]+\}", "", text)  # Remove {...}
+    text = text.replace(" , ", ", ")
     return text.strip()
 
 
@@ -141,6 +142,8 @@ class TypesenseField:
         value = getattr(obj, self.field_name, None)
         if value is None:
             return None
+        if self.type in ["int32", "int64"]:
+            return int(value)
         text = clean_text(value)
         return text
 

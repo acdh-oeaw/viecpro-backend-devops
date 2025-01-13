@@ -95,7 +95,7 @@ class BaseCollection:
 
 @dataclass
 class PersonCollection(BaseCollection):
-    id: TypesenseField = TypesenseField(type="int32", field_name="pk")
+    id: TypesenseField = TypesenseField(type="string", field_name="pk")
     name: TypesenseField = TypesenseField(type="string", field_name="name", sort=True)
     firstName: TypesenseField = TypesenseField(
         type="string", field_name="first_name", optional=True
@@ -398,7 +398,7 @@ class PersonDetailCollection(PersonCollection):
 
 @dataclass
 class HofstaatCollection(BaseCollection):
-    id: TypesenseField = TypesenseField(type="int32", field_name="pk")
+    id: TypesenseField = TypesenseField(type="string", field_name="pk")
     name: TypesenseField = TypesenseField(type="string", field_name="name", sort=True)
     startDate: TsFieldTimestamp = TsFieldTimestamp(
         type="int64", sort=True, optional=True, field_name="start_date"
@@ -431,6 +431,7 @@ class HofstaatCollection(BaseCollection):
     )
     category: TsRelationFlatField = TsRelationFlatField(
         type="string",
+        facet=True,
         optional=True,
         many=False,
         accessor="label_set.label",
@@ -509,6 +510,110 @@ class HofstaatDetailCollection(HofstaatCollection):
 
     def get_collection_name(self):
         return "viecpro_v3_court_detail"
+
+    def __init__(
+        self,
+        queryset: QuerySet,
+    ):
+        self.queryset = queryset
+        self.enable_nested_fields = True
+
+
+@dataclass
+class InstitutionCollection(BaseCollection):
+    id: TypesenseField = TypesenseField(type="string", field_name="pk")
+    name: TypesenseField = TypesenseField(type="string", field_name="name", sort=True)
+    expandedName: TsRelationFlatField = TsRelationFlatField(
+        type="string",
+        many=False,
+        accessor="label_set.label",
+        optional=True,
+        filter={"label_type__name": "Auflösung"},
+    )
+    category: TsRelationFlatField = TsRelationFlatField(
+        type="string",
+        facet=True,
+        optional=True,
+        many=False,
+        accessor="label_set.label",
+        filter={"label_type__name": "Kategorie"},
+    )
+    startDate: TsFieldTimestamp = TsFieldTimestamp(
+        type="int64", sort=True, optional=True, field_name="start_date"
+    )
+    endDate: TsFieldTimestamp = TsFieldTimestamp(
+        type="int64", sort=True, optional=True, field_name="end_date"
+    )
+    startDateWritten: TypesenseField = TypesenseField(
+        type="string", optional=True, field_name="start_date_written"
+    )
+    endDateWritten: TypesenseField = TypesenseField(
+        type="string", optional=True, field_name="end_date_written"
+    )
+    status: TsStatusField = TsStatusField(type="string", facet=True, sort=True)
+    kind: TsFixedStringField = TsFixedStringField(type="string", string="institution")
+    type: TypesenseField = TypesenseField(
+        type="string", optional=True, field_name="kind"
+    )
+
+    def get_collection_name(self):
+        return "viecpro_v3_institution"
+
+    def __init__(
+        self,
+        queryset: QuerySet,
+    ):
+        self.queryset = queryset
+        self.enable_nested_fields = True
+
+
+@dataclass
+class InstitutionDetailCollection(InstitutionCollection):
+    hierarchy: TsRelationField = TsRelationField(
+        type="object[]",
+        optional=True,
+        relations=[
+            RelationsFieldDef(
+                accessor="related_institutionA.related_institutionA",
+                entity_type="court",
+                relation_types=["strukturelle Beziehung"],
+            ),
+            RelationsFieldDef(
+                accessor="related_institutionB.related_institutionB",
+                entity_type="court",
+                relation_types=["strukturelle Beziehung"],
+                relation_type_reverse=True,
+            ),
+        ],
+    )
+    locations: TsRelationField = TsRelationField(
+        type="object[]",
+        optional=True,
+        relations=[
+            RelationsFieldDef(
+                accessor="institutionplace_set.related_place",
+            )
+        ],
+    )
+    notes: TypesenseField = TypesenseField(
+        type="string", field_name="notes", optional=True
+    )
+    personnel: TsRelationField = TsRelationField(
+        type="object[]",
+        optional=True,
+        relations=[
+            RelationsFieldDef(
+                accessor="personinstitution_set.related_person",
+            )
+        ],
+    )
+    sameAs: TsSameAsField = TsSameAsField(
+        type="string[]", domain="viecpro", optional=True
+    )
+    references: TsReferencesField = TsReferencesField(type="object[]", optional=True)
+
+    def get_collection_name(self):
+        return "viecpro_v3_institution_detail"
 
     def __init__(
         self,
