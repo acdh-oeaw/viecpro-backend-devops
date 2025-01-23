@@ -98,7 +98,7 @@ class PersonCollection(BaseCollection):
     id: TypesenseField = TypesenseField(type="string", field_name="pk")
     name: TypesenseField = TypesenseField(type="string", field_name="name", sort=True)
     firstName: TypesenseField = TypesenseField(
-        type="string", field_name="first_name", optional=True
+        type="string", field_name="first_name", sort=True, optional=True
     )
     gender: TsFieldGender = TsFieldGender(
         type="string", facet=True, sort=True, field_name="gender"
