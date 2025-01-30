@@ -556,6 +556,12 @@ class HofstaatDetailCollection(HofstaatCollection):
         self.queryset = queryset
         self.enable_nested_fields = True
 
+        # Set all fields to index=False
+        for field in fields(self):
+            field_value = getattr(self, field.name)
+            if hasattr(field_value, "index"):
+                field_value.index = False
+
 
 @dataclass
 class InstitutionCollection(BaseCollection):
@@ -668,6 +674,12 @@ class InstitutionDetailCollection(InstitutionCollection):
         self.queryset = queryset
         self.enable_nested_fields = True
 
+        # Set all fields to index=False
+        for field in fields(self):
+            field_value = getattr(self, field.name)
+            if hasattr(field_value, "index"):
+                field_value.index = False
+
 
 @dataclass
 class PlaceCollection(BaseCollection):
@@ -767,3 +779,9 @@ class PlaceDetailCollection(PlaceCollection):
     ):
         self.queryset = queryset
         self.enable_nested_fields = True
+
+        # Set all fields to index=False
+        for field in fields(self):
+            field_value = getattr(self, field.name)
+            if hasattr(field_value, "index"):
+                field_value.index = False
