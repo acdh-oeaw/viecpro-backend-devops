@@ -313,10 +313,10 @@ class TsRelationField(TypesenseField):
         mc = ct.model_class()
         t1 = mc.objects.get(name=term)
         res.append(t1)
-        pc = mc.objects.filter(parent_class_id=t1.pk)
+        pc = mc.objects.filter(parent_class=t1)
         while pc.count() > 0:
-            pc = mc.objects.filter(parent_class__in=pc)
             res.extend([p1 for p1 in pc])
+            pc = mc.objects.filter(parent_class__in=pc)
         return res
 
     def get_data_representation(self, obj: Model) -> Any:
@@ -374,7 +374,7 @@ class TsRelationField(TypesenseField):
                         else obj2.relation_type.name,
                         "target": r1,
                     }
-                    time_data = create_timestamps(obj1)
+                    time_data = create_timestamps(obj2)
                     r2.update(time_data)
                     res.append(r2)
         if len(res) == 0 and self.optional:

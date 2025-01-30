@@ -1,3 +1,4 @@
+from operator import index
 from typing import Dict, Any, List
 from dataclasses import fields
 from django.db.models import QuerySet, Model
@@ -146,6 +147,7 @@ class PersonCollection(BaseCollection):
 class PersonDetailCollection(PersonCollection):
     placeOfBirth: TsRelatedEntitiesField = TsRelatedEntitiesField(
         type="object",
+        index=False,
         optional=True,
         accessor="personplace_set.related_place",
         accessor_label="name",
@@ -153,6 +155,7 @@ class PersonDetailCollection(PersonCollection):
     )
     placeOfDeath: TsRelatedEntitiesField = TsRelatedEntitiesField(
         type="object",
+        index=False,
         optional=True,
         accessor="personplace_set.related_place",
         accessor_label="name",
@@ -160,6 +163,7 @@ class PersonDetailCollection(PersonCollection):
     )
     alternativeBirthDates: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
+        index=False,
         accessor="label_set.label",
         optional=True,
         filter={
@@ -171,6 +175,7 @@ class PersonDetailCollection(PersonCollection):
     )
     alternativeDeathDates: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
+        index=False,
         accessor="label_set.label",
         optional=True,
         filter={
@@ -182,6 +187,7 @@ class PersonDetailCollection(PersonCollection):
     )
     alternativeLastNames: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
+        index=False,
         accessor="label_set.label",
         optional=True,
         filter={
@@ -193,6 +199,7 @@ class PersonDetailCollection(PersonCollection):
     )
     alternativeFirstNames: TsRelationFlatField = TsRelationFlatField(
         type="string[]",
+        index=False,
         accessor="label_set.label",
         optional=True,
         filter={
@@ -204,6 +211,7 @@ class PersonDetailCollection(PersonCollection):
     )
     courtFunctions: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         relations=[
             RelationsFieldDef(
@@ -215,6 +223,7 @@ class PersonDetailCollection(PersonCollection):
     )
     nonCourtFunctions: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         labels=[
             "Funktion, Amtsinhabe und Beruf",
@@ -240,6 +249,7 @@ class PersonDetailCollection(PersonCollection):
     )
     confession: TsRelationFlatField = TsRelationFlatField(
         type="string",
+        index=False,
         optional=True,
         many=False,
         accessor="label_set.label",
@@ -247,6 +257,7 @@ class PersonDetailCollection(PersonCollection):
     )
     duplicates: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         relations=[
             RelationsFieldDef(
@@ -274,6 +285,7 @@ class PersonDetailCollection(PersonCollection):
     )
     hadCourts: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         relations=[
             RelationsFieldDef(
@@ -285,11 +297,13 @@ class PersonDetailCollection(PersonCollection):
     )
     honoraryTitles: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         labels=["Adelstitel / -prädikat", "Auszeichnung", "Stand"],
     )
     marriagesAndFamilyRelations: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         relations=[
             RelationsFieldDef(
@@ -319,6 +333,7 @@ class PersonDetailCollection(PersonCollection):
     )
     marriedNames: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         labels=[
             "Schreibvariante Nachname verheiratet",
@@ -331,10 +346,14 @@ class PersonDetailCollection(PersonCollection):
         ],
     )
     notes: TypesenseField = TypesenseField(
-        type="string", field_name="notes", optional=True
+        type="string",
+        field_name="notes",
+        optional=True,
+        index=False,
     )
     otherRelationsCourt: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         labels=[
             "Sonstiger Hofbezug",
@@ -344,6 +363,7 @@ class PersonDetailCollection(PersonCollection):
     )
     personRelationsCourt: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         relations=[
             RelationsFieldDef(
@@ -359,6 +379,7 @@ class PersonDetailCollection(PersonCollection):
     )
     relationsToChurchAndOrders: TsRelationField = TsRelationField(
         type="object[]",
+        index=False,
         optional=True,
         relations=[
             RelationsFieldDef(
@@ -373,17 +394,26 @@ class PersonDetailCollection(PersonCollection):
         ],
     )
     sameAs: TsSameAsField = TsSameAsField(
-        type="string[]", domain="viecpro", optional=True
-    )
-    relatedPlaces: TsRelatedEntitiesField = TsRelatedEntitiesField(
-        type="object[]",
-        many=True,
+        type="string[]",
+        domain="viecpro",
         optional=True,
-        accessor="personplace_set.related_place",
-        accessor_label="name",
-        filter={"relation_type__name": "ist geboren in"},
+        index=False,
     )
-    references: TsReferencesField = TsReferencesField(type="object[]", optional=True)
+    relatedPlaces: TsRelationField = TsRelationField(
+        type="object[]",
+        index=False,
+        optional=True,
+        relations=[
+            RelationsFieldDef(
+                accessor="personplace_set.related_place",
+                accessor_label="name",
+                entity_type="place",
+            )
+        ],
+    )
+    references: TsReferencesField = TsReferencesField(
+        type="object[]", index=False, optional=True
+    )
 
     def get_collection_name(self):
         return "viecpro_v3_person_detail"
@@ -394,6 +424,12 @@ class PersonDetailCollection(PersonCollection):
     ):
         self.queryset = queryset
         self.enable_nested_fields = True
+
+        # Set all fields to index=False
+        for field in fields(self):
+            field_value = getattr(self, field.name)
+            if hasattr(field_value, "index"):
+                field_value.index = False
 
 
 @dataclass
@@ -416,6 +452,7 @@ class HofstaatCollection(BaseCollection):
     kind: TsFixedStringField = TsFixedStringField(type="string", string="court")
     owner: TsRelationFlatField = TsRelationFlatField(
         type="string",
+        sort=True,
         optional=True,
         use_str_method=True,
         many=False,
@@ -431,6 +468,7 @@ class HofstaatCollection(BaseCollection):
     )
     category: TsRelationFlatField = TsRelationFlatField(
         type="string",
+        sort=True,
         facet=True,
         optional=True,
         many=False,
@@ -525,6 +563,7 @@ class InstitutionCollection(BaseCollection):
     name: TypesenseField = TypesenseField(type="string", field_name="name", sort=True)
     expandedName: TsRelationFlatField = TsRelationFlatField(
         type="string",
+        sort=True,
         many=False,
         accessor="label_set.label",
         optional=True,
@@ -532,6 +571,7 @@ class InstitutionCollection(BaseCollection):
     )
     category: TsRelationFlatField = TsRelationFlatField(
         type="string",
+        sort=True,
         facet=True,
         optional=True,
         many=False,
@@ -553,7 +593,7 @@ class InstitutionCollection(BaseCollection):
     status: TsStatusField = TsStatusField(type="string", facet=True, sort=True)
     kind: TsFixedStringField = TsFixedStringField(type="string", string="institution")
     type: TypesenseField = TypesenseField(
-        type="string", optional=True, field_name="kind"
+        type="string", optional=True, facet=True, field_name="kind"
     )
 
     def get_collection_name(self):
@@ -633,13 +673,8 @@ class InstitutionDetailCollection(InstitutionCollection):
 class PlaceCollection(BaseCollection):
     id: TypesenseField = TypesenseField(type="string", field_name="pk")
     name: TypesenseField = TypesenseField(type="string", field_name="name", sort=True)
-    category: TsRelationFlatField = TsRelationFlatField(
-        type="string",
-        facet=True,
-        optional=True,
-        many=False,
-        accessor="label_set.label",
-        filter={"label_type__name": "Kategorie"},
+    category: TypesenseField = TypesenseField(
+        type="string", sort=True, optional=True, facet=True, field_name="kind"
     )
     startDate: TsFieldTimestamp = TsFieldTimestamp(
         type="int64", sort=True, optional=True, field_name="start_date"
@@ -707,6 +742,12 @@ class PlaceDetailCollection(PlaceCollection):
                 relation_type_reverse=True,
             ),
         ],
+    )
+    longitude: TypesenseField = TypesenseField(
+        type="float", field_name="lng", optional=True, index=False
+    )
+    latitude: TypesenseField = TypesenseField(
+        type="float", field_name="lat", optional=True, index=False
     )
 
     notes: TypesenseField = TypesenseField(
