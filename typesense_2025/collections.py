@@ -255,6 +255,14 @@ class PersonDetailCollection(PersonCollection):
         accessor="label_set.label",
         filter={"label_type__name": "Konfession"},
     )
+    causeOfDeath: TsRelationFlatField = TsRelationFlatField(
+        type="string",
+        index=False,
+        optional=True,
+        many=False,
+        accessor="label_set.label",
+        filter={"label_type__name": "Todesursache"},
+    )
     duplicates: TsRelationField = TsRelationField(
         type="object[]",
         index=False,
@@ -430,6 +438,8 @@ class PersonDetailCollection(PersonCollection):
             field_value = getattr(self, field.name)
             if hasattr(field_value, "index"):
                 field_value.index = False
+            if hasattr(field_value, "facet"):
+                field_value.facet = False
 
 
 @dataclass
@@ -561,6 +571,8 @@ class HofstaatDetailCollection(HofstaatCollection):
             field_value = getattr(self, field.name)
             if hasattr(field_value, "index"):
                 field_value.index = False
+            if hasattr(field_value, "facet"):
+                field_value.facet = False
 
 
 @dataclass
@@ -679,6 +691,8 @@ class InstitutionDetailCollection(InstitutionCollection):
             field_value = getattr(self, field.name)
             if hasattr(field_value, "index"):
                 field_value.index = False
+            if hasattr(field_value, "facet"):
+                field_value.facet = False
 
 
 @dataclass
@@ -785,3 +799,5 @@ class PlaceDetailCollection(PlaceCollection):
             field_value = getattr(self, field.name)
             if hasattr(field_value, "index"):
                 field_value.index = False
+            if hasattr(field_value, "facet"):
+                field_value.facet = False

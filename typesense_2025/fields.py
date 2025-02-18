@@ -144,6 +144,8 @@ class TypesenseField:
             return None
         if self.type in ["int32", "int64"]:
             return int(value)
+        if self.type == "float":
+            return float(value)
         text = clean_text(value)
         return text
 
