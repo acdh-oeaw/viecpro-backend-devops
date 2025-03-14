@@ -105,10 +105,18 @@ class PersonCollection(BaseCollection):
         type="string", facet=True, sort=True, field_name="gender"
     )
     startDate: TsFieldTimestamp = TsFieldTimestamp(
-        type="int64", sort=True, optional=True, field_name="start_date"
+        type="int64",
+        sort=True,
+        optional=True,
+        field_name="start_date",
+        include_relations="lower",
     )
     endDate: TsFieldTimestamp = TsFieldTimestamp(
-        type="int64", sort=True, optional=True, field_name="end_date"
+        type="int64",
+        sort=True,
+        optional=True,
+        field_name="end_date",
+        include_relations="upper",
     )
     startDateWritten: TypesenseField = TypesenseField(
         type="string", optional=True, field_name="start_date_written"
@@ -194,6 +202,9 @@ class PersonDetailCollection(PersonCollection):
             "label_type__name__in": [
                 "alternativer Nachname",
                 "Schreibvariante Nachname",
+                "Schreibvariante Nachname verheiratet",
+                "Schreibvariante Nachname verheiratet (1. Ehe)",
+                "Schreibvariante Nachname verheiratet (2. Ehe)",
             ]
         },
     )
@@ -217,7 +228,10 @@ class PersonDetailCollection(PersonCollection):
             RelationsFieldDef(
                 accessor="personinstitution_set.related_institution",
                 accessor_label="name",
-                entity_type="court",
+                entity_type=lambda obj: "court"
+                if obj.kind and obj.kind.name == "Hofstaat"
+                else "institution",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -234,16 +248,20 @@ class PersonDetailCollection(PersonCollection):
                 accessor="personinstitution_set.related_institution",
                 filter={"relation_type__name": "Tätigkeiten für ausländische Höfe"},
                 accessor_label="name",
-                entity_type="court",
+                entity_type=lambda obj: "court"
+                if obj.kind and obj.kind.name == "Hofstaat"
+                else "institution",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
             RelationsFieldDef(
                 accessor="related_personA.related_personA",
                 filter={"relation_type__name": "Dynastische Beziehung"},
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
             RelationsFieldDef(
                 accessor="related_personB.related_personB",
                 filter={"relation_type__name": "Dynastische Beziehung"},
-                relation_type_reverse=True,
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
         ],
     )
@@ -277,6 +295,7 @@ class PersonDetailCollection(PersonCollection):
                         "ist potentielle Doublette von",
                     ]
                 },
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
             RelationsFieldDef(
                 accessor="related_personB.related_personB",
@@ -287,7 +306,7 @@ class PersonDetailCollection(PersonCollection):
                         "ist potentielle Doublette von",
                     ]
                 },
-                relation_type_reverse=True,
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
         ],
     )
@@ -299,7 +318,10 @@ class PersonDetailCollection(PersonCollection):
             RelationsFieldDef(
                 accessor="personinstitution_set.related_institution",
                 filter={"relation_type__name": "hatte den Hofstaat"},
-                entity_type="court",
+                entity_type=lambda obj: "court"
+                if obj.kind and obj.kind.name == "Hofstaat"
+                else "institution",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -309,6 +331,12 @@ class PersonDetailCollection(PersonCollection):
         optional=True,
         labels=["Adelstitel / -prädikat", "Auszeichnung", "Stand"],
     )
+    academicTitles: TsRelationField = TsRelationField(
+        type="object[]",
+        index=False,
+        optional=True,
+        labels=["Akadem. Titel"],
+    )
     marriagesAndFamilyRelations: TsRelationField = TsRelationField(
         type="object[]",
         index=False,
@@ -316,26 +344,29 @@ class PersonDetailCollection(PersonCollection):
         relations=[
             RelationsFieldDef(
                 accessor="related_personA.related_personA",
-                filter={
-                    "relation_type__name__in": [
-                        "war Vetter von",
-                        "unbek. Verwandtschaftliche Beziehung",
-                        "war verheiratet mit",
-                        "war verwandt mit",
-                    ]
-                },
+                relation_types=["Verwandtschaftliche Beziehung"],
+                #              filter={
+                #                  "relation_type__name__in": [
+                #                      "war Vetter von",
+                #                      "unbek. Verwandtschaftliche Beziehung",
+                #                      "war verheiratet mit",
+                #                      "war verwandt mit",
+                #                  ]
+                #              },
+                post_proc_rel_type=lambda obj: obj.split("[")[0].strip(),
             ),
             RelationsFieldDef(
                 accessor="related_personB.related_personB",
-                filter={
-                    "relation_type__name__in": [
-                        "war Vetter von",
-                        "unbek. Verwandtschaftliche Beziehung",
-                        "war verheiratet mit",
-                        "war verwandt mit",
-                    ]
-                },
-                relation_type_reverse=True,
+                relation_types=["Verwandtschaftliche Beziehung"],
+                #               filter={
+                #                   "relation_type__name__in": [
+                #                       "war Vetter von",
+                #                       "unbek. Verwandtschaftliche Beziehung",
+                #                       "war verheiratet mit",
+                #                       "war verwandt mit",
+                #                   ]
+                #               },
+                post_proc_rel_type=lambda obj: obj.split("[")[0].strip(),
             ),
         ],
     )
@@ -344,13 +375,10 @@ class PersonDetailCollection(PersonCollection):
         index=False,
         optional=True,
         labels=[
-            "Schreibvariante Nachname verheiratet",
-            "Schreibvariante Nachname verheiratet (2. Ehe)",
+            "Nachname verheiratet",
             "Nachname verheiratet (1. Ehe)",
-            "Schreibvariante Nachname verheiratet (1. Ehe)",
             "Nachname verheiratet (2. Ehe)",
             "Nachname verheiratet (3. Ehe)",
-            "Nachname verheiratet",
         ],
     )
     notes: TypesenseField = TypesenseField(
@@ -376,12 +404,25 @@ class PersonDetailCollection(PersonCollection):
         relations=[
             RelationsFieldDef(
                 accessor="related_personA.related_personA",
-                relation_types=["Berufliche Beziehung"],
+                relation_types=[
+                    "Berufliche Beziehung",
+                    "war Gläubiger von",
+                    "war Testamentsvollstrecker von",
+                    "war Vormund der Kinder von",
+                    "war Erbe/Erbin von",
+                ],
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
             RelationsFieldDef(
                 accessor="related_personB.related_personB",
-                relation_types=["Berufliche Beziehung"],
-                relation_type_reverse=True,
+                relation_types=[
+                    "Berufliche Beziehung",
+                    "war Gläubiger von",
+                    "war Testamentsvollstrecker von",
+                    "war Vormund der Kinder von",
+                    "war Erbe/Erbin von",
+                ],
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
         ],
     )
@@ -389,15 +430,17 @@ class PersonDetailCollection(PersonCollection):
         type="object[]",
         index=False,
         optional=True,
+        labels=["Kirche", "Orden"],
         relations=[
             RelationsFieldDef(
                 accessor="related_personA.related_personA",
                 relation_types=["Kirchl. Amtsbeziehung"],
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
             RelationsFieldDef(
                 accessor="related_personB.related_personB",
                 relation_types=["Kirchl. Amtsbeziehung"],
-                relation_type_reverse=True,
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
         ],
     )
@@ -416,6 +459,10 @@ class PersonDetailCollection(PersonCollection):
                 accessor="personplace_set.related_place",
                 accessor_label="name",
                 entity_type="place",
+                exclude_filter={
+                    "relation_type__name__in": ["ist gestorben in", "ist geboren in"]
+                },
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -518,14 +565,19 @@ class HofstaatDetailCollection(HofstaatCollection):
         relations=[
             RelationsFieldDef(
                 accessor="related_institutionA.related_institutionA",
-                entity_type="court",
                 relation_types=["strukturelle Beziehung"],
+                entity_type=lambda obj: "court"
+                if obj.kind and obj.kind.name == "Hofstaat"
+                else "institution",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
             RelationsFieldDef(
                 accessor="related_institutionB.related_institutionB",
-                entity_type="court",
                 relation_types=["strukturelle Beziehung"],
-                relation_type_reverse=True,
+                entity_type=lambda obj: "court"
+                if obj.kind and obj.kind.name == "Hofstaat"
+                else "institution",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
         ],
     )
@@ -535,6 +587,7 @@ class HofstaatDetailCollection(HofstaatCollection):
         relations=[
             RelationsFieldDef(
                 accessor="institutionplace_set.related_place",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -548,6 +601,7 @@ class HofstaatDetailCollection(HofstaatCollection):
             RelationsFieldDef(
                 accessor="personinstitution_set.related_person",
                 exclude_filter={"relation_type__name": "hatte den Hofstaat"},
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -639,14 +693,19 @@ class InstitutionDetailCollection(InstitutionCollection):
         relations=[
             RelationsFieldDef(
                 accessor="related_institutionA.related_institutionA",
-                entity_type="court",
                 relation_types=["strukturelle Beziehung"],
+                entity_type=lambda obj: "court"
+                if obj.kind and obj.kind.name == "Hofstaat"
+                else "institution",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
             RelationsFieldDef(
                 accessor="related_institutionB.related_institutionB",
-                entity_type="court",
                 relation_types=["strukturelle Beziehung"],
-                relation_type_reverse=True,
+                entity_type=lambda obj: "court"
+                if obj.kind and obj.kind.name == "Hofstaat"
+                else "institution",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
         ],
     )
@@ -656,6 +715,7 @@ class InstitutionDetailCollection(InstitutionCollection):
         relations=[
             RelationsFieldDef(
                 accessor="institutionplace_set.related_place",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -668,6 +728,7 @@ class InstitutionDetailCollection(InstitutionCollection):
         relations=[
             RelationsFieldDef(
                 accessor="personinstitution_set.related_person",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -742,6 +803,7 @@ class PlaceDetailCollection(PlaceCollection):
         relations=[
             RelationsFieldDef(
                 accessor="institutionplace_set.related_institution",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -751,6 +813,7 @@ class PlaceDetailCollection(PlaceCollection):
         relations=[
             RelationsFieldDef(
                 accessor="personplace_set.related_person",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             )
         ],
     )
@@ -761,11 +824,12 @@ class PlaceDetailCollection(PlaceCollection):
             RelationsFieldDef(
                 accessor="related_placeA.related_placeA",
                 entity_type="place",
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
             RelationsFieldDef(
                 accessor="related_placeB.related_placeB",
                 entity_type="place",
-                relation_type_reverse=True,
+                post_proc_rel_type=lambda obj: obj.replace(" [REVERSE]", ""),
             ),
         ],
     )

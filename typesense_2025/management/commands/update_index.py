@@ -3,7 +3,9 @@ from django.core.management.base import BaseCommand, CommandError
 import json
 import typesense
 import os
-from typing import Dict, Any
+import pickle
+from pathlib import Path
+from typing import Dict, Any, List, Optional
 
 
 class Command(BaseCommand):
@@ -50,35 +52,121 @@ class Command(BaseCommand):
             raise CommandError(f"Error creating collection: {str(e)}")
 
     def import_documents(
-        self, client: typesense.Client, collection_name: str, documents: list
+        self,
+        client: typesense.Client,
+        collection_name: str,
+        documents: list,
+        start_index: int = 0,
     ) -> None:
         """
         Import documents into Typesense collection with batch processing
+
+        Args:
+            client: Typesense client
+            collection_name: Name of the collection
+            documents: List of documents to import
+            start_index: Index to start importing from (for resuming)
         """
         try:
             # Configure batch size
-            batch_size = int(os.getenv("TYPESENSE_BATCH_SIZE", "1000"))
+            batch_size = int(os.getenv("TYPESENSE_BATCH_SIZE", "500"))
+
+            # Create checkpoint directory if it doesn't exist
+            checkpoint_dir = Path(
+                os.getenv("TYPESENSE_CHECKPOINT_DIR", "/tmp/typesense_checkpoints")
+            )
+            checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            checkpoint_file = (
+                checkpoint_dir / f"{collection_name}_upload_checkpoint.pkl"
+            )
 
             # Process in batches
-            for i in range(0, len(documents), batch_size):
+            total_docs = len(documents)
+            for i in range(start_index, total_docs, batch_size):
                 batch = documents[i : i + batch_size]
-                results = client.collections[collection_name].documents.import_(batch)
 
-                # Check for errors in import results
-                errors = [r for r in results if "error" in r]
-                if errors:
-                    self.stdout.write(
-                        self.style.WARNING(
-                            f"Batch {i//batch_size + 1}: {len(errors)} errors in {len(batch)} documents | {errors}"
-                        )
+                try:
+                    results = client.collections[collection_name].documents.import_(
+                        batch
                     )
 
+                    # Check for errors in import results
+                    errors = [r for r in results if "error" in r]
+                    if errors:
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"Batch {i // batch_size + 1}: {len(errors)} errors in {len(batch)} documents | {errors}"
+                            )
+                        )
+
+                    # Save checkpoint after successful batch
+                    next_index = min(i + batch_size, total_docs)
+                    self._save_checkpoint(checkpoint_file, collection_name, next_index)
+
+                    self.stdout.write(f"Imported {next_index}/{total_docs} documents")
+
+                except Exception as e:
+                    self.stdout.write(
+                        self.style.ERROR(f"Error during import at index {i}: {str(e)}")
+                    )
+                    # Save the current position for resuming
+                    self._save_checkpoint(checkpoint_file, collection_name, i)
+                    raise
+
+        except Exception as e:
+            raise CommandError(f"Error importing documents: {str(e)}")
+
+    def _save_checkpoint(
+        self, checkpoint_file: Path, collection_name: str, index: int
+    ) -> None:
+        """Save checkpoint information for resuming imports"""
+        checkpoint_data = {
+            "collection_name": collection_name,
+            "last_processed_index": index,
+            "timestamp": os.path.getmtime(checkpoint_file)
+            if checkpoint_file.exists()
+            else None,
+        }
+
+        with open(checkpoint_file, "wb") as f:
+            pickle.dump(checkpoint_data, f)
+
+    def _save_documents_checkpoint(
+        self, checkpoint_file: Path, collection_name: str, index: int, documents: list
+    ) -> None:
+        """Save checkpoint information for resuming document creation"""
+        checkpoint_data = {
+            "collection_name": collection_name,
+            "last_processed_index": index,
+            "documents": documents,
+            "timestamp": os.path.getmtime(checkpoint_file)
+            if checkpoint_file.exists()
+            else None,
+        }
+
+        with open(checkpoint_file, "wb") as f:
+            pickle.dump(checkpoint_data, f)
+
+    def _load_checkpoint(self, collection_name: str) -> Optional[int]:
+        """Load checkpoint information for resuming imports"""
+        checkpoint_dir = Path(
+            os.getenv("TYPESENSE_CHECKPOINT_DIR", "/tmp/typesense_checkpoints")
+        )
+        checkpoint_file = checkpoint_dir / f"{collection_name}_checkpoint.pkl"
+
+        if checkpoint_file.exists():
+            try:
+                with open(checkpoint_file, "rb") as f:
+                    checkpoint_data = pickle.load(f)
+
+                if checkpoint_data.get("collection_name") == collection_name:
+                    return checkpoint_data.get("last_processed_index", 0)
+            except Exception as e:
                 self.stdout.write(
-                    f"Imported {min(i + batch_size, len(documents))}/{len(documents)} documents"
+                    self.style.WARNING(f"Error loading checkpoint: {str(e)}")
                 )
 
-        except typesense.exceptions.TypesenseClientError as e:
-            raise CommandError(f"Error importing documents: {str(e)}")
+        return 0
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -115,6 +203,18 @@ class Command(BaseCommand):
             "--export-only",
             action="store_true",
             help="Only export files without updating Typesense index",
+            default=False,
+        )
+        parser.add_argument(
+            "--resume",
+            action="store_true",
+            help="Resume indexing from the last checkpoint",
+            default=False,
+        )
+        parser.add_argument(
+            "--force-restart",
+            action="store_true",
+            help="Force restart indexing from the beginning, ignoring checkpoints",
             default=False,
         )
 
@@ -190,7 +290,7 @@ class Command(BaseCommand):
 
         # Initialize the collection with the queryset
         try:
-            # Initialize collection and get schema/documents
+            # Initialize collection and get schema
             queryset = queryset.prefetch_related(
                 "personinstitution", "personperson", "personplace", "label_set"
             )
@@ -199,7 +299,92 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"Serializing index {collection.__class__.__name__} with {schema}"
             )
-            documents = collection.get_documents()
+
+            # Create checkpoint directory if it doesn't exist
+            checkpoint_dir = Path(
+                os.getenv("TYPESENSE_CHECKPOINT_DIR", "/tmp/typesense_checkpoints")
+            )
+            checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            collection_name = schema["name"]
+            checkpoint_file = (
+                checkpoint_dir / f"{collection_name}_documents_checkpoint.pkl"
+            )
+
+            # Check if we should resume document creation from a checkpoint
+            documents = []
+            start_obj_index = 0
+            total_objects = queryset.count()
+
+            if (
+                options["resume"]
+                and not options["force_restart"]
+                and checkpoint_file.exists()
+            ):
+                try:
+                    with open(checkpoint_file, "rb") as f:
+                        checkpoint_data = pickle.load(f)
+
+                    if checkpoint_data.get("collection_name") == collection_name:
+                        documents = checkpoint_data.get("documents", [])
+                        start_obj_index = checkpoint_data.get("last_processed_index", 0)
+
+                        if start_obj_index > 0 and start_obj_index < total_objects:
+                            self.stdout.write(
+                                self.style.SUCCESS(
+                                    f"Resuming document creation from object {start_obj_index}/{total_objects}"
+                                )
+                            )
+                except Exception as e:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Error loading document checkpoint: {str(e)}"
+                        )
+                    )
+                    documents = []
+                    start_obj_index = 0
+
+            # If we don't have all documents yet, continue creating them
+            if len(documents) < total_objects:
+                # Get the queryset slice we need to process
+                if start_obj_index > 0:
+                    remaining_queryset = queryset[start_obj_index:]
+                else:
+                    remaining_queryset = queryset
+
+                # Process in batches to create documents
+                batch_size = int(os.getenv("TYPESENSE_DOC_CREATION_BATCH", "100"))
+
+                for i in range(0, remaining_queryset.count(), batch_size):
+                    batch_queryset = remaining_queryset[i : i + batch_size]
+                    try:
+                        # Create a temporary collection for this batch
+                        batch_collection = collection_class(queryset=batch_queryset)
+                        batch_documents = batch_collection.get_documents()
+                        documents.extend(batch_documents)
+
+                        # Update progress
+                        current_index = start_obj_index + i + len(batch_queryset)
+                        self.stdout.write(
+                            f"Created documents for {current_index}/{total_objects} objects"
+                        )
+
+                        # Save checkpoint after each batch
+                        self._save_documents_checkpoint(
+                            checkpoint_file, collection_name, current_index, documents
+                        )
+                    except Exception as e:
+                        # Save checkpoint at the point of failure
+                        current_index = start_obj_index + i
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f"Error during document creation at index {current_index}: {str(e)}"
+                            )
+                        )
+                        self._save_documents_checkpoint(
+                            checkpoint_file, collection_name, current_index, documents
+                        )
+                        raise CommandError(f"Error creating documents: {str(e)}")
+
             self.stdout.write(f"Generated {len(documents)} documents for indexing")
 
             # Export to JSON if requested
@@ -216,8 +401,56 @@ class Command(BaseCommand):
                 # Create or update collection
                 self.create_or_update_collection(client, schema)
 
+                # Import documents (no need to resume here as we already have all documents)
+                collection_name = schema["name"]
+
+                # For upload, we'll use a separate checkpoint file
+                upload_checkpoint_file = (
+                    checkpoint_dir / f"{collection_name}_upload_checkpoint.pkl"
+                )
+                start_index = 0
+
+                # Check if we should resume from an upload checkpoint
+                if options["resume"] and not options["force_restart"]:
+                    # Try to load upload checkpoint
+                    checkpoint_dir = Path(
+                        os.getenv(
+                            "TYPESENSE_CHECKPOINT_DIR", "/tmp/typesense_checkpoints"
+                        )
+                    )
+                    upload_checkpoint_file = (
+                        checkpoint_dir / f"{collection_name}_upload_checkpoint.pkl"
+                    )
+
+                    if upload_checkpoint_file.exists():
+                        try:
+                            with open(upload_checkpoint_file, "rb") as f:
+                                checkpoint_data = pickle.load(f)
+
+                            if (
+                                checkpoint_data.get("collection_name")
+                                == collection_name
+                            ):
+                                start_index = checkpoint_data.get(
+                                    "last_processed_index", 0
+                                )
+
+                                if start_index > 0 and start_index < len(documents):
+                                    self.stdout.write(
+                                        self.style.SUCCESS(
+                                            f"Resuming upload from document {start_index}/{len(documents)}"
+                                        )
+                                    )
+                        except Exception as e:
+                            self.stdout.write(
+                                self.style.WARNING(
+                                    f"Error loading upload checkpoint: {str(e)}"
+                                )
+                            )
+                            start_index = 0
+
                 # Import documents
-                self.import_documents(client, schema["name"], documents)
+                self.import_documents(client, collection_name, documents, start_index)
         except Exception as e:
             raise CommandError(f"Error processing collection: {str(e)}")
 

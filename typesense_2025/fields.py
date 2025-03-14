@@ -212,6 +212,48 @@ class TsFieldTimestamp(TypesenseField):
         date = getattr(obj, self.field_name, None)
         if date is not None:
             return int(date.strftime("%s"))
+        elif self.include_relations is not None:
+            if self.relations_filter is None:
+                self.relations_filter = {
+                    "personinstitution_set": {},
+                    "personplace_set": {},
+                    "related_personA": {},
+                    "related_personB": {},
+                    "personevent_set": {},
+                    "personwork_set": {},
+                }
+            date_fin = None
+            for key, value in self.relations_filter.items():
+                if self.include_relations == "lower":
+                    value["start_date__isnull"] = False
+                    order = "start_date"
+                else:
+                    value["end_date__isnull"] = False
+                    order = "-end_date"
+                date_pre = (
+                    getattr(getattr(obj, key), "filter")(**value)
+                    .order_by(order)
+                    .first()
+                )
+                if date_pre is not None:
+                    if self.include_relations == "lower":
+                        if date_pre.start_start_date is not None:
+                            date_value = date_pre.start_start_date
+                        else:
+                            date_value = date_pre.start_date
+                        if date_fin is None or date_value < date_fin:
+                            date_fin = date_value
+                    else:  # self.include_relations == "upper"
+                        if date_pre.end_end_date is not None:
+                            date_value = date_pre.end_end_date
+                        else:
+                            date_value = date_pre.end_date
+                        if date_fin is None or date_value > date_fin:
+                            date_fin = date_value
+            if date_fin is not None:
+                return int(date_fin.strftime("%s"))
+            else:
+                return int(datetime.datetime(5000, 1, 1, 0, 0).timestamp())
         else:
             return int(datetime.datetime(5000, 1, 1, 0, 0).timestamp())
 
@@ -226,12 +268,14 @@ class TsFieldTimestamp(TypesenseField):
         locale: Optional[str] = None,
         num_dim: Optional[int] = None,
         field_name: Optional[str] = None,
-        include_relations: bool = False,
+        include_relations: Optional[Literal["lower", "upper"]] = None,
+        relations_filter: Optional[Dict] = None,
     ):
         super().__init__(
             type, facet, optional, index, sort, infix, locale, num_dim, field_name
         )
         self.include_relations = include_relations
+        self.relations_filter = relations_filter
 
 
 class TsStatusField(TypesenseField):
