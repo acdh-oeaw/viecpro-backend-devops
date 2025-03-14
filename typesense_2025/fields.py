@@ -1,7 +1,7 @@
 from dataclasses import dataclass, astuple, field
 from os import wait
 import string
-from typing import List, Optional, Literal, Dict, Any, Tuple
+from typing import List, Optional, Literal, Dict, Any, Callable
 from django.db.models import Model
 import re
 import datetime
@@ -52,6 +52,22 @@ def create_timestamps(obj):
     return r1
 
 
+def get_relation_type_str(obj, rel, post_proc=None):
+    """retrieves the correct relation type string from the obj to a subj"""
+    rel_cls = rel.__class__.__name__.lower()
+    obj_class = obj.__class__.__name__.lower()
+    attr_rel_type = "name"
+    if rel_cls.startswith(obj_class) and rel_cls.endswith(obj_class):
+        if getattr(rel, f"related_{obj_class}B_id") == obj.pk:
+            attr_rel_type = "name_reverse"
+    elif rel_cls.endswith(obj_class):
+        attr_rel_type = "name_reverse"
+    res = getattr(rel.relation_type, attr_rel_type)
+    if post_proc is not None:
+        res = post_proc(res)
+    return res
+
+
 @dataclass
 class RelationsFieldDef:
     """Class used to store the relation definitions for the TsRelationField"""
@@ -60,9 +76,9 @@ class RelationsFieldDef:
     filter: dict = field(default_factory=dict)
     exclude_filter: dict = field(default_factory=dict)
     accessor_label: Optional[str] = None
-    entity_type: Optional[str] = None
+    entity_type: Optional[str | Callable] = None
     relation_types: Optional[list[str]] = None
-    relation_type_reverse: bool = False
+    post_proc_rel_type: Optional[Callable] = None
 
 
 # Valid Typesense field types
@@ -198,6 +214,24 @@ class TsFieldTimestamp(TypesenseField):
             return int(date.strftime("%s"))
         else:
             return int(datetime.datetime(5000, 1, 1, 0, 0).timestamp())
+
+    def __init__(
+        self,
+        type: FieldType,
+        facet: bool = False,
+        optional: bool = False,
+        index: bool = True,
+        sort: bool = False,
+        infix: bool = False,
+        locale: Optional[str] = None,
+        num_dim: Optional[int] = None,
+        field_name: Optional[str] = None,
+        include_relations: bool = False,
+    ):
+        super().__init__(
+            type, facet, optional, index, sort, infix, locale, num_dim, field_name
+        )
+        self.include_relations = include_relations
 
 
 class TsStatusField(TypesenseField):
@@ -338,7 +372,7 @@ class TsRelationField(TypesenseField):
                     acc_label,
                     entity_type,
                     rel_types,
-                    rel_type_reverse,
+                    post_proc_rel_type,
                 ) = astuple(rel_type_class)
                 lst_accessor = acc.split(".")
                 if acc_label is not None:
@@ -362,7 +396,14 @@ class TsRelationField(TypesenseField):
                         obj1 = getattr(obj1, acc)
                     r1 = {"id": obj1.pk}
                     if entity_type is not None:
-                        r1["kind"] = entity_type
+                        if callable(entity_type):
+                            kind = entity_type(obj1)
+                            if kind is not None:
+                                r1["kind"] = kind
+                            else:
+                                r1["kind"] = obj1.__class__.__name__.lower()
+                        else:
+                            r1["kind"] = entity_type
                     else:
                         r1["kind"] = obj1.__class__.__name__.lower()
                     label = obj1
@@ -371,9 +412,9 @@ class TsRelationField(TypesenseField):
                             label = getattr(label, acc)
                     r1["name"] = clean_text(str(label))
                     r2 = {
-                        "relationType": obj2.relation_type.name_reverse
-                        if rel_type_reverse
-                        else obj2.relation_type.name,
+                        "relationType": get_relation_type_str(
+                            obj, obj2, post_proc_rel_type
+                        ),
                         "target": r1,
                     }
                     time_data = create_timestamps(obj2)
