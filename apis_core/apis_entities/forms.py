@@ -37,7 +37,6 @@ class SearchForm(forms.Form):
 
 
 def get_entities_form(entity):
-
     # TODO __sresch__ : consider moving this class outside of the function call to avoid redundant class definitions
     class GenericEntitiesForm(forms.ModelForm):
         class Meta:
@@ -55,6 +54,7 @@ def get_entities_form(entity):
                 "text",
                 "source",
                 "published",
+                "grouped_into",
             ]
             exclude.extend(model.get_related_entity_field_names())
             exclude.extend(model.get_related_relationtype_field_names())
@@ -145,12 +145,12 @@ def get_entities_form(entity):
                     The sorted list if entity-specific ordering was defined, the same unordered list if not.
                 """
 
-                entity_settings = getattr(settings, 'APIS_ENTITIES', None)
+                entity_settings = getattr(settings, "APIS_ENTITIES", None)
 
                 if entity_settings is None:
                     return list_unsorted
 
-                sort_preferences = entity_settings[entity_label].get('form_order', None)
+                sort_preferences = entity_settings[entity_label].get("form_order", None)
                 sort_preferences_used = []
 
                 if sort_preferences is None:
@@ -167,12 +167,11 @@ def get_entities_form(entity):
                         else:
                             # if no ordering for the field was found, then give it 'Inf'
                             # so that it will be attached at the end.
-                            field_rank_pair = (field, float('Inf'))
+                            field_rank_pair = (field, float("Inf"))
                         field_rank_pair_list.append(field_rank_pair)
                     # Make a check if all items of sort_preferences were used. If not, this indicates an out of sync setting
                     # if len(sort_preferences) > 0:
                     if len(sort_preferences_used) != len(sort_preferences):
-
                         differences = []
                         for p in sort_preferences_used:
                             if p not in sort_preferences:
@@ -189,7 +188,9 @@ def get_entities_form(entity):
                         )
                     # sort the list according to the second element in each tuple
                     # and then take the first elements from it and return as list
-                    return [ t[0] for t in sorted(field_rank_pair_list, key=lambda x: x[1]) ]
+                    return [
+                        t[0] for t in sorted(field_rank_pair_list, key=lambda x: x[1])
+                    ]
 
             # sort field list, iterate over it and append each element to the accordion group
             for f in sort_fields_list(fields_list_unsorted, entity):
@@ -203,7 +204,6 @@ def get_entities_form(entity):
 
             instance = getattr(self, "instance", None)
             if instance != None:
-
                 if instance.start_date_written:
                     self.fields[
                         "start_date_written"
@@ -252,7 +252,6 @@ class GenericEntitiesStanbolForm(forms.Form):
         return entity
 
     def __init__(self, entity, *args, **kwargs):
-
         attrs = {
             "data-placeholder": "Type to get suggestions",
             "data-minimum-input-length": getattr(settings, "APIS_MIN_CHAR", 3),
@@ -482,4 +481,3 @@ class GenericFilterFormHelper(FormHelper):
         self.form_class = "genericFilterForm"
         self.form_method = "GET"
         self.add_input(Submit("Filter", "Filter"))
-

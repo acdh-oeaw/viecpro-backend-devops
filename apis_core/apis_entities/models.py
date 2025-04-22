@@ -1,3 +1,4 @@
+from copy import deepcopy
 import inspect
 import re
 import sys
@@ -510,7 +511,9 @@ class Person(AbstractEntity):
     gender = models.CharField(
         max_length=15, choices=GENDER_CHOICES, blank=True, null=True
     )
-    grouped_into = models.ForeignKey("self", null=True, on_delete=models.SET_NULL)
+    grouped_into = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL
+    )
 
     def save(self, *args, **kwargs):
         if self.first_name:
@@ -521,7 +524,7 @@ class Person(AbstractEntity):
         return self
 
     def merge(self, group_pers):
-        new_pers = self
+        new_pers = deepcopy(self)
         new_pers.pk = None
         new_pers.id = None
         new_pers._state.adding = True
@@ -529,7 +532,7 @@ class Person(AbstractEntity):
         for m2m in ["profession", "text", "title", "collection"]:
             m2m_objcts = getattr(self, m2m).all()
             if m2m_objcts.count() > 0:
-                getattr(new_pers, m2m).add(m2m_objcts)
+                getattr(new_pers, m2m).add(*m2m_objcts)
         pers_ids = [pers.id for pers in group_pers + [self]]
         rels_dict = []
         for ct in ContentType.objects.filter(
@@ -561,11 +564,16 @@ class Person(AbstractEntity):
         for label in Label.objects.filter(temp_entity_id__in=pers_ids):
             label.pk = label.id = None
             label._state.adding = True
+            label.temp_entity_id = new_pers.pk
             rels_dict.append(rel)
         rel_dict_lst = []
         for obj in rels_dict:
-            if model_to_dict(obj) not in rel_dict_lst:
-                rel_dict_lst.append(model_to_dict(obj))
+            dct = model_to_dict(obj)
+            for key, value in dct.items():
+                if value == "":
+                    dct[key] = None
+            if dct not in rel_dict_lst:
+                rel_dict_lst.append(dct)
                 obj.save()
         for p in group_pers + [self]:
             p.grouped_into = new_pers
