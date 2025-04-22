@@ -67,5 +67,26 @@
             </td>
         </tr>
         {% endif %}
+	{% if object.grouped_into %}
+	<tr>
+	   <th>
+	      Grouped into 
+	   </th>
+	   <td>
+		   <a href="{% url 'apis:apis_entities:generic_entities_detail_view' 'person' object.grouped_into_id %}">{{ object.grouped_into }}</a>
+	   </td>
+	</tr>
+	{% endif %}
+
+	{% if object.person_set %}
+	<tr>
+	   <th>
+	      Represents 
+	   </th>
+	   <td>
+		   {% for grp in object.person_set.all %}  <a href="{% url 'apis:apis_entities:generic_entities_detail_view' 'person' grp.pk %}">{{ grp }}</a>, {% endfor %}
+	   </td>
+	</tr>
+	{% endif %}
     </table>
     {% endblock info-table %}
