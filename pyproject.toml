@@ -61,9 +61,12 @@ tqdm = "*"
 jupyterlab = "^4.1.2"
 openpyxl = "^3.1.2"
 jmespath = "^1.0.1"
-django-grouper = "^0.1.0"
+django-grouper = { git = "https://github.com/acdh-oeaw/django-grouper.git", branch = "ms/deploy-branch-for-viecpro-test" }
 
 
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.14"
 
 [build-system]
 requires = ["poetry>=1.1.12"]
