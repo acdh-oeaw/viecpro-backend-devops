@@ -530,10 +530,12 @@ class Person(AbstractEntity):
         new_pers.id = None
         new_pers._state.adding = True
         new_pers.save()
-        for m2m in ["profession", "title", "collection"]:
+        for m2m in ["profession", "title"]:
             m2m_objcts = getattr(self, m2m).all()
             if m2m_objcts.count() > 0:
                 getattr(new_pers, m2m).add(*m2m_objcts)
+        col, created = Collection.objects.get_or_create(name="Vorfinale Einträge")
+        new_pers.collection.add(col)
         pers_ids = [pers.id for pers in group_pers + [self]]
         rels_dict = []
         for ct in ContentType.objects.filter(
@@ -598,6 +600,9 @@ class Person(AbstractEntity):
         for p in group_pers + [self]:
             p.grouped_into = new_pers
             p.save()
+        coldub, created = Collection.objects.get_or_create(name="Dubletten")
+        for p2 in pers_ids:
+            Person.objects.get(pk=p2).collection.add(coldub)
         return new_pers
 
 
