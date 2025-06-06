@@ -19,7 +19,7 @@ from django.urls import reverse
 from guardian.shortcuts import assign_perm, remove_perm
 
 from apis_core.apis_labels.models import Label
-from apis_core.apis_metainfo.models import Collection, TempEntityClass, Uri
+from apis_core.apis_metainfo.models import Collection, TempEntityClass, Uri, Text
 from apis_core.apis_vocabularies.models import (
     EventType,
     InstitutionType,
@@ -530,7 +530,7 @@ class Person(AbstractEntity):
         new_pers.id = None
         new_pers._state.adding = True
         new_pers.save()
-        for m2m in ["profession", "text", "title", "collection"]:
+        for m2m in ["profession", "title", "collection"]:
             m2m_objcts = getattr(self, m2m).all()
             if m2m_objcts.count() > 0:
                 getattr(new_pers, m2m).add(*m2m_objcts)
@@ -581,6 +581,20 @@ class Person(AbstractEntity):
             if dct not in rel_dict_lst:
                 rel_dict_lst.append(dct)
                 obj.save()
+        texts = dict()
+        for text in Text.objects.filter(tempentityclass__id__in=pers_ids).order_by(
+            "kind_id"
+        ):
+            if len(text.text) > 0:
+                t = f"{text.tempentityclass_set.first().id}: {text.text}\n---\n"
+                if text.kind_id in texts:
+                    texts[text.kind_id].append(t)
+                else:
+                    texts[text.kind_id] = [t]
+        for k, v in texts.items():
+            t_new = Text.objects.create(kind_id=k, text="".join(v)[:-7])
+            new_pers.text.add(t_new)
+
         for p in group_pers + [self]:
             p.grouped_into = new_pers
             p.save()
