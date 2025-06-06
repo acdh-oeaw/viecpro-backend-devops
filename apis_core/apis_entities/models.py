@@ -29,6 +29,7 @@ from apis_core.apis_vocabularies.models import (
     WorkType,
 )
 from apis_core.helper_functions import EntityRelationFieldGenerator
+from apis_bibsonomy.models import Reference
 
 BASE_URI = getattr(settings, "APIS_BASE_URI", "http://apis.info/")
 DOMAIN_DEFAULT = getattr(settings, "APIS_DEFAULT_DOMAIN", "apis default")
@@ -566,6 +567,11 @@ class Person(AbstractEntity):
             label._state.adding = True
             label.temp_entity_id = new_pers.pk
             rels_dict.append(label)
+        for ref in Reference.objects.filter(object_id__in=pers_ids):
+            ref.pk = ref.id = None
+            ref._state.adding = True
+            ref.object_id = new_pers.pk
+            rels_dict.append(ref)
         rel_dict_lst = []
         for obj in rels_dict:
             dct = model_to_dict(obj)
