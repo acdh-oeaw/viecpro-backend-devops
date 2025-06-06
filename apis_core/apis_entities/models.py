@@ -538,6 +538,18 @@ class Person(AbstractEntity):
         new_pers.collection.add(col)
         pers_ids = [pers.id for pers in group_pers + [self]]
         rels_dict = []
+        save_refs = False
+        for field in ["notes", "references"]:
+            for p in group_pers:
+                if len(getattr(p, field)) > 0:
+                    setattr(
+                        new_pers,
+                        field,
+                        getattr(new_pers, field) + f"\n--\n{p.id}: {getattr(p, field)}",
+                    )
+                    save_refs = True
+        if save_refs:
+            new_pers.save()
         for ct in ContentType.objects.filter(
             app_label="apis_relations", model__contains="person"
         ).exclude(model="personperson"):
@@ -601,8 +613,8 @@ class Person(AbstractEntity):
             p.grouped_into = new_pers
             p.save()
         coldub, created = Collection.objects.get_or_create(name="Dubletten")
-        for p2 in pers_ids:
-            Person.objects.get(pk=p2).collection.add(coldub)
+        for p2 in group_pers + [self]:
+            p2.collection.add(coldub)
         return new_pers
 
 
