@@ -565,7 +565,7 @@ class Person(AbstractEntity):
             label.pk = label.id = None
             label._state.adding = True
             label.temp_entity_id = new_pers.pk
-            rels_dict.append(rel)
+            rels_dict.append(label)
         rel_dict_lst = []
         for obj in rels_dict:
             dct = model_to_dict(obj)
